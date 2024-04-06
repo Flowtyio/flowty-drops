@@ -19,6 +19,7 @@ import "FlowtyDrops"
 import "FlowtySwitches"
 import "FlowtyAddressVerifiers"
 import "FlowtyPricers"
+import "DropFactory"
 
 pub contract OpenEditionNFT: NonFungibleToken, ViewResolver {
 
@@ -303,25 +304,14 @@ pub contract OpenEditionNFT: NonFungibleToken, ViewResolver {
 
         emit ContractInitialized()
 
-        // initialize the drop
-        let switch = FlowtySwitches.AlwaysOn()
-        let addressVerifier = FlowtyAddressVerifiers.AllowAll()
-        let pricer = FlowtyPricers.FlatPrice(price: 1.0, paymentTokenType: Type<@FlowToken.Vault>())
-
-        let phaseDetails = FlowtyDrops.PhaseDetails(switch: switch, display: nil, pricer: pricer, addressVerifier: addressVerifier)
-        let phase <- FlowtyDrops.createPhase(details: phaseDetails)
-
         let dropDisplay = MetadataViews.Display(
             name: "Sample Open Edition",
             description: "This is a sample Open Edition NFT Drop utilizing flowty drops for minting",
             thumbnail: MetadataViews.IPFSFile(cid: "QmNtDmxuyBeA6YJht3ADMJCCqLoG3SPf3S7DYavZTeFUy7", path: nil)
         )
-        let dropDetails = FlowtyDrops.DropDetails(display: dropDisplay, medias: nil, commissionRate: 0.05)
-        let drop <- FlowtyDrops.createDrop(details: dropDetails, minterCap: minterCap, phases: <- [<-phase])
-
+        let drop <- DropFactory.createEndlessOpenEditionDrop(price: 1.0, paymentTokenType: Type<@FlowToken.Vault>(), dropDisplay: dropDisplay, minterCap: minterCap)
         let container <- FlowtyDrops.createContainer()
         container.addDrop(<- drop)
-
         self.account.save(<-container, to: FlowtyDrops.ContainerStoragePath)
     }
 }

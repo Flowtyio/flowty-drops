@@ -35,6 +35,12 @@
         "testing": "0x0000000000000006"
       }
     },
+    "DropFactory": {
+      "source": "./contracts/DropFactory.cdc",
+      "aliases": {
+        "testing": "0x0000000000000006"
+      }
+    },
     "FlowtySwitches": {
       "source": "./contracts/FlowtySwitches.cdc",
       "aliases": {
@@ -115,6 +121,7 @@
         "FlowtySwitches",
         "FlowtyAddressVerifiers",
         "FlowtyPricers",
+        "DropFactory",
         "NonFungibleToken",
         "ViewResolver",
         "MetadataViews",

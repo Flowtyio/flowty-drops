@@ -49,15 +49,15 @@ pub contract FlowtyDrops {
                 message: "receiver address has exceeded their mint capacity"
             )
 
-            let paymentAmount = phase.details.pricer.getPrice(num: amount, minter: receiverCap.address)
+            let paymentAmount = phase.details.pricer.getPrice(num: amount, paymentTokenType: payment.getType(), minter: receiverCap.address)
             let withdrawn <- payment.withdraw(amount: paymentAmount) // make sure that we have a fresh vault resource
 
             // take commission
             let commission <- withdrawn.withdraw(amount: self.details.commissionRate * withdrawn.balance)
             commissionReceiver.borrow()!.deposit(from: <-commission)
 
-            assert(phase.details.pricer.getPaymentType() == withdrawn.getType(), message: "incorrect payment type")
-            assert(phase.details.pricer.getPrice(num: amount, minter: receiverCap.address) == withdrawn.balance, message: "incorrect payment amount")
+            assert(phase.details.pricer.getPaymentTypes().contains(withdrawn.getType()), message: "unsupported payment type")
+            assert(phase.details.pricer.getPrice(num: amount, paymentTokenType: withdrawn.getType(), minter: receiverCap.address) == withdrawn.balance, message: "incorrect payment amount")
 
             // mint the nfts
             let minter = self.minterCap.borrow() ?? panic("minter capability could not be borrowed")
@@ -252,8 +252,8 @@ pub contract FlowtyDrops {
     }
 
     pub struct interface Pricer {
-        pub fun getPrice(num: Int, minter: Address): UFix64
-        pub fun getPaymentType(): Type
+        pub fun getPrice(num: Int, paymentTokenType: Type, minter: Address): UFix64
+        pub fun getPaymentTypes(): [Type]
     }
 
     pub resource interface Minter {
