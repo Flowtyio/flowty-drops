@@ -53,6 +53,12 @@
         "testing": "0x0000000000000006"
       }
     },
+    "OpenEditionNFT": {
+      "source": "./contracts/nfts/OpenEditionNFT.cdc",
+      "aliases": {
+        "testing": "0x0000000000000007"
+      }
+    },
     "NonFungibleToken": {
       "source": "./node_modules/@flowtyio/flow-contracts/contracts/NonFungibleToken.cdc",
       "aliases": {
@@ -111,7 +117,8 @@
         "FlowtyPricers",
         "NonFungibleToken",
         "ViewResolver",
-        "MetadataViews"
+        "MetadataViews",
+        "OpenEditionNFT"
       ],
       "emulator-ft": [
         "FungibleToken",

@@ -16,18 +16,14 @@ pub contract FlowtyPricers {
         pub let paymentTokenType: Type
 
         pub fun getPrice(num: Int, minter: Address): UFix64 {
-            return self.price
+            return self.price * UFix64(num)
         }
 
         pub fun getPaymentType(): Type {
             return self.paymentTokenType
         }
 
-        init(price: UFix64, paymentTokenType: Type, commissionRate: UFix64) {
-            pre {
-                commissionRate < 1.0: "commission is a percentage of the total mint price and must be below 1.0"
-            }
-
+        init(price: UFix64, paymentTokenType: Type) {
             self.price = price
             self.paymentTokenType = paymentTokenType
         }

@@ -16,7 +16,6 @@ pub contract FlowtyDrops {
     // Interface to expose all the components necessary to participate in a drop
     // and to ask questions about a drop.
     pub resource interface DropPublic {
-        pub fun borrowDropSwitch(): &{Switch}
         pub fun borrowPhase(index: Int): &{PhasePublic}
         pub fun borrowActivePhases(): [&{PhasePublic}]
         pub fun borrowAllPhases(): [&{PhasePublic}]
@@ -27,7 +26,6 @@ pub contract FlowtyDrops {
         access(self) let phases: @[Phase]
         // the details of a drop. This includes things like display information and total number of mints
         access(self) let details: DropDetails
-
         access(self) let minterCap: Capability<&{Minter}>
 
         pub fun mint(
@@ -85,10 +83,6 @@ pub contract FlowtyDrops {
             return <- payment
         }
 
-        pub fun borrowDropSwitch(): &{Switch} {
-            return &self.details.switch as! &{Switch}
-        }
-
         pub fun borrowPhase(index: Int): &{PhasePublic} {
             return &self.phases[index] as! &{PhasePublic}
         }
@@ -134,12 +128,12 @@ pub contract FlowtyDrops {
             return <- self.phases.remove(at: index)
         }
 
-        init(details: DropDetails, minterCap: Capability<&{Minter}>) {
+        init(details: DropDetails, minterCap: Capability<&{Minter}>, phases: @[Phase]) {
             pre {
                 minterCap.check(): "minter capability is not valid"
             }
 
-            self.phases <- []
+            self.phases <- phases
             self.details = details
             self.minterCap = minterCap
         }
@@ -154,7 +148,6 @@ pub contract FlowtyDrops {
         pub let medias: MetadataViews.Medias?
         pub var totalMinted: Int
         pub var minters: {Address: Int}
-        pub let switch: {Switch}
         pub let commissionRate: UFix64
 
         access(contract) fun addMinted(num: Int, addr: Address) {
@@ -166,12 +159,11 @@ pub contract FlowtyDrops {
             self.minters[addr] = self.minters[addr]! + num
         }
 
-        init(display: MetadataViews.Display, medias: MetadataViews.Medias?, switch: {Switch}, commissionRate: UFix64) {
+        init(display: MetadataViews.Display, medias: MetadataViews.Medias?, commissionRate: UFix64) {
             self.display = display
             self.medias = medias
             self.totalMinted = 0
             self.commissionRate = commissionRate
-            self.switch = switch
             self.minters = {}
         }
     }
@@ -325,6 +317,18 @@ pub contract FlowtyDrops {
         destroy () {
             destroy self.drops
         }
+    }
+
+    pub fun createPhase(details: PhaseDetails): @Phase {
+        return <- create Phase(details: details)
+    }
+
+    pub fun createDrop(details: DropDetails, minterCap: Capability<&{Minter}>, phases: @[Phase]): @Drop {
+        return <- create Drop(details: details, minterCap: minterCap, phases: <- phases)
+    }
+
+    pub fun createContainer(): @Container {
+        return <- create Container()
     }
 
     init() {

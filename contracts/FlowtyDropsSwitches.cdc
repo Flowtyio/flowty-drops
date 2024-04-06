@@ -6,6 +6,27 @@ You can use these implementations, or your own, for switches when configuring a 
 */
 pub contract FlowtyDropsSwitches {
     /*
+    The AlwaysOn Switch is always on and never ends.
+    */
+    pub struct AlwaysOn: FlowtyDrops.Switch {
+        pub fun hasStarted(): Bool {
+            return true
+        }
+
+        pub fun hasEnded(): Bool {
+            return false
+        }
+
+        pub fun getStart(): UInt64? {
+            return nil
+        }
+
+        pub fun getEnd(): UInt64? {
+            return nil
+        }
+    }
+
+    /*
     The manual switch is used to explicitly toggle a drop.
     This version of switch allows a creator to turn on or off a drop at will
     */
