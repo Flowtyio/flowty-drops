@@ -1,0 +1,36 @@
+name: Unit Tests
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+
+jobs:
+  tests:
+    name: Flow CLI Tests
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: "true"
+    - name: Set up Go
+      uses: actions/setup-go@v3
+      with:
+        go-version: 1.18
+    - name: Set up Node
+      uses: actions/setup-node@v2
+      with:
+        node-version: ^18
+    - name: Install Flow dependencies
+      run: npm i
+    - name: Install Flow CLI
+      run: bash -ci "$(curl -fsSL https://raw.githubusercontent.com/onflow/flow-cli/feature/stable-cadence/install.sh)" -- v1.17.0
+    - name: Run tests
+      run: sh ./run-tests.sh
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v4.0.1
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        slug: Flowtyio/flowty-drops
