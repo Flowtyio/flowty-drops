@@ -157,6 +157,7 @@ pub fun deployAll() {
     deploy("FlowtySwitches", "../contracts/FlowtySwitches.cdc", [])
     deploy("FlowtyPricers", "../contracts/FlowtyPricers.cdc", [])
     deploy("FlowtyAddressVerifiers", "../contracts/FlowtyAddressVerifiers.cdc", [])
+    deploy("DropFactory", "../contracts/DropFactory.cdc", [])
 
     deploy("OpenEditionNFT", "../contracts/nft/OpenEditionNFT.cdc", [])
 }
