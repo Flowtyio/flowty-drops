@@ -29,6 +29,30 @@
     }
   },
   "contracts": {
+    "FlowtyDrops": {
+      "source": "./contracts/FlowtyDrops.cdc",
+      "aliases": {
+        "testing": "0x0000000000000006"
+      }
+    },
+    "FlowtyDropsSwitches": {
+      "source": "./contracts/FlowtyDropsSwitches.cdc",
+      "aliases": {
+        "testing": "0x0000000000000006"
+      }
+    },
+    "FlowtyPricers": {
+      "source": "./contracts/FlowtyPricers.cdc",
+      "aliases": {
+        "testing": "0x0000000000000006"
+      }
+    },
+    "FlowtyAddressVerifiers": {
+      "source": "./contracts/FlowtyAddressVerifiers.cdc",
+      "aliases": {
+        "testing": "0x0000000000000006"
+      }
+    },
     "NonFungibleToken": {
       "source": "./node_modules/@flowtyio/flow-contracts/contracts/NonFungibleToken.cdc",
       "aliases": {
@@ -81,6 +105,10 @@
   "deployments": {
     "emulator": {
       "emulator-account": [
+        "FlowtyDrops",
+        "FlowtyDropsSwitches",
+        "FlowtyAddressVerifiers",
+        "FlowtyPricers",
         "NonFungibleToken",
         "ViewResolver",
         "MetadataViews"
