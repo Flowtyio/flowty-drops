@@ -17,7 +17,7 @@ pub contract DropFactory {
         minterCap: Capability<&{FlowtyDrops.Minter}>
     ): @FlowtyDrops.Drop {
         pre {
-            Type<@FungibleToken.Vault>().isSubtype(of: paymentTokenType): "paymentTokenType must be a FungibleToken"
+            paymentTokenType.isSubtype(of: Type<@FungibleToken.Vault>()): "paymentTokenType must be a FungibleToken"
         }
 
         // This drop is always on and never ends.
