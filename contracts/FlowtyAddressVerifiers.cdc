@@ -35,7 +35,7 @@ pub contract FlowtyAddressVerifiers {
             self.allowedAddresses[addr] = value
         }
 
-        pub fun removeAddress(addr: Address, value: Int) {
+        pub fun removeAddress(addr: Address) {
             self.allowedAddresses.remove(key: addr)
         }
 
