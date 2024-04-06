@@ -154,7 +154,7 @@ pub let flowTokenReceiverPath = /public/flowTokenReceiver
 
 pub fun deployAll() {
     deploy("FlowtyDrops", "../contracts/FlowtyDrops.cdc", [])
-    deploy("FlowtyDropsSwitches", "../contracts/FlowtyDropsSwitches.cdc", [])
+    deploy("FlowtySwitches", "../contracts/FlowtySwitches.cdc", [])
     deploy("FlowtyPricers", "../contracts/FlowtyPricers.cdc", [])
     deploy("FlowtyAddressVerifiers", "../contracts/FlowtyAddressVerifiers.cdc", [])
 

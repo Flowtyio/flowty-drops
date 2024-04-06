@@ -4,7 +4,7 @@ import "FlowtyDrops"
 This contract contains implementations for the FlowtyDrops.Switch struct interface.
 You can use these implementations, or your own, for switches when configuring a drop
 */
-pub contract FlowtyDropsSwitches {
+pub contract FlowtySwitches {
     /*
     The AlwaysOn Switch is always on and never ends.
     */
@@ -94,43 +94,12 @@ pub contract FlowtyDropsSwitches {
         }
 
         init(start: UInt64?, end: UInt64?) {
-            self.start = start
-            self.end = end
-        }
-    }
-
-    /*
-    BlockHeightSwitch uses the current block height as a marker for when a phase or drop is live.
-    */
-    pub struct BlockHeightSwitch: FlowtyDrops.Switch {
-        pub let start: UInt64?
-        pub let end: UInt64?
-
-
-        pub fun hasStarted(): Bool {
-            return self.start == nil || getCurrentBlock().height >= self.start!
-        }
-
-        pub fun hasEnded(): Bool {
-            if self.end == nil {
-                return false
+            pre {
+                start == nil || end == nil || start! < end!: "start must be less than end"
             }
 
-            return getCurrentBlock().height > self.end!
-        }
-
-        pub fun getStart(): UInt64? {
-            return self.start
-        }
-
-        pub fun getEnd(): UInt64? {
-            return self.end
-        }
-
-        init(start: UInt64?, end: UInt64?) {
             self.start = start
             self.end = end
         }
-
     }
 }

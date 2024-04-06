@@ -16,7 +16,7 @@ import "FungibleToken"
 import "FlowToken"
 
 import "FlowtyDrops"
-import "FlowtyDropsSwitches"
+import "FlowtySwitches"
 import "FlowtyAddressVerifiers"
 import "FlowtyPricers"
 
@@ -304,7 +304,7 @@ pub contract OpenEditionNFT: NonFungibleToken, ViewResolver {
         emit ContractInitialized()
 
         // initialize the drop
-        let switch = FlowtyDropsSwitches.AlwaysOn()
+        let switch = FlowtySwitches.AlwaysOn()
         let addressVerifier = FlowtyAddressVerifiers.AllowAll()
         let pricer = FlowtyPricers.FlatPrice(price: 1.0, paymentTokenType: Type<@FlowToken.Vault>())
 

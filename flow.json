@@ -35,8 +35,8 @@
         "testing": "0x0000000000000006"
       }
     },
-    "FlowtyDropsSwitches": {
-      "source": "./contracts/FlowtyDropsSwitches.cdc",
+    "FlowtySwitches": {
+      "source": "./contracts/FlowtySwitches.cdc",
       "aliases": {
         "testing": "0x0000000000000006"
       }
@@ -54,7 +54,7 @@
       }
     },
     "OpenEditionNFT": {
-      "source": "./contracts/nfts/OpenEditionNFT.cdc",
+      "source": "./contracts/nft/OpenEditionNFT.cdc",
       "aliases": {
         "testing": "0x0000000000000007"
       }
@@ -112,7 +112,7 @@
     "emulator": {
       "emulator-account": [
         "FlowtyDrops",
-        "FlowtyDropsSwitches",
+        "FlowtySwitches",
         "FlowtyAddressVerifiers",
         "FlowtyPricers",
         "NonFungibleToken",
