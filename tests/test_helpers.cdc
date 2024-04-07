@@ -3,6 +3,7 @@ import Test
 import "NonFungibleToken"
 import "FlowToken"
 import "FlowtyDrops"
+import "ExampleToken"
 
 // Helper functions. All of the following were taken from
 // https://github.com/onflow/Offers/blob/fd380659f0836e5ce401aa99a2975166b2da5cb0/lib/cadence/test/Offers.cdc
@@ -145,16 +146,24 @@ pub let Account0xc = Address(0x000000000000000c)
 pub let Account0xd = Address(0x000000000000000d)
 pub let Account0xe = Address(0x000000000000000e)
 
+// Example Token constants
+pub let exampleTokenStoragePath = /storage/exampleTokenVault
+pub let exampleTokenReceiverPath = /public/exampleTokenReceiver
+pub let exampleTokenProviderPath = /private/exampleTokenProvider
+pub let exampleTokenBalancePath = /public/exampleTokenBalance
+
 pub let serviceAccount = Test.getAccount(Account0x5)
-pub let dropsAccount = Test.getAccount(Account0x6)
+pub let flowtyDropsAccount = Test.getAccount(Account0x6)
 pub let openEditionAccount = Test.getAccount(Account0x7)
+pub let exampleTokenAccount = Test.getAccount(Account0x8)
 
 // Flow Token constants
 pub let flowTokenStoragePath = /storage/flowTokenVault
 pub let flowTokenReceiverPath = /public/flowTokenReceiver
 
-
 pub fun deployAll() {
+    deploy("ExampleToken", "../contracts/standard/ExampleToken.cdc", [])
+
     deploy("FlowtyDrops", "../contracts/FlowtyDrops.cdc", [])
     deploy("FlowtySwitches", "../contracts/FlowtySwitches.cdc", [])
     deploy("FlowtyPricers", "../contracts/FlowtyPricers.cdc", [])
@@ -162,6 +171,10 @@ pub fun deployAll() {
     deploy("DropFactory", "../contracts/DropFactory.cdc", [])
 
     deploy("OpenEditionNFT", "../contracts/nft/OpenEditionNFT.cdc", [])
+
+
+    setupExampleToken(flowtyDropsAccount)
+    setupExampleToken(openEditionAccount)
 }
 
 pub fun deploy(_ name: String, _ path: String, _ arguments: [AnyStruct]) {
@@ -230,4 +243,20 @@ pub fun createEndlessOpenEditionDrop(
     
     let e = Test.eventsOfType(Type<FlowtyDrops.DropAdded>()).removeLast() as! FlowtyDrops.DropAdded
     return e.id
+}
+
+pub fun sendFlowTokens(fromAccount: Test.Account, toAccount: Test.Account, amount: UFix64) {
+    txExecutor("util/send_flow_tokens.cdc", [fromAccount], [toAccount.address, amount], nil, nil)
+}
+
+pub fun setupExampleToken(_ acct: Test.Account) {
+    txExecutor("example-token/setup.cdc", [acct], [], nil, nil)
+}
+
+pub fun mintExampleTokens(_ acct: Test.Account, _ amount: UFix64) {
+    txExecutor("example-token/mint.cdc", [exampleTokenAccount], [acct.address, amount], nil, nil)
+}
+
+pub fun exampleTokenIdentifier(): String {
+    return Type<@ExampleToken.Vault>().identifier
 }

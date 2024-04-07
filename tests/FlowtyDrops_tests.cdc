@@ -2,6 +2,8 @@ import Test
 import "test_helpers.cdc"
 import "FlowToken"
 import "FlowtyDrops"
+import "OpenEditionNFT"
+import "ExampleToken"
 
 pub let defaultEndlessOpenEditionName = "Default Endless Open Edition"
 
@@ -38,6 +40,50 @@ pub fun test_OpenEditionNFT_getDetails() {
     Test.assertEqual(details.display.name, defaultEndlessOpenEditionName)
 }
 
+pub fun test_OpenEditionNFT_mint() {
+    let dropID = createDefaultEndlessOpenEditionDrop()
+    let details = getDropDetails(contractAddress: openEditionAccount.address, contractName: "OpenEditionNFT", dropID: dropID)
+
+    let minter = Test.createAccount()
+    setupExampleToken(minter)
+    mintExampleTokens(minter, 100.0)
+
+    let costPerItem = 1.0
+    let numToMint = 2
+    let total = costPerItem * UFix64(numToMint)
+
+    let ids = mintDrop(
+        minter: minter,
+        contractAddress: openEditionAccount.address,
+        contractName: "OpenEditionNFT",
+        numToMint: numToMint,
+        totalCost: total,
+        paymentIdentifier: exampleTokenIdentifier(),
+        paymentStoragePath: exampleTokenStoragePath,
+        paymentReceiverPath: exampleTokenReceiverPath,
+        dropID: dropID,
+        dropPhaseIndex: 0,
+        nftIdentifier: Type<@OpenEditionNFT.NFT>().identifier,
+        commissionAddress: flowtyDropsAccount.address
+    )
+
+    Test.assertEqual(numToMint, ids.length)
+
+    // did the commission get sent correctly?
+    let commissionDepositAmount = total * details.commissionRate
+    let minterDepositAmount = total - commissionDepositAmount
+
+    let tokenDeposits = Test.eventsOfType(Type<ExampleToken.TokensDeposited>())
+    let minterFee = tokenDeposits.removeLast() as! ExampleToken.TokensDeposited
+    let commissionEvent = tokenDeposits.removeLast() as! ExampleToken.TokensDeposited
+    
+    Test.assertEqual(commissionDepositAmount, commissionEvent.amount)
+    Test.assertEqual(flowtyDropsAccount.address, commissionEvent.to!)
+    
+    Test.assertEqual(minterDepositAmount, minterFee.amount)
+    Test.assertEqual(openEditionAccount.address, minterFee.to!)
+}
+
 // ------------------------------------------------------------------------
 //                      Helper functions section
 
@@ -49,7 +95,7 @@ pub fun createDefaultEndlessOpenEditionDrop(): UInt64 {
         ipfsCid: "1234",
         ipfsPath: nil,
         price: 1.0,
-        paymentIdentifier: Type<@FlowToken.Vault>().identifier,
+        paymentIdentifier: exampleTokenIdentifier(),
         minterPrivatePath: FlowtyDrops.MinterPrivatePath
     )
 }
@@ -60,4 +106,34 @@ pub fun getPriceAtPhase(contractAddress: Address, contractName: String, dropID: 
 
 pub fun getDropDetails(contractAddress: Address, contractName: String, dropID: UInt64): FlowtyDrops.DropDetails {
     return scriptExecutor("get_drop_details.cdc", [contractAddress, contractName, dropID])! as! FlowtyDrops.DropDetails
+}
+
+pub fun mintDrop(
+    minter: Test.Account,
+    contractAddress: Address,
+    contractName: String,
+    numToMint: Int,
+    totalCost: UFix64,
+    paymentIdentifier: String,
+    paymentStoragePath: StoragePath,
+    paymentReceiverPath: PublicPath,
+    dropID: UInt64,
+    dropPhaseIndex: Int,
+    nftIdentifier: String,
+    commissionAddress: Address
+): [UInt64] {
+    txExecutor("drops/mint.cdc", [minter], [
+        contractAddress, contractName, numToMint, totalCost, paymentIdentifier, paymentStoragePath, paymentReceiverPath, dropID, dropPhaseIndex, nftIdentifier, commissionAddress
+    ], nil, nil)
+
+    let ids: [UInt64] = []
+    let events = Test.eventsOfType(Type<FlowtyDrops.Minted>())
+    var count = 0
+    while count < numToMint {
+        count = count + 1
+        let event = events.removeFirst() as! FlowtyDrops.Minted
+        ids.append(event.nftID)
+    }
+
+    return ids
 }

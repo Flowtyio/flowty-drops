@@ -65,6 +65,12 @@
         "testing": "0x0000000000000007"
       }
     },
+    "ExampleToken": {
+      "source": "./contracts/standard/ExampleToken.cdc",
+      "aliases": {
+        "testing": "0x0000000000000008"
+      }
+    },
     "NonFungibleToken": {
       "source": "./node_modules/@flowtyio/flow-contracts/contracts/NonFungibleToken.cdc",
       "aliases": {
@@ -122,10 +128,12 @@
         "FlowtyAddressVerifiers",
         "FlowtyPricers",
         "DropFactory",
+        "OpenEditionNFT",
+
         "NonFungibleToken",
         "ViewResolver",
         "MetadataViews",
-        "OpenEditionNFT"
+        "ExampleToken"
       ],
       "emulator-ft": [
         "FungibleToken",
