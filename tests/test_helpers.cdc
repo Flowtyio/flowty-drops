@@ -2,6 +2,7 @@ import Test
 
 import "NonFungibleToken"
 import "FlowToken"
+import "FlowtyDrops"
 
 // Helper functions. All of the following were taken from
 // https://github.com/onflow/Offers/blob/fd380659f0836e5ce401aa99a2975166b2da5cb0/lib/cadence/test/Offers.cdc
@@ -145,7 +146,8 @@ pub let Account0xd = Address(0x000000000000000d)
 pub let Account0xe = Address(0x000000000000000e)
 
 pub let serviceAccount = Test.getAccount(Account0x5)
-pub let dropsAccount = Test.getAccount(Account0x5)
+pub let dropsAccount = Test.getAccount(Account0x6)
+pub let openEditionAccount = Test.getAccount(Account0x7)
 
 // Flow Token constants
 pub let flowTokenStoragePath = /storage/flowTokenVault
@@ -173,4 +175,59 @@ pub fun heartbeat() {
 
 pub fun getCurrentTime(): UFix64 {
     return scriptExecutor("util/get_current_time.cdc", [])! as! UFix64
+}
+
+pub fun mintFromDrop(
+    minter: Test.Account,
+    contractAddress: Address,
+    contractName: String,
+    numToMint: Int,
+    totalCost: UFix64,
+    paymentIdentifier: String,
+    paymentStoragePath: StoragePath,
+    paymentReceiverPath: PublicPath,
+    dropID: UInt64,
+    dropPhaseIndex: Int,
+    nftIdentifier: String,
+    commissionReceiver: Address
+) {
+    let args = [
+        contractAddress,
+        contractName,
+        numToMint,
+        totalCost,
+        paymentIdentifier,
+        paymentStoragePath,
+        paymentReceiverPath,
+        dropID,
+        dropPhaseIndex,
+        nftIdentifier,
+        commissionReceiver
+    ]
+    txExecutor("drops/mint.cdc", [minter], args, nil, nil)
+}
+
+pub fun getDropIDs(
+    contractAddress: Address,
+    contractName: String
+): [UInt64] {
+    return scriptExecutor("get_drop_ids.cdc", [contractAddress, contractName])! as! [UInt64]
+}
+
+pub fun createEndlessOpenEditionDrop(
+    acct: Test.Account,
+    name: String,
+    description: String,
+    ipfsCid: String,
+    ipfsPath: String?,
+    price: UFix64,
+    paymentIdentifier: String,
+    minterPrivatePath: PrivatePath
+): UInt64 {
+    txExecutor("drops/add_endless_open_edition.cdc", [acct], [
+        name, description, ipfsCid, ipfsPath, price, paymentIdentifier, minterPrivatePath
+    ], nil, nil)
+    
+    let e = Test.eventsOfType(Type<FlowtyDrops.DropAdded>()).removeLast() as! FlowtyDrops.DropAdded
+    return e.id
 }

@@ -38,8 +38,6 @@ pub contract OpenEditionNFT: NonFungibleToken, ViewResolver {
     /// Storage and Public Paths
     pub let CollectionStoragePath: StoragePath
     pub let CollectionPublicPath: PublicPath
-    pub let MinterStoragePath: StoragePath
-    pub let MinterPrivatePath: PrivatePath
 
     /// The core resource that represents a Non Fungible Token.
     /// New instances will be created using the NFTMinter resource
@@ -259,7 +257,7 @@ pub contract OpenEditionNFT: NonFungibleToken, ViewResolver {
                     }
                 )
             case Type<FlowtyDrops.DropResolver>():
-                return FlowtyDrops.DropResolver(cap: OpenEditionNFT.account.getCapability<&{FlowtyDrops.ContainerPublic}>(OpenEditionNFT.MinterPrivatePath))
+                return FlowtyDrops.DropResolver(cap: OpenEditionNFT.account.getCapability<&{FlowtyDrops.ContainerPublic}>(FlowtyDrops.ContainerPublicPath))
         }
         return nil
     }
@@ -283,8 +281,6 @@ pub contract OpenEditionNFT: NonFungibleToken, ViewResolver {
         // Set the named paths
         self.CollectionStoragePath = /storage/openEditionNFT
         self.CollectionPublicPath = /public/openEditionNFT
-        self.MinterStoragePath = /storage/openEditionMinter
-        self.MinterPrivatePath = /private/openEditionMinter
 
         // Create a Collection resource and save it to storage
         let collection <- create Collection()
@@ -298,20 +294,10 @@ pub contract OpenEditionNFT: NonFungibleToken, ViewResolver {
 
         // Create a Minter resource and save it to storage
         let minter <- create NFTMinter()
-        self.account.save(<-minter, to: self.MinterStoragePath)
-        let minterCap = self.account.link<&NFTMinter{FlowtyDrops.Minter}>(self.MinterPrivatePath, target: self.MinterStoragePath)
+        self.account.save(<-minter, to: FlowtyDrops.MinterStoragePath)
+        let minterCap = self.account.link<&NFTMinter{FlowtyDrops.Minter}>(FlowtyDrops.MinterPrivatePath, target: FlowtyDrops.MinterStoragePath)
             ?? panic("unable to link minter capability")
 
         emit ContractInitialized()
-
-        let dropDisplay = MetadataViews.Display(
-            name: "Sample Open Edition",
-            description: "This is a sample Open Edition NFT Drop utilizing flowty drops for minting",
-            thumbnail: MetadataViews.IPFSFile(cid: "QmNtDmxuyBeA6YJht3ADMJCCqLoG3SPf3S7DYavZTeFUy7", path: nil)
-        )
-        let drop <- DropFactory.createEndlessOpenEditionDrop(price: 1.0, paymentTokenType: Type<@FlowToken.Vault>(), dropDisplay: dropDisplay, minterCap: minterCap)
-        let container <- FlowtyDrops.createContainer()
-        container.addDrop(<- drop)
-        self.account.save(<-container, to: FlowtyDrops.ContainerStoragePath)
     }
 }

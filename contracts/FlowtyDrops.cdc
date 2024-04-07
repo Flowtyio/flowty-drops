@@ -3,14 +3,14 @@ import "FungibleToken"
 import "MetadataViews"
 
 pub contract FlowtyDrops {
-
     pub let ContainerStoragePath: StoragePath
     pub let ContainerPublicPath: PublicPath
 
-    // TODO: Event definitions
-    // - DropAdded
-    // - Phase Started
-    // - Phase Ended
+    pub let MinterStoragePath: StoragePath
+    pub let MinterPrivatePath: PrivatePath
+
+    pub event DropAdded(address: Address, id: UInt64, name: String, description: String, imageUrl: String, start: UInt64?, end: UInt64?)
+
     // - Minted
 
     // Interface to expose all the components necessary to participate in a drop
@@ -19,6 +19,15 @@ pub contract FlowtyDrops {
         pub fun borrowPhase(index: Int): &{PhasePublic}
         pub fun borrowActivePhases(): [&{PhasePublic}]
         pub fun borrowAllPhases(): [&{PhasePublic}]
+        pub fun mint(
+            payment: @FungibleToken.Vault,
+            amount: Int,
+            phaseIndex: Int,
+            expectedType: Type,
+            receiverCap: Capability<&{NonFungibleToken.CollectionPublic}>,
+            commissionReceiver: Capability<&{FungibleToken.Receiver}>
+        ): @FungibleToken.Vault
+        pub fun getDetails(): DropDetails
     }
 
     pub resource Drop: DropPublic {
@@ -126,6 +135,10 @@ pub contract FlowtyDrops {
             }
 
             return <- self.phases.remove(at: index)
+        }
+
+        pub fun getDetails(): DropDetails {
+            return self.details
         }
 
         init(details: DropDetails, minterCap: Capability<&{Minter}>, phases: @[Phase]) {
@@ -283,14 +296,30 @@ pub contract FlowtyDrops {
 
     pub resource interface ContainerPublic {
         pub fun borrowDropPublic(id: UInt64): &{DropPublic}?
+        pub fun getIDs(): [UInt64]
     }
 
     // Contains drops. 
-    pub resource Container {
+    pub resource Container: ContainerPublic {
         pub let drops: @{UInt64: Drop}
 
         pub fun addDrop(_ drop: @Drop) {
-            // TODO: emit DropAdded event
+            let details = drop.getDetails()
+
+            let phases = drop.borrowAllPhases()
+            assert(phases.length > 0, message: "drops must have at least one phase to be added to a container")
+
+            let firstPhaseDetails = phases[0].getDetails()
+
+            emit DropAdded(
+                address: self.owner!.address,
+                id: drop.uuid,
+                name: details.display.name,
+                description: details.display.description,
+                imageUrl: details.display.thumbnail.uri(),
+                start: firstPhaseDetails.switch.getStart(),
+                end: firstPhaseDetails.switch.getEnd()
+            )
             destroy self.drops.insert(key: drop.uuid, <-drop)
         }
 
@@ -308,6 +337,10 @@ pub contract FlowtyDrops {
 
         pub fun borrowDropPublic(id: UInt64): &{DropPublic}? {
             return &self.drops[id] as &{DropPublic}?
+        }
+
+        pub fun getIDs(): [UInt64] {
+            return self.drops.keys
         }
 
         init() {
@@ -334,8 +367,12 @@ pub contract FlowtyDrops {
     init() {
         let identifier = "FlowtyDrops_".concat(self.account.address.toString())
         let containerIdentifier = identifier.concat("_Container")
+        let minterIdentifier = identifier.concat("_Minter")
 
         self.ContainerStoragePath = StoragePath(identifier: containerIdentifier)!
         self.ContainerPublicPath = PublicPath(identifier: containerIdentifier)!
+
+        self.MinterPrivatePath = PrivatePath(identifier: minterIdentifier)!
+        self.MinterStoragePath = StoragePath(identifier: minterIdentifier)!
     }
 }
