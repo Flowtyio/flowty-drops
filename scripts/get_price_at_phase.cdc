@@ -15,6 +15,6 @@ pub fun main(contractAddress: Address, contractName: String, dropID: UInt64, pha
     let drop = container.borrowDropPublic(id: dropID)
         ?? panic("drop not found")
 
-    let phase = drop.borrowPhase(index: phaseIndex)
+    let phase = drop.borrowPhasePublic(index: phaseIndex)
     return phase.getDetails().pricer.getPrice(num: numToMint, paymentTokenType: paymentTokenType, minter: minter)
 }
