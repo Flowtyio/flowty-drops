@@ -24,7 +24,8 @@ pub contract FlowtyDrops {
             phaseIndex: Int,
             expectedType: Type,
             receiverCap: Capability<&{NonFungibleToken.CollectionPublic}>,
-            commissionReceiver: Capability<&{FungibleToken.Receiver}>
+            commissionReceiver: Capability<&{FungibleToken.Receiver}>,
+            data: {String: AnyStruct}
         ): @FungibleToken.Vault
         pub fun getDetails(): DropDetails
     }
@@ -42,7 +43,8 @@ pub contract FlowtyDrops {
             phaseIndex: Int,
             expectedType: Type,
             receiverCap: Capability<&{NonFungibleToken.CollectionPublic}>,
-            commissionReceiver: Capability<&{FungibleToken.Receiver}>
+            commissionReceiver: Capability<&{FungibleToken.Receiver}>,
+            data: {String: AnyStruct}
         ): @FungibleToken.Vault {
             pre {
                 expectedType.isSubtype(of: Type<@NonFungibleToken.NFT>()): "expected type must be an NFT"
@@ -69,7 +71,7 @@ pub contract FlowtyDrops {
 
             // mint the nfts
             let minter = self.minterCap.borrow() ?? panic("minter capability could not be borrowed")
-            let mintedNFTs <- minter.mint(payment: <-withdrawn, amount: amount, phase: phase)
+            let mintedNFTs <- minter.mint(payment: <-withdrawn, amount: amount, phase: phase, data: data)
 
             // distribute to receiver
             let receiver = receiverCap.borrow() ?? panic("could not borrow receiver capability")
@@ -286,7 +288,7 @@ pub contract FlowtyDrops {
     }
 
     pub resource interface Minter {
-        pub fun mint(payment: @FungibleToken.Vault, amount: Int, phase: &Phase): @[NonFungibleToken.NFT] {
+        pub fun mint(payment: @FungibleToken.Vault, amount: Int, phase: &Phase, data: {String: AnyStruct}): @[NonFungibleToken.NFT] {
             post {
                 phase.details.switch.hasStarted() && !phase.details.switch.hasEnded(): "phase is not active"
                 result.length == amount: "incorrect number of items returned"
