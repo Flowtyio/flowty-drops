@@ -245,6 +245,26 @@ pub fun createEndlessOpenEditionDrop(
     return e.id
 }
 
+pub fun createTimebasedOpenEditionDrop(
+    acct: Test.Account,
+    name: String,
+    description: String,
+    ipfsCid: String,
+    ipfsPath: String?,
+    price: UFix64,
+    paymentIdentifier: String,
+    startUnix: UInt64?,
+    endUnix: UInt64?,
+    minterPrivatePath: PrivatePath
+): UInt64 {
+    txExecutor("drops/add_time_based_open_edition.cdc", [acct], [
+        name, description, ipfsCid, ipfsPath, price, paymentIdentifier, startUnix, endUnix, minterPrivatePath
+    ], nil, nil)
+
+    let e = Test.eventsOfType(Type<FlowtyDrops.DropAdded>()).removeLast() as! FlowtyDrops.DropAdded
+    return e.id
+}
+
 pub fun sendFlowTokens(fromAccount: Test.Account, toAccount: Test.Account, amount: UFix64) {
     txExecutor("util/send_flow_tokens.cdc", [fromAccount], [toAccount.address, amount], nil, nil)
 }
@@ -259,4 +279,18 @@ pub fun mintExampleTokens(_ acct: Test.Account, _ amount: UFix64) {
 
 pub fun exampleTokenIdentifier(): String {
     return Type<@ExampleToken.Vault>().identifier
+}
+
+pub fun hasDropPhaseStarted(contractAddress: Address, contractName: String, dropID: UInt64, phaseIndex: Int): Bool {
+    return scriptExecutor("has_phase_started.cdc", [contractAddress, contractName, dropID, phaseIndex])! as! Bool
+}
+
+pub fun hasDropPhaseEnded(contractAddress: Address, contractName: String, dropID: UInt64, phaseIndex: Int): Bool {
+    return scriptExecutor("has_phase_ended.cdc", [contractAddress, contractName, dropID, phaseIndex])! as! Bool
+}
+
+pub fun canMintAtPhase(contractAddress: Address, contractName: String, dropID: UInt64, phaseIndex: Int, minter: Address, numToMint: Int, totalMinted: Int, paymentIdentifier: String): Bool {
+    return scriptExecutor("can_mint_at_phase.cdc", [
+        contractAddress, contractName, dropID, phaseIndex, minter, numToMint, totalMinted, paymentIdentifier
+    ])! as! Bool
 }

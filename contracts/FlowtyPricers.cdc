@@ -12,7 +12,7 @@ pub contract FlowtyPricers {
     the number minter, or what address is minting
     */
     pub struct FlatPrice: FlowtyDrops.Pricer {
-        pub let price: UFix64
+        pub var price: UFix64
         pub let paymentTokenType: Type
 
         pub fun getPrice(num: Int, paymentTokenType: Type, minter: Address): UFix64 {
@@ -21,6 +21,10 @@ pub contract FlowtyPricers {
 
         pub fun getPaymentTypes(): [Type] {
             return [self.paymentTokenType]
+        }
+
+        pub fun setPrice(price: UFix64) {
+            self.price = price
         }
 
         init(price: UFix64, paymentTokenType: Type) {

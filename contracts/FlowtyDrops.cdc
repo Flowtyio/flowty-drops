@@ -225,7 +225,7 @@ pub contract FlowtyDrops {
             return &self.details.pricer as! auth &{Pricer}
         }
 
-        pub fun borrowAddressVerifier(): auth &{AddressVerifier} {
+        pub fun borrowAddressVerifierAuth(): auth &{AddressVerifier} {
             return &self.details.addressVerifier as! auth &{AddressVerifier}
         }
 
@@ -259,9 +259,6 @@ pub contract FlowtyDrops {
 
         // placecholder data dictionary to allow new fields to be accessed
         pub let data: {String: AnyStruct}
-
-        // TODO: how many can I mint at once?
-        // TODO: how many can I mint in total?
 
         init(switch: {Switch}, display: MetadataViews.Display?, pricer: {Pricer}, addressVerifier: {AddressVerifier}) {
             self.switch = switch

@@ -9,7 +9,7 @@ pub fun setup() {
 }
 
 pub fun test_FlowtyAddressVerifiers_AllowAll() {
-    let v = FlowtyAddressVerifiers.AllowAll()
+    let v = FlowtyAddressVerifiers.AllowAll(maxPerMint: 10)
     Test.assertEqual(true, v.canMint(addr: alice.address, num: 10, totalMinted: 10, data: {}))
     Test.assertEqual(nil, v.remainingForAddress(addr: alice.address, totalMinted: 10))
 }

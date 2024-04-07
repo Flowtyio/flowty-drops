@@ -84,11 +84,51 @@ pub fun test_OpenEditionNFT_mint() {
     Test.assertEqual(openEditionAccount.address, minterFee.to!)
 }
 
+pub fun test_OpenEditionNFT_EditPhaseDetails() {
+    let dropID = createDefaultTimeBasedOpenEditionDrop()
+    Test.assertEqual(true, hasDropPhaseStarted(contractAddress: openEditionAccount.address, contractName: "OpenEditionNFT", dropID: dropID, phaseIndex: 0))
+    Test.assertEqual(false, hasDropPhaseEnded(contractAddress: openEditionAccount.address, contractName: "OpenEditionNFT", dropID: dropID, phaseIndex: 0))
+    
+    // now let's set a new start and end time
+    let currentTime = getCurrentTime()
+    let newStart = UInt64(currentTime + 5.0)
+
+    txExecutor("drops/edit_timebased_phase_start_and_end.cdc", [openEditionAccount], [dropID, 0, newStart, newStart + UInt64(5)], nil, nil)
+    Test.assertEqual(false, hasDropPhaseStarted(contractAddress: openEditionAccount.address, contractName: "OpenEditionNFT", dropID: dropID, phaseIndex: 0))
+    Test.assertEqual(false, hasDropPhaseEnded(contractAddress: openEditionAccount.address, contractName: "OpenEditionNFT", dropID: dropID, phaseIndex: 0))
+
+    // now move time such that the drop should have started
+    Test.moveTime(by: 6.0)
+    Test.assertEqual(true, hasDropPhaseStarted(contractAddress: openEditionAccount.address, contractName: "OpenEditionNFT", dropID: dropID, phaseIndex: 0))
+    Test.assertEqual(false, hasDropPhaseEnded(contractAddress: openEditionAccount.address, contractName: "OpenEditionNFT", dropID: dropID, phaseIndex: 0))
+
+    // now move time to expire the phase
+    Test.moveTime(by: 10.0)
+    Test.assertEqual(true, hasDropPhaseEnded(contractAddress: openEditionAccount.address, contractName: "OpenEditionNFT", dropID: dropID, phaseIndex: 0))
+}
+
+pub fun test_OpenEditionNFT_EditPrice() {
+    let dropID = createDefaultTimeBasedOpenEditionDrop()
+    Test.assertEqual(1.0, getPriceAtPhase(contractAddress: openEditionAccount.address, contractName: "OpenEditionNFT", dropID: dropID, phaseIndex: 0, minter: openEditionAccount.address, numToMint: 1, paymentIdentifier: exampleTokenIdentifier()))
+
+    txExecutor("drops/edit_flat_price.cdc", [openEditionAccount], [dropID, 0, 2.0], nil, nil)
+    Test.assertEqual(2.0, getPriceAtPhase(contractAddress: openEditionAccount.address, contractName: "OpenEditionNFT", dropID: dropID, phaseIndex: 0, minter: openEditionAccount.address, numToMint: 1, paymentIdentifier: exampleTokenIdentifier()))
+}
+
+pub fun test_OpenEditionNFT_EditMaxPerMint() {
+    let dropID = createDefaultTimeBasedOpenEditionDrop()
+    Test.assertEqual(true, canMintAtPhase(contractAddress: openEditionAccount.address, contractName: "OpenEditionNFT", dropID: dropID, phaseIndex: 0, minter: openEditionAccount.address, numToMint: 10, totalMinted: 0, paymentIdentifier: exampleTokenIdentifier()))
+    txExecutor("drops/edit_address_verifier_max_per_mint.cdc", [openEditionAccount], [dropID, 0, 5], nil, nil)
+
+    Test.assertEqual(false, canMintAtPhase(contractAddress: openEditionAccount.address, contractName: "OpenEditionNFT", dropID: dropID, phaseIndex: 0, minter: openEditionAccount.address, numToMint: 10, totalMinted: 0, paymentIdentifier: exampleTokenIdentifier()))
+    Test.assertEqual(true, canMintAtPhase(contractAddress: openEditionAccount.address, contractName: "OpenEditionNFT", dropID: dropID, phaseIndex: 0, minter: openEditionAccount.address, numToMint: 5, totalMinted: 0, paymentIdentifier: exampleTokenIdentifier()))
+}
+
 // ------------------------------------------------------------------------
 //                      Helper functions section
 
 pub fun createDefaultEndlessOpenEditionDrop(): UInt64 {
-    return  createEndlessOpenEditionDrop(
+    return createEndlessOpenEditionDrop(
         acct: openEditionAccount,
         name: "Default Endless Open Edition",
         description: "This is a placeholder description",
@@ -96,6 +136,23 @@ pub fun createDefaultEndlessOpenEditionDrop(): UInt64 {
         ipfsPath: nil,
         price: 1.0,
         paymentIdentifier: exampleTokenIdentifier(),
+        minterPrivatePath: FlowtyDrops.MinterPrivatePath
+    )
+}
+
+pub fun createDefaultTimeBasedOpenEditionDrop(): UInt64 {
+    let currentTime = getCurrentTime()
+
+    return createTimebasedOpenEditionDrop(
+        acct: openEditionAccount,
+        name: "Default Time-based Open Edition",
+        description: "This is a placeholder description",
+        ipfsCid: "1234",
+        ipfsPath: nil,
+        price: 1.0,
+        paymentIdentifier: exampleTokenIdentifier(),
+        startUnix: UInt64(getCurrentTime()),
+        endUnix: UInt64(currentTime + 5.0),
         minterPrivatePath: FlowtyDrops.MinterPrivatePath
     )
 }
