@@ -10,8 +10,7 @@ pub contract FlowtyDrops {
     pub let MinterPrivatePath: PrivatePath
 
     pub event DropAdded(address: Address, id: UInt64, name: String, description: String, imageUrl: String, start: UInt64?, end: UInt64?)
-
-    // - Minted
+    pub event Minted(address: Address, dropID: UInt64, phaseID: UInt64, nftID: UInt64, nftType: String)
 
     // Interface to expose all the components necessary to participate in a drop
     // and to ask questions about a drop.
@@ -46,7 +45,7 @@ pub contract FlowtyDrops {
             commissionReceiver: Capability<&{FungibleToken.Receiver}>
         ): @FungibleToken.Vault {
             pre {
-                Type<@NonFungibleToken.NFT>().isSubtype(of: expectedType): "expected type must be an NFT"
+                expectedType.isSubtype(of: Type<@NonFungibleToken.NFT>()): "expected type must be an NFT"
                 self.phases.length > phaseIndex: "phase index is too high"
                 receiverCap.check(): "receiver capability is not valid"
             }
@@ -65,8 +64,8 @@ pub contract FlowtyDrops {
             let commission <- withdrawn.withdraw(amount: self.details.commissionRate * withdrawn.balance)
             commissionReceiver.borrow()!.deposit(from: <-commission)
 
+            assert(phase.details.pricer.getPrice(num: amount, paymentTokenType: withdrawn.getType(), minter: receiverCap.address) * (1.0 - self.details.commissionRate) == withdrawn.balance, message: "incorrect payment amount")
             assert(phase.details.pricer.getPaymentTypes().contains(withdrawn.getType()), message: "unsupported payment type")
-            assert(phase.details.pricer.getPrice(num: amount, paymentTokenType: withdrawn.getType(), minter: receiverCap.address) == withdrawn.balance, message: "incorrect payment amount")
 
             // mint the nfts
             let minter = self.minterCap.borrow() ?? panic("minter capability could not be borrowed")
@@ -79,8 +78,11 @@ pub contract FlowtyDrops {
             while mintedNFTs.length > 0 {
                 let nft <- mintedNFTs.removeFirst()
 
+                let nftType = nft.getType()
+                emit Minted(address: receiverCap.address, dropID: self.uuid, phaseID: phase.uuid, nftID: nft.id, nftType: nftType.identifier)
+
                 // validate that every nft is the right type
-                assert(nft.getType() == expectedType, message: "unexpected nft type was minted")
+                assert(nftType == expectedType, message: "unexpected nft type was minted")
     
                 receiver.deposit(token: <-nft)
             }

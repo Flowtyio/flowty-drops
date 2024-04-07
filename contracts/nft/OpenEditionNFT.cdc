@@ -14,6 +14,7 @@ import "MetadataViews"
 import "ViewResolver"
 import "FungibleToken"
 import "FlowToken"
+import "ExampleToken"
 
 import "FlowtyDrops"
 import "FlowtySwitches"
@@ -205,7 +206,16 @@ pub contract OpenEditionNFT: NonFungibleToken, ViewResolver {
     ///
     pub resource NFTMinter: FlowtyDrops.Minter {
         pub fun mint(payment: @FungibleToken.Vault, amount: Int, phase: &FlowtyDrops.Phase): @[NonFungibleToken.NFT] {
-            OpenEditionNFT.account.borrow<&{FungibleToken.Receiver}>(from: /storage/flowTokenVault)!.deposit(from: <-payment)
+            switch(payment.getType()) {
+                case Type<@FlowToken.Vault>():
+                    OpenEditionNFT.account.borrow<&{FungibleToken.Receiver}>(from: /storage/flowTokenVault)!.deposit(from: <-payment)
+                    break
+                case Type<@ExampleToken.Vault>():
+                    OpenEditionNFT.account.borrow<&{FungibleToken.Receiver}>(from: /storage/exampleTokenVault)!.deposit(from: <-payment)
+                    break
+                default:
+                    panic("unsupported payment token type")
+            }
 
             let nfts: @[NonFungibleToken.NFT] <- []
 
