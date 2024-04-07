@@ -1,2 +1,3 @@
 ignore:
   - "contracts/nft/OpenEditionNFT.cdc"
+  - "contracts/standard/ExampleToken.cdc"
