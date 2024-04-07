@@ -15,7 +15,7 @@ pub contract FlowtyDrops {
     // Interface to expose all the components necessary to participate in a drop
     // and to ask questions about a drop.
     pub resource interface DropPublic {
-        pub fun borrowPhase(index: Int): &{PhasePublic}
+        pub fun borrowPhasePublic(index: Int): &{PhasePublic}
         pub fun borrowActivePhases(): [&{PhasePublic}]
         pub fun borrowAllPhases(): [&{PhasePublic}]
         pub fun mint(
@@ -94,7 +94,12 @@ pub contract FlowtyDrops {
             return <- payment
         }
 
-        pub fun borrowPhase(index: Int): &{PhasePublic} {
+        pub fun borrowPhase(index: Int): &Phase {
+            return &self.phases[index] as! &Phase
+        }
+
+
+        pub fun borrowPhasePublic(index: Int): &{PhasePublic} {
             return &self.phases[index] as! &{PhasePublic}
         }
 
@@ -102,7 +107,7 @@ pub contract FlowtyDrops {
             let arr: [&{PhasePublic}] = []
             var count = 0
             while count < self.phases.length {
-                let ref = self.borrowPhase(index: count)
+                let ref = self.borrowPhasePublic(index: count)
                 let switch = ref.getDetails().switch
                 if switch.hasStarted() && !switch.hasEnded() {
                     arr.append(ref)
@@ -118,7 +123,7 @@ pub contract FlowtyDrops {
             let arr: [&{PhasePublic}] = []
             var count = 0
             while count < self.phases.length {
-                let ref = self.borrowPhase(index: count)
+                let ref = self.borrowPhasePublic(index: count)
                 arr.append(ref)
                 count = count + 1
             }
@@ -210,6 +215,18 @@ pub contract FlowtyDrops {
 
         pub fun getDetails(): PhaseDetails {
             return self.details
+        }
+
+        pub fun borrowSwitchAuth(): auth &{Switch} {
+            return &self.details.switch as! auth &{Switch}
+        }
+
+        pub fun borrowPricerAuth(): auth &{Pricer} {
+            return &self.details.pricer as! auth &{Pricer}
+        }
+
+        pub fun borrowAddressVerifier(): auth &{AddressVerifier} {
+            return &self.details.addressVerifier as! auth &{AddressVerifier}
         }
 
         init(details: PhaseDetails) {
