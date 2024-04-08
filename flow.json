@@ -26,6 +26,26 @@
         "type": "file",
         "location": "emulator-account.pkey"
       }
+    },
+    "flowty-drops-testnet": {
+      "address": "0x6efd9df59fee9a6a",
+      "key": {
+        "type": "google-kms",
+        "index": 0,
+        "signatureAlgorithm": "ECDSA_P256",
+        "hashAlgorithm": "SHA2_256",
+        "resourceID": "projects/flowty-test/locations/global/keyRings/flow/cryptoKeys/flowty-drops/cryptoKeyVersions/1"
+      }
+    },
+    "sample-nfts-testnet": {
+      "address": "0x81b016b14291e49c",
+      "key": {
+        "type": "google-kms",
+        "index": 0,
+        "signatureAlgorithm": "ECDSA_P256",
+        "hashAlgorithm": "SHA2_256",
+        "resourceID": "projects/flowty-test/locations/global/keyRings/flow/cryptoKeys/flowty-drops/cryptoKeyVersions/1"
+      }
     }
   },
   "contracts": {
@@ -129,7 +149,6 @@
         "FlowtyPricers",
         "DropFactory",
         "OpenEditionNFT",
-
         "NonFungibleToken",
         "ViewResolver",
         "MetadataViews",
@@ -141,6 +160,18 @@
       ],
       "emulator-flowtoken": [
         "FlowToken"
+      ]
+    },
+    "testnet": {
+      "flowty-drops-testnet": [
+        "FlowtyDrops",
+        "FlowtySwitches",
+        "FlowtyAddressVerifiers",
+        "FlowtyPricers",
+        "DropFactory"
+      ],
+      "sample-nfts-testnet": [
+        "OpenEditionNFT"
       ]
     }
   }
