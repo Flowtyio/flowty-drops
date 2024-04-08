@@ -69,8 +69,8 @@ pub contract FlowtySwitches {
     A timestamp switch has a start and an end time.
     */
     pub struct TimestampSwitch: FlowtyDrops.Switch {
-        pub let start: UInt64?
-        pub let end: UInt64?
+        pub var start: UInt64?
+        pub var end: UInt64?
 
 
         pub fun hasStarted(): Bool {
@@ -91,6 +91,14 @@ pub contract FlowtySwitches {
 
         pub fun getEnd(): UInt64? {
             return self.end
+        }
+
+        pub fun setStart(start: UInt64?) {
+            self.start = start
+        }
+
+        pub fun setEnd(end: UInt64?) {
+            self.end = end
         }
 
         init(start: UInt64?, end: UInt64?) {

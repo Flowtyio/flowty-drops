@@ -7,7 +7,25 @@ pub contract FlowtyAddressVerifiers {
     /*
     The AllowAll AddressVerifier allows any address to mint without any verification
     */
-    pub struct AllowAll: FlowtyDrops.AddressVerifier {}
+    pub struct AllowAll: FlowtyDrops.AddressVerifier {
+        pub var maxPerMint: Int
+
+        pub fun canMint(addr: Address, num: Int, totalMinted: Int, data: {String: AnyStruct}): Bool {
+            return num <= self.maxPerMint
+        }
+
+        pub fun setMaxPerMint(_ value: Int) {
+            self.maxPerMint = value
+        }
+
+        init(maxPerMint: Int) {
+            pre {
+                maxPerMint > 0: "maxPerMint must be greater than 0"
+            }
+
+            self.maxPerMint = maxPerMint
+        }
+    }
 
     /*
     The AllowList Verifier only lets a configured set of addresses participate in a drop phase. The number

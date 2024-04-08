@@ -205,7 +205,7 @@ pub contract OpenEditionNFT: NonFungibleToken, ViewResolver {
     /// able to mint new NFTs
     ///
     pub resource NFTMinter: FlowtyDrops.Minter {
-        pub fun mint(payment: @FungibleToken.Vault, amount: Int, phase: &FlowtyDrops.Phase): @[NonFungibleToken.NFT] {
+        pub fun mint(payment: @FungibleToken.Vault, amount: Int, phase: &FlowtyDrops.Phase, data: {String: AnyStruct}): @[NonFungibleToken.NFT] {
             switch(payment.getType()) {
                 case Type<@FlowToken.Vault>():
                     OpenEditionNFT.account.borrow<&{FungibleToken.Receiver}>(from: /storage/flowTokenVault)!.deposit(from: <-payment)

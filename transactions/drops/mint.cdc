@@ -51,7 +51,8 @@ transaction(
             phaseIndex: dropPhaseIndex,
             expectedType: expectedNftType,
             receiverCap: receiverCap,
-            commissionReceiver: commissionReceiver
+            commissionReceiver: commissionReceiver,
+            data: {}
         )
 
         if remainder.balance > 0.0 {

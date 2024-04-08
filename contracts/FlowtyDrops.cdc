@@ -15,7 +15,7 @@ pub contract FlowtyDrops {
     // Interface to expose all the components necessary to participate in a drop
     // and to ask questions about a drop.
     pub resource interface DropPublic {
-        pub fun borrowPhase(index: Int): &{PhasePublic}
+        pub fun borrowPhasePublic(index: Int): &{PhasePublic}
         pub fun borrowActivePhases(): [&{PhasePublic}]
         pub fun borrowAllPhases(): [&{PhasePublic}]
         pub fun mint(
@@ -24,7 +24,8 @@ pub contract FlowtyDrops {
             phaseIndex: Int,
             expectedType: Type,
             receiverCap: Capability<&{NonFungibleToken.CollectionPublic}>,
-            commissionReceiver: Capability<&{FungibleToken.Receiver}>
+            commissionReceiver: Capability<&{FungibleToken.Receiver}>,
+            data: {String: AnyStruct}
         ): @FungibleToken.Vault
         pub fun getDetails(): DropDetails
     }
@@ -42,7 +43,8 @@ pub contract FlowtyDrops {
             phaseIndex: Int,
             expectedType: Type,
             receiverCap: Capability<&{NonFungibleToken.CollectionPublic}>,
-            commissionReceiver: Capability<&{FungibleToken.Receiver}>
+            commissionReceiver: Capability<&{FungibleToken.Receiver}>,
+            data: {String: AnyStruct}
         ): @FungibleToken.Vault {
             pre {
                 expectedType.isSubtype(of: Type<@NonFungibleToken.NFT>()): "expected type must be an NFT"
@@ -69,7 +71,7 @@ pub contract FlowtyDrops {
 
             // mint the nfts
             let minter = self.minterCap.borrow() ?? panic("minter capability could not be borrowed")
-            let mintedNFTs <- minter.mint(payment: <-withdrawn, amount: amount, phase: phase)
+            let mintedNFTs <- minter.mint(payment: <-withdrawn, amount: amount, phase: phase, data: data)
 
             // distribute to receiver
             let receiver = receiverCap.borrow() ?? panic("could not borrow receiver capability")
@@ -94,7 +96,12 @@ pub contract FlowtyDrops {
             return <- payment
         }
 
-        pub fun borrowPhase(index: Int): &{PhasePublic} {
+        pub fun borrowPhase(index: Int): &Phase {
+            return &self.phases[index] as! &Phase
+        }
+
+
+        pub fun borrowPhasePublic(index: Int): &{PhasePublic} {
             return &self.phases[index] as! &{PhasePublic}
         }
 
@@ -102,7 +109,7 @@ pub contract FlowtyDrops {
             let arr: [&{PhasePublic}] = []
             var count = 0
             while count < self.phases.length {
-                let ref = self.borrowPhase(index: count)
+                let ref = self.borrowPhasePublic(index: count)
                 let switch = ref.getDetails().switch
                 if switch.hasStarted() && !switch.hasEnded() {
                     arr.append(ref)
@@ -118,7 +125,7 @@ pub contract FlowtyDrops {
             let arr: [&{PhasePublic}] = []
             var count = 0
             while count < self.phases.length {
-                let ref = self.borrowPhase(index: count)
+                let ref = self.borrowPhasePublic(index: count)
                 arr.append(ref)
                 count = count + 1
             }
@@ -212,6 +219,18 @@ pub contract FlowtyDrops {
             return self.details
         }
 
+        pub fun borrowSwitchAuth(): auth &{Switch} {
+            return &self.details.switch as! auth &{Switch}
+        }
+
+        pub fun borrowPricerAuth(): auth &{Pricer} {
+            return &self.details.pricer as! auth &{Pricer}
+        }
+
+        pub fun borrowAddressVerifierAuth(): auth &{AddressVerifier} {
+            return &self.details.addressVerifier as! auth &{AddressVerifier}
+        }
+
         init(details: PhaseDetails) {
             self.details = details
         }
@@ -243,9 +262,6 @@ pub contract FlowtyDrops {
         // placecholder data dictionary to allow new fields to be accessed
         pub let data: {String: AnyStruct}
 
-        // TODO: how many can I mint at once?
-        // TODO: how many can I mint in total?
-
         init(switch: {Switch}, display: MetadataViews.Display?, pricer: {Pricer}, addressVerifier: {AddressVerifier}) {
             self.switch = switch
             self.display = display
@@ -272,7 +288,7 @@ pub contract FlowtyDrops {
     }
 
     pub resource interface Minter {
-        pub fun mint(payment: @FungibleToken.Vault, amount: Int, phase: &Phase): @[NonFungibleToken.NFT] {
+        pub fun mint(payment: @FungibleToken.Vault, amount: Int, phase: &Phase, data: {String: AnyStruct}): @[NonFungibleToken.NFT] {
             post {
                 phase.details.switch.hasStarted() && !phase.details.switch.hasEnded(): "phase is not active"
                 result.length == amount: "incorrect number of items returned"

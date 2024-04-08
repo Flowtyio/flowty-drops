@@ -1,9 +1,7 @@
 import "FlowtyDrops"
 import "ViewResolver"
 
-pub fun main(contractAddress: Address, contractName: String, dropID: UInt64, phaseIndex: Int, minter: Address, numToMint: Int, paymentIdentifier: String): UFix64? {
-    let paymentTokenType = CompositeType(paymentIdentifier)!
-
+pub fun main(contractAddress: Address, contractName: String, dropID: UInt64, phaseIndex: Int): Bool {
     let resolver = getAccount(contractAddress).contracts.borrow<&ViewResolver>(name: contractName)
         ?? panic("contract does not implement ViewResolver interface")
 
@@ -16,5 +14,6 @@ pub fun main(contractAddress: Address, contractName: String, dropID: UInt64, pha
         ?? panic("drop not found")
 
     let phase = drop.borrowPhasePublic(index: phaseIndex)
-    return phase.getDetails().pricer.getPrice(num: numToMint, paymentTokenType: paymentTokenType, minter: minter)
+
+    return phase.getDetails().switch.hasEnded()
 }
