@@ -124,6 +124,12 @@ pub fun test_OpenEditionNFT_EditMaxPerMint() {
     Test.assertEqual(true, canMintAtPhase(contractAddress: openEditionAccount.address, contractName: "OpenEditionNFT", dropID: dropID, phaseIndex: 0, minter: openEditionAccount.address, numToMint: 5, totalMinted: 0, paymentIdentifier: exampleTokenIdentifier()))
 }
 
+pub fun test_OpenEditionNFT_GetActivePhases() {
+    let dropID = createDefaultTimeBasedOpenEditionDrop()
+    let activePhaseIDs = scriptExecutor("get_active_phases.cdc", [openEditionAccount.address, "OpenEditionNFT", dropID])! as! [UInt64]
+    Test.assert(activePhaseIDs.length == 1, message: "unexpected active phase length")
+}
+
 // ------------------------------------------------------------------------
 //                      Helper functions section
 
