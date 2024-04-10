@@ -4,6 +4,7 @@ import "FlowToken"
 import "FlowtyDrops"
 import "OpenEditionNFT"
 import "ExampleToken"
+import "DropTypes"
 
 pub let defaultEndlessOpenEditionName = "Default Endless Open Edition"
 
@@ -144,6 +145,40 @@ pub fun test_OpenEditionNFT_addPhase() {
     Test.assert(!activePhaseIDs.contains(phaseEvent.id), message: "unexpected active phase length")
 }
 
+pub fun test_OpenEditionNFT_getDropSummary() {
+    let dropID = createDefaultTimeBasedOpenEditionDrop()
+
+    let minter = Test.createAccount()
+    setupExampleToken(minter)
+    mintExampleTokens(minter, 100.0)
+
+    let summary = scriptExecutor("get_drop_summary.cdc", [openEditionAccount.address, "OpenEditionNFT", dropID, minter.address])! as! DropTypes.DropSummary
+    Test.assertEqual(minter.address, summary.address!)
+
+    let numToMint = 5
+    let totalCost = 5.0
+
+    mintDrop(
+        minter: minter,
+        contractAddress: openEditionAccount.address,
+        contractName: "OpenEditionNFT",
+        numToMint: numToMint,
+        totalCost: totalCost,
+        paymentIdentifier: exampleTokenIdentifier(),
+        paymentStoragePath: exampleTokenStoragePath,
+        paymentReceiverPath: exampleTokenReceiverPath,
+        dropID: dropID,
+        dropPhaseIndex: 0,
+        nftIdentifier: Type<@OpenEditionNFT.NFT>().identifier,
+        commissionAddress: flowtyDropsAccount.address
+    )
+
+    let summaryAfter = scriptExecutor("get_drop_summary.cdc", [openEditionAccount.address, "OpenEditionNFT", dropID, minter.address])! as! DropTypes.DropSummary
+    Test.assertEqual(summaryAfter.totalMinted, numToMint)
+    Test.assertEqual(summaryAfter.mintedByAddress!, numToMint)
+
+}
+
 // ------------------------------------------------------------------------
 //                      Helper functions section
 
@@ -156,7 +191,8 @@ pub fun createDefaultEndlessOpenEditionDrop(): UInt64 {
         ipfsPath: nil,
         price: 1.0,
         paymentIdentifier: exampleTokenIdentifier(),
-        minterPrivatePath: FlowtyDrops.MinterPrivatePath
+        minterPrivatePath: FlowtyDrops.MinterPrivatePath,
+        nftTypeIdentifier: openEditionNftIdentifier()
     )
 }
 
@@ -173,7 +209,8 @@ pub fun createDefaultTimeBasedOpenEditionDrop(): UInt64 {
         paymentIdentifier: exampleTokenIdentifier(),
         startUnix: UInt64(getCurrentTime()),
         endUnix: UInt64(currentTime + 5.0),
-        minterPrivatePath: FlowtyDrops.MinterPrivatePath
+        minterPrivatePath: FlowtyDrops.MinterPrivatePath,
+        nftTypeIdentifier: openEditionNftIdentifier()
     )
 }
 

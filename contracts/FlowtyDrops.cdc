@@ -184,6 +184,7 @@ pub contract FlowtyDrops {
         pub var totalMinted: Int
         pub var minters: {Address: Int}
         pub let commissionRate: UFix64
+        pub let nftType: Type
 
         access(contract) fun addMinted(num: Int, addr: Address) {
             self.totalMinted = self.totalMinted + num
@@ -194,12 +195,13 @@ pub contract FlowtyDrops {
             self.minters[addr] = self.minters[addr]! + num
         }
 
-        init(display: MetadataViews.Display, medias: MetadataViews.Medias?, commissionRate: UFix64) {
+        init(display: MetadataViews.Display, medias: MetadataViews.Medias?, commissionRate: UFix64, nftType: Type) {
             self.display = display
             self.medias = medias
             self.totalMinted = 0
             self.commissionRate = commissionRate
             self.minters = {}
+            self.nftType = nftType
         }
     }
 
