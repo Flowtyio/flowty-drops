@@ -14,6 +14,7 @@ import "MetadataViews"
 import "ViewResolver"
 import "FungibleToken"
 import "FlowToken"
+import "ExampleToken"
 
 import "FlowtyDrops"
 import "FlowtySwitchers"
@@ -208,6 +209,9 @@ pub contract OpenEditionNFT: NonFungibleToken, ViewResolver {
             switch(payment.getType()) {
                 case Type<@FlowToken.Vault>():
                     OpenEditionNFT.account.borrow<&{FungibleToken.Receiver}>(from: /storage/flowTokenVault)!.deposit(from: <-payment)
+                    break
+                case Type<@ExampleToken.Vault>():
+                    OpenEditionNFT.account.borrow<&{FungibleToken.Receiver}>(from: /storage/exampleTokenVault)!.deposit(from: <-payment)
                     break
                 default:
                     panic("unsupported payment token type")
