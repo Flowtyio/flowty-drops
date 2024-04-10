@@ -13,6 +13,7 @@ pub contract DropTypes {
         pub let nftType: String
 
         pub let address: Address?
+        pub let mintedByAddress: Int?
 
         pub let phases: [PhaseSummary]
 
@@ -25,6 +26,7 @@ pub contract DropTypes {
             medias: MetadataViews.Medias?,
             totalMinted: Int,
             minterCount: Int,
+            mintedByAddress: Int?,
             commissionRate: UFix64,
             nftType: Type,
             address: Address?,
@@ -36,6 +38,7 @@ pub contract DropTypes {
             self.totalMinted = totalMinted
             self.commissionRate = commissionRate
             self.minterCount = minterCount
+            self.mintedByAddress = mintedByAddress
             self.nftType = nftType.identifier
             self.address = address
             self.phases = phases
@@ -137,6 +140,7 @@ pub contract DropTypes {
             medias: dropDetails.medias,
             totalMinted: dropDetails.totalMinted,
             minterCount: dropDetails.minters.keys.length,
+            mintedByAddress: minter != nil ? dropDetails.minters[minter!] : nil,
             commissionRate: dropDetails.commissionRate,
             nftType: dropDetails.nftType,
             address: minter,
