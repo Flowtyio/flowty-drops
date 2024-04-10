@@ -16,6 +16,9 @@ pub contract DropTypes {
 
         pub let phases: [PhaseSummary]
 
+        pub let blockTimestamp: UInt64
+        pub let blockHeight: UInt64
+
         init(
             id: UInt64,
             display: MetadataViews.Display,
@@ -36,6 +39,10 @@ pub contract DropTypes {
             self.nftType = nftType.identifier
             self.address = address
             self.phases = phases
+
+            let b = getCurrentBlock()
+            self.blockHeight = b.height
+            self.blockTimestamp = UInt64(b.timestamp)
         }
     }
 
