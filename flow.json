@@ -28,7 +28,17 @@
       }
     },
     "flowty-drops-testnet": {
-      "address": "0x6efd9df59fee9a6a",
+      "address": "0x06f1e5cde6db0e70",
+      "key": {
+        "type": "google-kms",
+        "index": 0,
+        "signatureAlgorithm": "ECDSA_P256",
+        "hashAlgorithm": "SHA2_256",
+        "resourceID": "projects/flowty-test/locations/global/keyRings/flow/cryptoKeys/flowty-drops/cryptoKeyVersions/1"
+      }
+    },
+    "droptypes-testnet": {
+      "address": "0x59db35223b83a6e6",
       "key": {
         "type": "google-kms",
         "index": 0,
@@ -38,7 +48,7 @@
       }
     },
     "sample-nfts-testnet": {
-      "address": "0x81b016b14291e49c",
+      "address": "0xb1c92b8c73994e26",
       "key": {
         "type": "google-kms",
         "index": 0,
@@ -179,6 +189,9 @@
       ],
       "sample-nfts-testnet": [
         "OpenEditionNFT"
+      ],
+      "droptypes-testnet": [
+        "DropTypes"
       ]
     }
   }
