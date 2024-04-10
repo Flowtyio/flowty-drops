@@ -136,6 +136,6 @@ pub contract DropTypes {
             phases: phaseSummaries
         )
 
-        return nil
+        return dropSummary
     }
 }

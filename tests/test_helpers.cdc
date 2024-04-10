@@ -4,6 +4,7 @@ import "NonFungibleToken"
 import "FlowToken"
 import "FlowtyDrops"
 import "ExampleToken"
+import "OpenEditionNFT"
 
 // Helper functions. All of the following were taken from
 // https://github.com/onflow/Offers/blob/fd380659f0836e5ce401aa99a2975166b2da5cb0/lib/cadence/test/Offers.cdc
@@ -164,12 +165,17 @@ pub let flowTokenReceiverPath = /public/flowTokenReceiver
 pub fun deployAll() {
     deploy("ExampleToken", "../contracts/standard/ExampleToken.cdc", [])
 
+    // 0x6
     deploy("FlowtyDrops", "../contracts/FlowtyDrops.cdc", [])
     deploy("FlowtySwitchers", "../contracts/FlowtySwitchers.cdc", [])
     deploy("FlowtyPricers", "../contracts/FlowtyPricers.cdc", [])
     deploy("FlowtyAddressVerifiers", "../contracts/FlowtyAddressVerifiers.cdc", [])
     deploy("DropFactory", "../contracts/DropFactory.cdc", [])
 
+    // 0x8
+    deploy("DropTypes", "../contracts/DropTypes.cdc", [])
+
+    // 0x7
     deploy("OpenEditionNFT", "../contracts/nft/OpenEditionNFT.cdc", [])
 
 
@@ -235,10 +241,11 @@ pub fun createEndlessOpenEditionDrop(
     ipfsPath: String?,
     price: UFix64,
     paymentIdentifier: String,
-    minterPrivatePath: PrivatePath
+    minterPrivatePath: PrivatePath,
+    nftTypeIdentifier: String
 ): UInt64 {
     txExecutor("drops/add_endless_open_edition.cdc", [acct], [
-        name, description, ipfsCid, ipfsPath, price, paymentIdentifier, minterPrivatePath
+        name, description, ipfsCid, ipfsPath, price, paymentIdentifier, minterPrivatePath, nftTypeIdentifier
     ], nil, nil)
     
     let e = Test.eventsOfType(Type<FlowtyDrops.DropAdded>()).removeLast() as! FlowtyDrops.DropAdded
@@ -255,10 +262,11 @@ pub fun createTimebasedOpenEditionDrop(
     paymentIdentifier: String,
     startUnix: UInt64?,
     endUnix: UInt64?,
-    minterPrivatePath: PrivatePath
+    minterPrivatePath: PrivatePath,
+    nftTypeIdentifier: String
 ): UInt64 {
     txExecutor("drops/add_time_based_open_edition.cdc", [acct], [
-        name, description, ipfsCid, ipfsPath, price, paymentIdentifier, startUnix, endUnix, minterPrivatePath
+        name, description, ipfsCid, ipfsPath, price, paymentIdentifier, startUnix, endUnix, minterPrivatePath, nftTypeIdentifier
     ], nil, nil)
 
     let e = Test.eventsOfType(Type<FlowtyDrops.DropAdded>()).removeLast() as! FlowtyDrops.DropAdded
@@ -279,6 +287,10 @@ pub fun mintExampleTokens(_ acct: Test.Account, _ amount: UFix64) {
 
 pub fun exampleTokenIdentifier(): String {
     return Type<@ExampleToken.Vault>().identifier
+}
+
+pub fun openEditionNftIdentifier(): String {
+    return Type<@OpenEditionNFT.NFT>().identifier
 }
 
 pub fun hasDropPhaseStarted(contractAddress: Address, contractName: String, dropID: UInt64, phaseIndex: Int): Bool {

@@ -10,7 +10,8 @@ transaction(
     ipfsPath: String?,
     price: UFix64,
     paymentIdentifier: String,
-    minterPrivatePath: PrivatePath
+    minterPrivatePath: PrivatePath,
+    nftTypeIdentifier: String
 ) {
     prepare(acct: AuthAccount) {
         if acct.borrow<&AnyResource>(from: FlowtyDrops.ContainerStoragePath) == nil {
@@ -33,7 +34,7 @@ transaction(
             description: description,
             thumbnail: MetadataViews.IPFSFile(cid: ipfsCid, path: ipfsPath)
         )
-        let drop <- DropFactory.createEndlessOpenEditionDrop(price: 1.0, paymentTokenType: paymentType, dropDisplay: dropDisplay, minterCap: minter)
+        let drop <- DropFactory.createEndlessOpenEditionDrop(price: 1.0, paymentTokenType: paymentType, dropDisplay: dropDisplay, minterCap: minter, nftTypeIdentifier: nftTypeIdentifier)
         container.addDrop(<- drop)
     }
 }
