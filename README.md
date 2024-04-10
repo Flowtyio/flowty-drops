@@ -15,7 +15,7 @@ FlowtyDrops is made up of a few core resources and structs:
 3. @Container - Holds Drop resources in it.
 4. @{Minter} - A resource interface that creators can implement to be compatible with FlowtyDrops. When constructing a drop, you must
     supply a `Capability<&{Minter}>` to it.
-5. {Switch} - A struct interface that is responsible for whether a phase is active or not. For example, one implementation could be configured
+5. {Switcher} - A struct interface that is responsible for whether a phase is active or not. For example, one implementation could be configured
     to start a phase at a time in the future, while another could turn start based on block height.
 6. {AddressVerifier} - A struct interface that is responsible for determining if an account is permitted to mint or not. For example,
     one implementation might permit any account to mint as many as it wants, while another might check an allow-list.
@@ -38,7 +38,7 @@ FlowtyDrops is made up of a few core resources and structs:
     are responsible for handling how much an attempted mint should cost.
     For example, you might make a drop free, or might configure a drop to
     be a flat fee regardless of how many are being minted at once.
-5. FlowtySwitches - Implementations of the Switch struct interface.
-    Switch are responsible for flagging if a drop is live or not. For
+5. FlowtySwitchers - Implementations of the Switcher struct interface.
+    Switchers are responsible for flagging if a drop is live or not. For
     example, a drop might go live a certain unix timestamp and end at a
     future date, or it might be on perpetually until manually turned off.

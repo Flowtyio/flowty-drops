@@ -8,7 +8,7 @@ transaction(dropID: UInt64, start: UInt64?, end: UInt64?) {
         let drop = container.borrowDrop(id: dropID) ?? panic("drop not found")
         let firstPhase = drop.borrowPhase(index: 0)
 
-        let details = FlowtyDrops.PhaseDetails(switch: firstPhase.details.switch, display: firstPhase.details.display, pricer: FlowtyPricers.Free(), addressVerifier: firstPhase.details.addressVerifier)
+        let details = FlowtyDrops.PhaseDetails(switcher: firstPhase.details.switcher, display: firstPhase.details.display, pricer: FlowtyPricers.Free(), addressVerifier: firstPhase.details.addressVerifier)
         let phase <- FlowtyDrops.createPhase(details: details)
 
         drop.addPhase(<- phase)

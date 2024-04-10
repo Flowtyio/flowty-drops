@@ -1,14 +1,14 @@
 import "FlowtyDrops"
 
 /*
-This contract contains implementations for the FlowtyDrops.Switch struct interface.
+This contract contains implementations for the FlowtyDrops.Switcher struct interface.
 You can use these implementations, or your own, for switches when configuring a drop
 */
-pub contract FlowtySwitches {
+pub contract FlowtySwitchers {
     /*
-    The AlwaysOn Switch is always on and never ends.
+    The AlwaysOn Switcher is always on and never ends.
     */
-    pub struct AlwaysOn: FlowtyDrops.Switch {
+    pub struct AlwaysOn: FlowtyDrops.Switcher {
         pub fun hasStarted(): Bool {
             return true
         }
@@ -27,10 +27,10 @@ pub contract FlowtySwitches {
     }
 
     /*
-    The manual switch is used to explicitly toggle a drop.
-    This version of switch allows a creator to turn on or off a drop at will
+    The manual switcher is used to explicitly toggle a drop.
+    This version of switcher allows a creator to turn on or off a drop at will
     */
-    pub struct ManualSwitch: FlowtyDrops.Switch {
+    pub struct ManualSwitch: FlowtyDrops.Switcher {
         access(self) var started: Bool
         access(self) var ended: Bool
 
@@ -66,9 +66,9 @@ pub contract FlowtySwitches {
 
     /*
     TimestampSwitch uses block timestamps to determine if a phase or drop is live or not.
-    A timestamp switch has a start and an end time.
+    A timestamp switcher has a start and an end time.
     */
-    pub struct TimestampSwitch: FlowtyDrops.Switch {
+    pub struct TimestampSwitch: FlowtyDrops.Switcher {
         pub var start: UInt64?
         pub var end: UInt64?
 

@@ -112,8 +112,8 @@ pub contract FlowtyDrops {
             var count = 0
             while count < self.phases.length {
                 let ref = self.borrowPhasePublic(index: count)
-                let switch = ref.getDetails().switch
-                if switch.hasStarted() && !switch.hasEnded() {
+                let switcher = ref.getDetails().switcher
+                if switcher.hasStarted() && !switcher.hasEnded() {
                     arr.append(ref)
                 }
 
@@ -141,7 +141,7 @@ pub contract FlowtyDrops {
                 dropAddress: self.owner!.address,
                 id: phase.uuid,
                 index: self.phases.length,
-                switcherType: phase.details.switch.getType().identifier,
+                switcherType: phase.details.switcher.getType().identifier,
                 pricerType: phase.details.pricer.getType().identifier,
                 addressVerifierType: phase.details.addressVerifier.getType().identifier
             )
@@ -203,13 +203,13 @@ pub contract FlowtyDrops {
         }
     }
 
-    // A switch represents a phase being on or off, and holds information
+    // A switcher represents a phase being on or off, and holds information
     // about whether a phase has started or not.
-    pub struct interface Switch {
-        // Signal that a phase has started. If the phase has not ended, it means that this switch's phase
+    pub struct interface Switcher {
+        // Signal that a phase has started. If the phase has not ended, it means that this switcher's phase
         // is active
         pub fun hasStarted(): Bool
-        // Signal that a phase has ended. If a switch has ended, minting will not work. That could mean
+        // Signal that a phase has ended. If a switcher has ended, minting will not work. That could mean
         // the drop is over, or it could mean another phase has begun.
         pub fun hasEnded(): Bool
 
@@ -225,15 +225,15 @@ pub contract FlowtyDrops {
 
         // returns whether this phase of a drop has started.
         pub fun isActive(): Bool {
-            return self.details.switch.hasStarted() && !self.details.switch.hasEnded()
+            return self.details.switcher.hasStarted() && !self.details.switcher.hasEnded()
         }
 
         pub fun getDetails(): PhaseDetails {
             return self.details
         }
 
-        pub fun borrowSwitchAuth(): auth &{Switch} {
-            return &self.details.switch as! auth &{Switch}
+        pub fun borrowSwitchAuth(): auth &{Switcher} {
+            return &self.details.switcher as! auth &{Switcher}
         }
 
         pub fun borrowPricerAuth(): auth &{Pricer} {
@@ -261,7 +261,7 @@ pub contract FlowtyDrops {
 
     pub struct PhaseDetails {
         // handles whether a phase is on or not
-        pub let switch: {Switch}
+        pub let switcher: {Switcher}
 
         // display information about a phase
         pub let display: MetadataViews.Display?
@@ -275,8 +275,8 @@ pub contract FlowtyDrops {
         // placecholder data dictionary to allow new fields to be accessed
         pub let data: {String: AnyStruct}
 
-        init(switch: {Switch}, display: MetadataViews.Display?, pricer: {Pricer}, addressVerifier: {AddressVerifier}) {
-            self.switch = switch
+        init(switcher: {Switcher}, display: MetadataViews.Display?, pricer: {Pricer}, addressVerifier: {AddressVerifier}) {
+            self.switcher = switcher
             self.display = display
             self.pricer = pricer
             self.addressVerifier = addressVerifier
@@ -303,7 +303,7 @@ pub contract FlowtyDrops {
     pub resource interface Minter {
         pub fun mint(payment: @FungibleToken.Vault, amount: Int, phase: &Phase, data: {String: AnyStruct}): @[NonFungibleToken.NFT] {
             post {
-                phase.details.switch.hasStarted() && !phase.details.switch.hasEnded(): "phase is not active"
+                phase.details.switcher.hasStarted() && !phase.details.switcher.hasEnded(): "phase is not active"
                 result.length == amount: "incorrect number of items returned"
             }
         }
@@ -348,8 +348,8 @@ pub contract FlowtyDrops {
                 name: details.display.name,
                 description: details.display.description,
                 imageUrl: details.display.thumbnail.uri(),
-                start: firstPhaseDetails.switch.getStart(),
-                end: firstPhaseDetails.switch.getEnd()
+                start: firstPhaseDetails.switcher.getStart(),
+                end: firstPhaseDetails.switcher.getEnd()
             )
             destroy self.drops.insert(key: drop.uuid, <-drop)
         }
