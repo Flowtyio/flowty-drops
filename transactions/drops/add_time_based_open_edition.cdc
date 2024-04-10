@@ -12,7 +12,8 @@ transaction(
     paymentIdentifier: String,
     startUnix: UInt64?,
     endUnix: UInt64?,
-    minterPrivatePath: PrivatePath
+    minterPrivatePath: PrivatePath,
+    nftTypeIdentifier: String
 ) {
     prepare(acct: AuthAccount) {
         if acct.borrow<&AnyResource>(from: FlowtyDrops.ContainerStoragePath) == nil {

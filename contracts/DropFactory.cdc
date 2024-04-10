@@ -14,7 +14,8 @@ pub contract DropFactory {
         price: UFix64,
         paymentTokenType: Type,
         dropDisplay: MetadataViews.Display,
-        minterCap: Capability<&{FlowtyDrops.Minter}>
+        minterCap: Capability<&{FlowtyDrops.Minter}>,
+        nftTypeIdentifier: String
     ): @FlowtyDrops.Drop {
         pre {
             paymentTokenType.isSubtype(of: Type<@FungibleToken.Vault>()): "paymentTokenType must be a FungibleToken"
@@ -32,7 +33,9 @@ pub contract DropFactory {
         let phaseDetails = FlowtyDrops.PhaseDetails(switcher: switcher, display: nil, pricer: pricer, addressVerifier: addressVerifier)
         let phase <- FlowtyDrops.createPhase(details: phaseDetails)
 
-        let dropDetails = FlowtyDrops.DropDetails(display: dropDisplay, medias: nil, commissionRate: 0.05)
+
+        let nftType = CompositeType(nftTypeIdentifier) ?? panic("invalid nft type identifier")
+        let dropDetails = FlowtyDrops.DropDetails(display: dropDisplay, medias: nil, commissionRate: 0.05, nftType: nftType)
         let drop <- FlowtyDrops.createDrop(details: dropDetails, minterCap: minterCap, phases: <- [<-phase])
 
         return <- drop
@@ -44,7 +47,8 @@ pub contract DropFactory {
         dropDisplay: MetadataViews.Display,
         minterCap: Capability<&{FlowtyDrops.Minter}>,
         startUnix: UInt64?,
-        endUnix: UInt64?
+        endUnix: UInt64?,
+        nftTypeIdentifier: String
     ): @FlowtyDrops.Drop {
         pre {
             paymentTokenType.isSubtype(of: Type<@FungibleToken.Vault>()): "paymentTokenType must be a FungibleToken"
@@ -62,7 +66,8 @@ pub contract DropFactory {
         let phaseDetails = FlowtyDrops.PhaseDetails(switcher: switcher, display: nil, pricer: pricer, addressVerifier: addressVerifier)
         let phase <- FlowtyDrops.createPhase(details: phaseDetails)
 
-        let dropDetails = FlowtyDrops.DropDetails(display: dropDisplay, medias: nil, commissionRate: 0.05)
+        let nftType = CompositeType(nftTypeIdentifier) ?? panic("invalid nft type identifier")
+        let dropDetails = FlowtyDrops.DropDetails(display: dropDisplay, medias: nil, commissionRate: 0.05, nftType: nftType)
         let drop <- FlowtyDrops.createDrop(details: dropDetails, minterCap: minterCap, phases: <- [<-phase])
 
         return <- drop

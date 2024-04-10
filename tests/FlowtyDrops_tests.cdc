@@ -4,6 +4,7 @@ import "FlowToken"
 import "FlowtyDrops"
 import "OpenEditionNFT"
 import "ExampleToken"
+import "DropTypes"
 
 pub let defaultEndlessOpenEditionName = "Default Endless Open Edition"
 
@@ -142,6 +143,14 @@ pub fun test_OpenEditionNFT_addPhase() {
     txExecutor("drops/remove_last_phase.cdc", [openEditionAccount], [dropID, nil, nil], nil, nil)
     activePhaseIDs = scriptExecutor("get_active_phases.cdc", [openEditionAccount.address, "OpenEditionNFT", dropID])! as! [UInt64]
     Test.assert(!activePhaseIDs.contains(phaseEvent.id), message: "unexpected active phase length")
+}
+
+pub fun test_OpenEditionNFT_getDropSummary() {
+    let dropID = createDefaultTimeBasedOpenEditionDrop()
+
+    let minter = Test.createAccount()
+
+    let summary = scriptExecutor("get_drop_summary.cdc", [openEditionAccount.address, "OpenEditionNFT", dropID, minter.address])! as! DropTypes.DropSummary
 }
 
 // ------------------------------------------------------------------------

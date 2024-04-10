@@ -79,6 +79,12 @@
         "testing": "0x0000000000000006"
       }
     },
+    "DropTypes": {
+      "source": "./contracts/DropTypes.cdc",
+      "aliases": {
+        "testing": "0x0000000000000008"
+      }
+    },
     "OpenEditionNFT": {
       "source": "./contracts/nft/OpenEditionNFT.cdc",
       "aliases": {
@@ -148,6 +154,7 @@
         "FlowtyAddressVerifiers",
         "FlowtyPricers",
         "DropFactory",
+        "DropTypes",
         "OpenEditionNFT",
         "NonFungibleToken",
         "ViewResolver",
