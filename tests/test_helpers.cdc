@@ -165,7 +165,7 @@ pub fun deployAll() {
     deploy("ExampleToken", "../contracts/standard/ExampleToken.cdc", [])
 
     deploy("FlowtyDrops", "../contracts/FlowtyDrops.cdc", [])
-    deploy("FlowtySwitches", "../contracts/FlowtySwitches.cdc", [])
+    deploy("FlowtySwitchers", "../contracts/FlowtySwitchers.cdc", [])
     deploy("FlowtyPricers", "../contracts/FlowtyPricers.cdc", [])
     deploy("FlowtyAddressVerifiers", "../contracts/FlowtyAddressVerifiers.cdc", [])
     deploy("DropFactory", "../contracts/DropFactory.cdc", [])

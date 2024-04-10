@@ -17,7 +17,7 @@ import "FlowToken"
 import "ExampleToken"
 
 import "FlowtyDrops"
-import "FlowtySwitches"
+import "FlowtySwitchers"
 import "FlowtyAddressVerifiers"
 import "FlowtyPricers"
 import "DropFactory"

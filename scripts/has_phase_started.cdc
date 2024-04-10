@@ -15,5 +15,5 @@ pub fun main(contractAddress: Address, contractName: String, dropID: UInt64, pha
 
     let phase = drop.borrowPhasePublic(index: phaseIndex)
 
-    return phase.getDetails().switch.hasStarted()
+    return phase.getDetails().switcher.hasStarted()
 }

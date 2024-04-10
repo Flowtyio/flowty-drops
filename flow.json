@@ -61,8 +61,8 @@
         "testing": "0x0000000000000006"
       }
     },
-    "FlowtySwitches": {
-      "source": "./contracts/FlowtySwitches.cdc",
+    "FlowtySwitchers": {
+      "source": "./contracts/FlowtySwitchers.cdc",
       "aliases": {
         "testing": "0x0000000000000006"
       }
@@ -144,7 +144,7 @@
     "emulator": {
       "emulator-account": [
         "FlowtyDrops",
-        "FlowtySwitches",
+        "FlowtySwitchers",
         "FlowtyAddressVerifiers",
         "FlowtyPricers",
         "DropFactory",
@@ -165,7 +165,7 @@
     "testnet": {
       "flowty-drops-testnet": [
         "FlowtyDrops",
-        "FlowtySwitches",
+        "FlowtySwitchers",
         "FlowtyAddressVerifiers",
         "FlowtyPricers",
         "DropFactory"
