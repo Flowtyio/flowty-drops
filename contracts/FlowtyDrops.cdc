@@ -11,6 +11,8 @@ pub contract FlowtyDrops {
 
     pub event DropAdded(address: Address, id: UInt64, name: String, description: String, imageUrl: String, start: UInt64?, end: UInt64?)
     pub event Minted(address: Address, dropID: UInt64, phaseID: UInt64, nftID: UInt64, nftType: String)
+    pub event PhaseAdded(dropID: UInt64, dropAddress: Address, id: UInt64, index: Int, switcherType: String, pricerType: String, addressVerifierType: String)
+    pub event PhaseRemoved(dropID: UInt64, dropAddress: Address, id: UInt64)
 
     // Interface to expose all the components necessary to participate in a drop
     // and to ask questions about a drop.
@@ -51,7 +53,7 @@ pub contract FlowtyDrops {
                 self.phases.length > phaseIndex: "phase index is too high"
                 receiverCap.check(): "receiver capability is not valid"
             }
-            
+
             // validate the payment vault amount and type
             let phase = &self.phases[phaseIndex] as! &Phase
             assert(
@@ -134,7 +136,15 @@ pub contract FlowtyDrops {
         }
 
         pub fun addPhase(_ phase: @Phase) {
-            // TODO: phase added event
+            emit PhaseAdded(
+                dropID: self.uuid,
+                dropAddress: self.owner!.address,
+                id: phase.uuid,
+                index: self.phases.length,
+                switcherType: phase.details.switch.getType().identifier,
+                pricerType: phase.details.pricer.getType().identifier,
+                addressVerifierType: phase.details.addressVerifier.getType().identifier
+            )
             self.phases.append(<-phase)
         }
 
@@ -143,7 +153,10 @@ pub contract FlowtyDrops {
                 self.phases.length > index: "index is greater than length of phases"
             }
 
-            return <- self.phases.remove(at: index)
+            let phase <- self.phases.remove(at: index)
+            emit PhaseRemoved(dropID: self.uuid, dropAddress: self.owner!.address, id: phase.uuid)
+
+            return <- phase
         }
 
         pub fun getDetails(): DropDetails {
