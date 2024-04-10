@@ -14,7 +14,6 @@ import "MetadataViews"
 import "ViewResolver"
 import "FungibleToken"
 import "FlowToken"
-import "ExampleToken"
 
 import "FlowtyDrops"
 import "FlowtySwitchers"
@@ -55,7 +54,7 @@ pub contract OpenEditionNFT: NonFungibleToken, ViewResolver {
             self.display = MetadataViews.Display(
                 name: "Fluid #".concat(self.id.toString()),
                 description: "This is a sample open-edition NFT utilizing flowty drops for minting",
-                thumbnail: MetadataViews.IPFSFile(cid: "QmNtDmxuyBeA6YJht3ADMJCCqLoG3SPf3S7DYavZTeFUy7", path: nil)
+                thumbnail: MetadataViews.IPFSFile(cid: "QmWWLhnkPR3ejavNtzeJcdG9fwcBHKwBVEP4pZ9rGbdHEM", path: nil)
             )
         }
 
@@ -210,9 +209,6 @@ pub contract OpenEditionNFT: NonFungibleToken, ViewResolver {
                 case Type<@FlowToken.Vault>():
                     OpenEditionNFT.account.borrow<&{FungibleToken.Receiver}>(from: /storage/flowTokenVault)!.deposit(from: <-payment)
                     break
-                case Type<@ExampleToken.Vault>():
-                    OpenEditionNFT.account.borrow<&{FungibleToken.Receiver}>(from: /storage/exampleTokenVault)!.deposit(from: <-payment)
-                    break
                 default:
                     panic("unsupported payment token type")
             }
@@ -249,19 +245,28 @@ pub contract OpenEditionNFT: NonFungibleToken, ViewResolver {
                     })
                 )
             case Type<MetadataViews.NFTCollectionDisplay>():
-                let media = MetadataViews.Media(
+                let square = MetadataViews.Media(
+                    file: MetadataViews.IPFSFile(
+                        cid: "QmWWLhnkPR3ejavNtzeJcdG9fwcBHKwBVEP4pZ9rGbdHEM",
+                        path: nil
+                    ),
+                    mediaType: "image/png"
+                )
+
+                let banner = MetadataViews.Media(
                     file: MetadataViews.IPFSFile(
                         cid: "QmYD8e5s59qYFFQXref1YzyqW1WKYUMPxfqVDEis2s23BF",
                         path: nil
                     ),
                     mediaType: "image/png"
                 )
+
                 return MetadataViews.NFTCollectionDisplay(
                     name: "The Open Edition Collection",
                     description: "This collection is used as an example to help you develop your next Open Edition Flow NFT",
                     externalURL: MetadataViews.ExternalURL("https://flowty.io"),
-                    squareImage: media,
-                    bannerImage: media,
+                    squareImage: square,
+                    bannerImage: banner,
                     socials: {
                         "twitter": MetadataViews.ExternalURL("https://twitter.com/flowty_io")
                     }
