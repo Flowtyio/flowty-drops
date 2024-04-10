@@ -178,6 +178,11 @@ pub fun test_OpenEditionNFT_getDropSummary() {
     Test.assertEqual(summaryAfter.mintedByAddress!, numToMint)
     Test.assertEqual(1, summaryAfter.phases.length)
 
+    let summaries = scriptExecutor("get_drop_summaries.cdc", [openEditionAccount.address, "OpenEditionNFT", minter.address])! as! [DropTypes.DropSummary]
+    Test.assertEqual(1, summaries.length)
+    Test.assertEqual(summaries[0].totalMinted, numToMint)
+    Test.assertEqual(summaries[0].mintedByAddress!, numToMint)
+    Test.assertEqual(1, summaries[0].phases.length)
 }
 
 // ------------------------------------------------------------------------

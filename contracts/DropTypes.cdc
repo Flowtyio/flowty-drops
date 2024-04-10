@@ -178,4 +178,57 @@ pub contract DropTypes {
 
         return dropSummary
     }
+
+    pub fun getAllDropSummaries(contractAddress: Address, contractName: String, minter: Address?): [DropSummary] {
+        let resolver = getAccount(contractAddress).contracts.borrow<&ViewResolver>(name: contractName)
+        if resolver == nil {
+            return []
+        }
+
+        let dropResolver = resolver!.resolveView(Type<FlowtyDrops.DropResolver>()) as! FlowtyDrops.DropResolver?
+        if dropResolver == nil {
+            return []
+        }
+
+        let container = dropResolver!.borrowContainer()
+        if container == nil {
+            return []
+        }
+
+        let summaries: [DropSummary] = []
+        for id in container!.getIDs() {
+            let drop = container!.borrowDropPublic(id: id)
+            if drop == nil {
+                continue
+            }
+
+            let dropDetails = drop!.getDetails()
+
+            let phaseSummaries: [PhaseSummary] = []
+            for index, phase in drop!.borrowAllPhases() {
+                let summary = PhaseSummary(
+                    index: index,
+                    phase: phase,
+                    address: minter,
+                    totalMinted: minter != nil ? dropDetails.minters[minter!] : nil
+                )
+                phaseSummaries.append(summary)
+            }
+
+            summaries.append(DropSummary(
+                id: drop!.uuid,
+                display: dropDetails.display,
+                medias: dropDetails.medias,
+                totalMinted: dropDetails.totalMinted,
+                minterCount: dropDetails.minters.keys.length,
+                mintedByAddress: minter != nil ? dropDetails.minters[minter!] : nil,
+                commissionRate: dropDetails.commissionRate,
+                nftType: dropDetails.nftType,
+                address: minter,
+                phases: phaseSummaries
+            ))
+        }
+
+        return summaries
+    }
 }
