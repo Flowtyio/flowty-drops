@@ -3,10 +3,32 @@ import "MetadataViews"
 import "ViewResolver"
 
 pub contract DropTypes {
+    pub struct Display {
+        pub let name: String
+        pub let description: String
+        pub let url: String
+
+        init(_ display: MetadataViews.Display) {
+            self.name = display.name
+            self.description = display.description
+            self.url = display.thumbnail.uri()
+        }
+    }
+
+    pub struct Media {
+        pub let url: String
+        pub let mediaType: String
+
+        init(_ media: MetadataViews.Media) {
+            self.url = media.file.uri()
+            self.mediaType = media.mediaType
+        }
+    }
+
     pub struct DropSummary {
         pub let id: UInt64
-        pub let display: MetadataViews.Display
-        pub let medias: MetadataViews.Medias?
+        pub let display: Display
+        pub let medias: [Media]
         pub let totalMinted: Int
         pub let minterCount: Int
         pub let commissionRate: UFix64
@@ -33,8 +55,14 @@ pub contract DropTypes {
             phases: [PhaseSummary]
         ) {
             self.id = id
-            self.display = display
-            self.medias = medias
+            self.display = Display(display)
+            
+            self.medias = []
+            for m in medias?.items ?? [] {
+                self.medias.append(Media(m))
+            }
+
+
             self.totalMinted = totalMinted
             self.commissionRate = commissionRate
             self.minterCount = minterCount
@@ -127,11 +155,12 @@ pub contract DropTypes {
         let phaseSummaries: [PhaseSummary] = []
         for index, phase in drop!.borrowAllPhases() {
             let summary = PhaseSummary(
-                index: 0,
+                index: index,
                 phase: phase,
                 address: minter,
                 totalMinted: minter != nil ? dropDetails.minters[minter!] : nil
             )
+            phaseSummaries.append(summary)
         }
 
         let dropSummary = DropSummary(

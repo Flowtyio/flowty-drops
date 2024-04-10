@@ -125,11 +125,11 @@ pub contract FlowtyDrops {
 
         pub fun borrowAllPhases(): [&{PhasePublic}] {
             let arr: [&{PhasePublic}] = []
-            var count = 0
-            while count < self.phases.length {
-                let ref = self.borrowPhasePublic(index: count)
+            var index = 0
+            while index < self.phases.length {
+                let ref = self.borrowPhasePublic(index: index)
                 arr.append(ref)
-                count = count + 1
+                index = index + 1
             }
 
             return arr
