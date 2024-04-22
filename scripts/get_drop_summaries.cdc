@@ -1,5 +1,5 @@
 import "DropTypes"
 
-pub fun main(contractAddress: Address, contractName: String, minter: Address?): [DropTypes.DropSummary] {
-    return DropTypes.getAllDropSummaries(contractAddress: contractAddress, contractName: contractName, minter: minter)
+pub fun main(contractAddress: Address, contractName: String, minter: Address?, quantity: Int?, paymentIdentifier: String?): [DropTypes.DropSummary] {
+    return DropTypes.getAllDropSummaries(contractAddress: contractAddress, contractName: contractName, minter: minter, quantity: quantity, paymentIdentifier: paymentIdentifier)
 }

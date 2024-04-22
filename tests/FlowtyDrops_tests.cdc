@@ -152,7 +152,7 @@ pub fun test_OpenEditionNFT_getDropSummary() {
     setupExampleToken(minter)
     mintExampleTokens(minter, 100.0)
 
-    let summary = scriptExecutor("get_drop_summary.cdc", [openEditionAccount.address, "OpenEditionNFT", dropID, minter.address])! as! DropTypes.DropSummary
+    let summary = scriptExecutor("get_drop_summary.cdc", [openEditionAccount.address, "OpenEditionNFT", dropID, minter.address, 1, exampleTokenIdentifier()])! as! DropTypes.DropSummary
     Test.assertEqual(minter.address, summary.address!)
 
     let numToMint = 5
@@ -173,12 +173,12 @@ pub fun test_OpenEditionNFT_getDropSummary() {
         commissionAddress: flowtyDropsAccount.address
     )
 
-    let summaryAfter = scriptExecutor("get_drop_summary.cdc", [openEditionAccount.address, "OpenEditionNFT", dropID, minter.address])! as! DropTypes.DropSummary
+    let summaryAfter = scriptExecutor("get_drop_summary.cdc", [openEditionAccount.address, "OpenEditionNFT", dropID, minter.address, 1, exampleTokenIdentifier()])! as! DropTypes.DropSummary
     Test.assertEqual(summaryAfter.totalMinted, numToMint)
     Test.assertEqual(summaryAfter.mintedByAddress!, numToMint)
     Test.assertEqual(1, summaryAfter.phases.length)
 
-    let summaries = scriptExecutor("get_drop_summaries.cdc", [openEditionAccount.address, "OpenEditionNFT", minter.address])! as! [DropTypes.DropSummary]
+    let summaries = scriptExecutor("get_drop_summaries.cdc", [openEditionAccount.address, "OpenEditionNFT", minter.address, 1, exampleTokenIdentifier()])! as! [DropTypes.DropSummary]
     Test.assertEqual(1, summaries.length)
     Test.assertEqual(summaries[0].totalMinted, numToMint)
     Test.assertEqual(summaries[0].mintedByAddress!, numToMint)

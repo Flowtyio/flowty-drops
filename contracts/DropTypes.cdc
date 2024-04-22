@@ -77,6 +77,20 @@ pub contract DropTypes {
         }
     }
 
+    pub struct Quote {
+        pub let price: UFix64
+        pub let quantity: Int
+        pub let paymentIdentifier: String
+        pub let minter: Address
+
+        init(price: UFix64, quantity: Int, paymentIdentifier: String, minter: Address) {
+            self.price = price
+            self.quantity = quantity
+            self.paymentIdentifier = paymentIdentifier
+            self.minter = minter
+        }
+    }
+
     pub struct PhaseSummary {
         pub let id: UInt64
         pub let index: Int
@@ -95,11 +109,16 @@ pub contract DropTypes {
         pub let address: Address?
         pub let remainingForAddress: Int?
 
+        pub let quote: Quote?
+
         init(
             index: Int,
             phase: &{FlowtyDrops.PhasePublic},
             address: Address?,
-            totalMinted: Int?
+            totalMinted: Int?,
+            minter: Address?,
+            quantity: Int?,
+            paymentIdentifier: String?
         ) {
             self.index = index
             self.id = phase.uuid
@@ -126,10 +145,18 @@ pub contract DropTypes {
                 self.address = nil
                 self.remainingForAddress = nil
             }
+
+            if minter != nil && paymentIdentifier != nil && minter != nil {
+                let price = d.pricer.getPrice(num: quantity!, paymentTokenType: CompositeType(paymentIdentifier!)!, minter: minter!)
+
+                self.quote = Quote(price: price, quantity: quantity!, paymentIdentifier: paymentIdentifier!, minter: minter!)
+            } else {
+                self.quote = nil
+            }
         }
     }
 
-    pub fun getDropSummary(contractAddress: Address, contractName: String, dropID: UInt64, minter: Address?): DropSummary? {
+    pub fun getDropSummary(contractAddress: Address, contractName: String, dropID: UInt64, minter: Address?, quantity: Int?, paymentIdentifier: String?): DropSummary? {
         let resolver = getAccount(contractAddress).contracts.borrow<&ViewResolver>(name: contractName)
         if resolver == nil {
             return nil
@@ -158,7 +185,10 @@ pub contract DropTypes {
                 index: index,
                 phase: phase,
                 address: minter,
-                totalMinted: minter != nil ? dropDetails.minters[minter!] : nil
+                totalMinted: minter != nil ? dropDetails.minters[minter!] : nil,
+                minter: minter,
+                quantity: quantity,
+                paymentIdentifier: paymentIdentifier
             )
             phaseSummaries.append(summary)
         }
@@ -179,7 +209,7 @@ pub contract DropTypes {
         return dropSummary
     }
 
-    pub fun getAllDropSummaries(contractAddress: Address, contractName: String, minter: Address?): [DropSummary] {
+    pub fun getAllDropSummaries(contractAddress: Address, contractName: String, minter: Address?, quantity: Int?, paymentIdentifier: String?): [DropSummary] {
         let resolver = getAccount(contractAddress).contracts.borrow<&ViewResolver>(name: contractName)
         if resolver == nil {
             return []
@@ -210,7 +240,10 @@ pub contract DropTypes {
                     index: index,
                     phase: phase,
                     address: minter,
-                    totalMinted: minter != nil ? dropDetails.minters[minter!] : nil
+                    totalMinted: minter != nil ? dropDetails.minters[minter!] : nil,
+                    minter: minter,
+                    quantity: quantity,
+                    paymentIdentifier: paymentIdentifier
                 )
                 phaseSummaries.append(summary)
             }
