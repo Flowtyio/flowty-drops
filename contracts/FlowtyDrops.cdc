@@ -298,7 +298,7 @@ pub contract FlowtyDrops {
     }
 
     pub struct interface Pricer {
-        pub fun getPrice(num: Int, paymentTokenType: Type, minter: Address): UFix64
+        pub fun getPrice(num: Int, paymentTokenType: Type, minter: Address?): UFix64
         pub fun getPaymentTypes(): [Type]
     }
 
