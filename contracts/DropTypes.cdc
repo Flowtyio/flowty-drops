@@ -146,8 +146,8 @@ pub contract DropTypes {
                 self.remainingForAddress = nil
             }
 
-            if minter != nil && paymentIdentifier != nil && minter != nil {
-                let price = d.pricer.getPrice(num: quantity!, paymentTokenType: CompositeType(paymentIdentifier!)!, minter: minter!)
+            if paymentIdentifier != nil && quantity != nil {
+                let price = d.pricer.getPrice(num: quantity!, paymentTokenType: CompositeType(paymentIdentifier!)!, minter: minter)
 
                 self.quote = Quote(price: price, quantity: quantity!, paymentIdentifier: paymentIdentifier!, minter: minter!)
             } else {

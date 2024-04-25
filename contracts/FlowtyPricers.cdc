@@ -15,7 +15,7 @@ pub contract FlowtyPricers {
         pub var price: UFix64
         pub let paymentTokenType: Type
 
-        pub fun getPrice(num: Int, paymentTokenType: Type, minter: Address): UFix64 {
+        pub fun getPrice(num: Int, paymentTokenType: Type, minter: Address?): UFix64 {
             return self.price * UFix64(num)
         }
 
@@ -37,7 +37,7 @@ pub contract FlowtyPricers {
     The Free Pricer can be used for a free mint, it has no price and always marks its payment type as @FlowToken.Vault
     */
     pub struct Free: FlowtyDrops.Pricer {
-        pub fun getPrice(num: Int, paymentTokenType: Type, minter: Address): UFix64 {
+        pub fun getPrice(num: Int, paymentTokenType: Type, minter: Address?): UFix64 {
             return 0.0
         }
 
