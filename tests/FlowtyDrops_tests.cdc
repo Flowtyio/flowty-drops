@@ -185,6 +185,15 @@ pub fun test_OpenEditionNFT_getDropSummary() {
     Test.assertEqual(1, summaries[0].phases.length)
 }
 
+pub fun test_OpenEditionNFT_getDropSummary_noMinter() {
+    let dropID = createDefaultTimeBasedOpenEditionDrop()
+
+    let summaries = scriptExecutor("get_drop_summaries.cdc", [openEditionAccount.address, "OpenEditionNFT", nil, 1, exampleTokenIdentifier()])! as! [DropTypes.DropSummary]
+    Test.assertEqual(1, summaries.length)
+    Test.assertEqual(summaries[0].totalMinted, 0)
+    Test.assertEqual(summaries[0].mintedByAddress, nil)
+    Test.assertEqual(1, summaries[0].phases.length)
+}
 // ------------------------------------------------------------------------
 //                      Helper functions section
 
