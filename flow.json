@@ -38,7 +38,7 @@
       }
     },
     "droptypes-testnet": {
-      "address": "0x1fb65b9676e716bd",
+      "address": "0x9680721e43087f43",
       "key": {
         "type": "google-kms",
         "index": 0,
@@ -186,9 +186,6 @@
         "FlowtyAddressVerifiers",
         "FlowtyPricers",
         "DropFactory"
-      ],
-      "sample-nfts-testnet": [
-        "OpenEditionNFT"
       ],
       "droptypes-testnet": [
         "DropTypes"
