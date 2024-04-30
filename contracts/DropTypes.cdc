@@ -81,9 +81,9 @@ pub contract DropTypes {
         pub let price: UFix64
         pub let quantity: Int
         pub let paymentIdentifier: String
-        pub let minter: Address
+        pub let minter: Address?
 
-        init(price: UFix64, quantity: Int, paymentIdentifier: String, minter: Address) {
+        init(price: UFix64, quantity: Int, paymentIdentifier: String, minter: Address?) {
             self.price = price
             self.quantity = quantity
             self.paymentIdentifier = paymentIdentifier
@@ -149,7 +149,7 @@ pub contract DropTypes {
             if paymentIdentifier != nil && quantity != nil {
                 let price = d.pricer.getPrice(num: quantity!, paymentTokenType: CompositeType(paymentIdentifier!)!, minter: minter)
 
-                self.quote = Quote(price: price, quantity: quantity!, paymentIdentifier: paymentIdentifier!, minter: minter!)
+                self.quote = Quote(price: price, quantity: quantity!, paymentIdentifier: paymentIdentifier!, minter: minter)
             } else {
                 self.quote = nil
             }
