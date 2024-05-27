@@ -1,8 +1,8 @@
 import "FlowtyDrops"
 
 transaction {
-    prepare(acct: AuthAccount) {
-        if let container = acct.borrow<&FlowtyDrops.Container>(from: FlowtyDrops.ContainerStoragePath) {
+    prepare(acct: auth(BorrowValue) &Account) {
+        if let container = acct.storage.borrow<auth(FlowtyDrops.Owner) &FlowtyDrops.Container>(from: FlowtyDrops.ContainerStoragePath) {
             for id in container.getIDs() {
                 destroy container.removeDrop(id: id)
             }

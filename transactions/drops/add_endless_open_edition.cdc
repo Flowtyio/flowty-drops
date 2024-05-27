@@ -10,21 +10,27 @@ transaction(
     ipfsPath: String?,
     price: UFix64,
     paymentIdentifier: String,
-    minterPrivatePath: PrivatePath,
+    minterControllerID: UInt64,
     nftTypeIdentifier: String
 ) {
-    prepare(acct: AuthAccount) {
-        if acct.borrow<&AnyResource>(from: FlowtyDrops.ContainerStoragePath) == nil {
-            acct.save(<- FlowtyDrops.createContainer(), to: FlowtyDrops.ContainerStoragePath)
+    prepare(acct: auth(Storage, Capabilities) &Account) {
+        if acct.storage.borrow<&AnyResource>(from: FlowtyDrops.ContainerStoragePath) == nil {
+            acct.storage.save(<- FlowtyDrops.createContainer(), to: FlowtyDrops.ContainerStoragePath)
 
-            acct.unlink(FlowtyDrops.ContainerPublicPath)
-            acct.link<&{FlowtyDrops.ContainerPublic}>(FlowtyDrops.ContainerPublicPath, target: FlowtyDrops.ContainerStoragePath)
+            acct.capabilities.unpublish(FlowtyDrops.ContainerPublicPath)
+            acct.capabilities.publish(
+                acct.capabilities.storage.issue<&{FlowtyDrops.ContainerPublic}>(FlowtyDrops.ContainerStoragePath),
+                at: FlowtyDrops.ContainerPublicPath
+            )
         }
 
-        let minter = acct.getCapability<&{FlowtyDrops.Minter}>(minterPrivatePath)
+        let controller = acct.capabilities.storage.getController(byCapabilityID: minterControllerID)
+            ?? panic("minter capability not found")
+
+        let minter = controller.capability as! Capability<&{FlowtyDrops.Minter}> 
         assert(minter.check(), message: "minter capability is not valid")
 
-        let container = acct.borrow<&FlowtyDrops.Container>(from: FlowtyDrops.ContainerStoragePath)
+        let container = acct.storage.borrow<auth(FlowtyDrops.Owner) &FlowtyDrops.Container>(from: FlowtyDrops.ContainerStoragePath)
             ?? panic("drops container not found")
 
         let paymentType = CompositeType(paymentIdentifier) ?? panic("invalid payment identifier")

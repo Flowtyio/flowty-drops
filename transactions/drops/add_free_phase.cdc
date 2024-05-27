@@ -1,14 +1,31 @@
 import "FlowtyDrops"
 import "FlowtyPricers"
+import "FlowtySwitchers"
+import "FlowtyAddressVerifiers"
 
-transaction(dropID: UInt64, start: UInt64?, end: UInt64?) {
-    prepare(acct: AuthAccount) {
-        let container = acct.borrow<&FlowtyDrops.Container>(from: FlowtyDrops.ContainerStoragePath)
+import "MetadataViews"
+
+transaction(dropID: UInt64, start: UInt64?, end: UInt64?, displayURL: String) {
+    prepare(acct: auth(BorrowValue) &Account) {
+        let container = acct.storage.borrow<auth(FlowtyDrops.Owner) &FlowtyDrops.Container>(from: FlowtyDrops.ContainerStoragePath)
             ?? panic("container not found")
         let drop = container.borrowDrop(id: dropID) ?? panic("drop not found")
         let firstPhase = drop.borrowPhase(index: 0)
 
-        let details = FlowtyDrops.PhaseDetails(switcher: firstPhase.details.switcher, display: firstPhase.details.display, pricer: FlowtyPricers.Free(), addressVerifier: firstPhase.details.addressVerifier)
+        let switcher = FlowtySwitchers.TimestampSwitch(start: start, end: end)
+
+        var display: MetadataViews.Display? = nil
+        if let tmpDisplay = firstPhase.details.display {
+            display = MetadataViews.Display(
+                name: tmpDisplay.name,
+                description: tmpDisplay.description,
+                thumbnail: MetadataViews.HTTPFile(url: displayURL)
+            )
+        }
+
+        let verifier = FlowtyAddressVerifiers.AllowAll(maxPerMint: 1000)
+
+        let details = FlowtyDrops.PhaseDetails(switcher: switcher, display: display, pricer: FlowtyPricers.Free(), addressVerifier: verifier)
         let phase <- FlowtyDrops.createPhase(details: details)
 
         drop.addPhase(<- phase)
