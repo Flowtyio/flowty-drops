@@ -3,7 +3,6 @@ import "test_helpers.cdc"
 import "FlowToken"
 import "FlowtyDrops"
 import "OpenEditionNFT"
-import "ExampleToken"
 import "DropTypes"
 
 access(all) let defaultEndlessOpenEditionName = "Default Endless Open Edition"
@@ -59,7 +58,7 @@ access(all) fun test_OpenEditionNFT_mint() {
         contractName: "OpenEditionNFT",
         numToMint: numToMint,
         totalCost: total,
-        paymentIdentifier: exampleTokenIdentifier(),
+        paymentIdentifier: flowTokenIdentifier(),
         paymentStoragePath: exampleTokenStoragePath,
         paymentReceiverPath: exampleTokenReceiverPath,
         dropID: dropID,
@@ -74,9 +73,9 @@ access(all) fun test_OpenEditionNFT_mint() {
     let commissionDepositAmount = total * details.commissionRate
     let minterDepositAmount = total - commissionDepositAmount
 
-    let tokenDeposits = Test.eventsOfType(Type<ExampleToken.TokensDeposited>())
-    let minterFee = tokenDeposits.removeLast() as! ExampleToken.TokensDeposited
-    let commissionEvent = tokenDeposits.removeLast() as! ExampleToken.TokensDeposited
+    let tokenDeposits = Test.eventsOfType(Type<FlowToken.TokensDeposited>())
+    let minterFee = tokenDeposits.removeLast() as! FlowToken.TokensDeposited
+    let commissionEvent = tokenDeposits.removeLast() as! FlowToken.TokensDeposited
     
     Test.assertEqual(commissionDepositAmount, commissionEvent.amount)
     Test.assertEqual(flowtyDropsAccount.address, commissionEvent.to!)
@@ -110,19 +109,19 @@ access(all) fun test_OpenEditionNFT_EditPhaseDetails() {
 
 access(all) fun test_OpenEditionNFT_EditPrice() {
     let dropID = createDefaultTimeBasedOpenEditionDrop()
-    Test.assertEqual(1.0, getPriceAtPhase(contractAddress: openEditionAccount.address, contractName: "OpenEditionNFT", dropID: dropID, phaseIndex: 0, minter: openEditionAccount.address, numToMint: 1, paymentIdentifier: exampleTokenIdentifier()))
+    Test.assertEqual(1.0, getPriceAtPhase(contractAddress: openEditionAccount.address, contractName: "OpenEditionNFT", dropID: dropID, phaseIndex: 0, minter: openEditionAccount.address, numToMint: 1, paymentIdentifier: flowTokenIdentifier()))
 
     txExecutor("drops/edit_flat_price.cdc", [openEditionAccount], [dropID, 0, 2.0], nil, nil)
-    Test.assertEqual(2.0, getPriceAtPhase(contractAddress: openEditionAccount.address, contractName: "OpenEditionNFT", dropID: dropID, phaseIndex: 0, minter: openEditionAccount.address, numToMint: 1, paymentIdentifier: exampleTokenIdentifier()))
+    Test.assertEqual(2.0, getPriceAtPhase(contractAddress: openEditionAccount.address, contractName: "OpenEditionNFT", dropID: dropID, phaseIndex: 0, minter: openEditionAccount.address, numToMint: 1, paymentIdentifier: flowTokenIdentifier()))
 }
 
 access(all) fun test_OpenEditionNFT_EditMaxPerMint() {
     let dropID = createDefaultTimeBasedOpenEditionDrop()
-    Test.assertEqual(true, canMintAtPhase(contractAddress: openEditionAccount.address, contractName: "OpenEditionNFT", dropID: dropID, phaseIndex: 0, minter: openEditionAccount.address, numToMint: 10, totalMinted: 0, paymentIdentifier: exampleTokenIdentifier()))
+    Test.assertEqual(true, canMintAtPhase(contractAddress: openEditionAccount.address, contractName: "OpenEditionNFT", dropID: dropID, phaseIndex: 0, minter: openEditionAccount.address, numToMint: 10, totalMinted: 0, paymentIdentifier: flowTokenIdentifier()))
     txExecutor("drops/edit_address_verifier_max_per_mint.cdc", [openEditionAccount], [dropID, 0, 5], nil, nil)
 
-    Test.assertEqual(false, canMintAtPhase(contractAddress: openEditionAccount.address, contractName: "OpenEditionNFT", dropID: dropID, phaseIndex: 0, minter: openEditionAccount.address, numToMint: 10, totalMinted: 0, paymentIdentifier: exampleTokenIdentifier()))
-    Test.assertEqual(true, canMintAtPhase(contractAddress: openEditionAccount.address, contractName: "OpenEditionNFT", dropID: dropID, phaseIndex: 0, minter: openEditionAccount.address, numToMint: 5, totalMinted: 0, paymentIdentifier: exampleTokenIdentifier()))
+    Test.assertEqual(false, canMintAtPhase(contractAddress: openEditionAccount.address, contractName: "OpenEditionNFT", dropID: dropID, phaseIndex: 0, minter: openEditionAccount.address, numToMint: 10, totalMinted: 0, paymentIdentifier: flowTokenIdentifier()))
+    Test.assertEqual(true, canMintAtPhase(contractAddress: openEditionAccount.address, contractName: "OpenEditionNFT", dropID: dropID, phaseIndex: 0, minter: openEditionAccount.address, numToMint: 5, totalMinted: 0, paymentIdentifier: flowTokenIdentifier()))
 }
 
 access(all) fun test_OpenEditionNFT_GetActivePhases() {
@@ -152,7 +151,7 @@ access(all) fun test_OpenEditionNFT_getDropSummary() {
     setupExampleToken(minter)
     mintExampleTokens(minter, 100.0)
 
-    let summary = scriptExecutor("get_drop_summary.cdc", [openEditionAccount.address, "OpenEditionNFT", dropID, minter.address, 1, exampleTokenIdentifier()])! as! DropTypes.DropSummary
+    let summary = scriptExecutor("get_drop_summary.cdc", [openEditionAccount.address, "OpenEditionNFT", dropID, minter.address, 1, flowTokenIdentifier()])! as! DropTypes.DropSummary
     Test.assertEqual(minter.address, summary.address!)
 
     let numToMint = 5
@@ -164,7 +163,7 @@ access(all) fun test_OpenEditionNFT_getDropSummary() {
         contractName: "OpenEditionNFT",
         numToMint: numToMint,
         totalCost: totalCost,
-        paymentIdentifier: exampleTokenIdentifier(),
+        paymentIdentifier: flowTokenIdentifier(),
         paymentStoragePath: exampleTokenStoragePath,
         paymentReceiverPath: exampleTokenReceiverPath,
         dropID: dropID,
@@ -173,12 +172,12 @@ access(all) fun test_OpenEditionNFT_getDropSummary() {
         commissionAddress: flowtyDropsAccount.address
     )
 
-    let summaryAfter = scriptExecutor("get_drop_summary.cdc", [openEditionAccount.address, "OpenEditionNFT", dropID, minter.address, 1, exampleTokenIdentifier()])! as! DropTypes.DropSummary
+    let summaryAfter = scriptExecutor("get_drop_summary.cdc", [openEditionAccount.address, "OpenEditionNFT", dropID, minter.address, 1, flowTokenIdentifier()])! as! DropTypes.DropSummary
     Test.assertEqual(summaryAfter.totalMinted, numToMint)
     Test.assertEqual(summaryAfter.mintedByAddress!, numToMint)
     Test.assertEqual(1, summaryAfter.phases.length)
 
-    let summaries = scriptExecutor("get_drop_summaries.cdc", [openEditionAccount.address, "OpenEditionNFT", minter.address, 1, exampleTokenIdentifier()])! as! [DropTypes.DropSummary]
+    let summaries = scriptExecutor("get_drop_summaries.cdc", [openEditionAccount.address, "OpenEditionNFT", minter.address, 1, flowTokenIdentifier()])! as! [DropTypes.DropSummary]
     Test.assertEqual(1, summaries.length)
     Test.assertEqual(summaries[0].totalMinted, numToMint)
     Test.assertEqual(summaries[0].mintedByAddress!, numToMint)
@@ -188,7 +187,7 @@ access(all) fun test_OpenEditionNFT_getDropSummary() {
 access(all) fun test_OpenEditionNFT_getDropSummary_noMinter() {
     let dropID = createDefaultTimeBasedOpenEditionDrop()
 
-    let summaries = scriptExecutor("get_drop_summaries.cdc", [openEditionAccount.address, "OpenEditionNFT", nil, 1, exampleTokenIdentifier()])! as! [DropTypes.DropSummary]
+    let summaries = scriptExecutor("get_drop_summaries.cdc", [openEditionAccount.address, "OpenEditionNFT", nil, 1, flowTokenIdentifier()])! as! [DropTypes.DropSummary]
     Test.assertEqual(1, summaries.length)
     Test.assertEqual(summaries[0].totalMinted, 0)
     Test.assertEqual(summaries[0].mintedByAddress, nil)
@@ -205,7 +204,7 @@ access(all) fun createDefaultEndlessOpenEditionDrop(): UInt64 {
         ipfsCid: "1234",
         ipfsPath: nil,
         price: 1.0,
-        paymentIdentifier: exampleTokenIdentifier(),
+        paymentIdentifier: flowTokenIdentifier(),
         minterPrivatePath: FlowtyDrops.MinterPrivatePath,
         nftTypeIdentifier: openEditionNftIdentifier()
     )
@@ -221,7 +220,7 @@ access(all) fun createDefaultTimeBasedOpenEditionDrop(): UInt64 {
         ipfsCid: "1234",
         ipfsPath: nil,
         price: 1.0,
-        paymentIdentifier: exampleTokenIdentifier(),
+        paymentIdentifier: flowTokenIdentifier(),
         startUnix: UInt64(getCurrentTime()),
         endUnix: UInt64(currentTime + 5.0),
         minterPrivatePath: FlowtyDrops.MinterPrivatePath,
@@ -238,7 +237,7 @@ access(all) fun getDropDetails(contractAddress: Address, contractName: String, d
 }
 
 access(all) fun mintDrop(
-    minter: Test.Account,
+    minter: Test.TestAccount,
     contractAddress: Address,
     contractName: String,
     numToMint: Int,
@@ -260,8 +259,8 @@ access(all) fun mintDrop(
     var count = 0
     while count < numToMint {
         count = count + 1
-        let event = events.removeFirst() as! FlowtyDrops.Minted
-        ids.append(event.nftID)
+        let evt = events.removeFirst() as! FlowtyDrops.Minted
+        ids.append(evt.nftID)
     }
 
     return ids

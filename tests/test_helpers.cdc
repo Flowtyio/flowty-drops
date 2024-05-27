@@ -3,7 +3,6 @@ import Test
 import "NonFungibleToken"
 import "FlowToken"
 import "FlowtyDrops"
-import "ExampleToken"
 import "OpenEditionNFT"
 
 // Helper functions. All of the following were taken from
@@ -11,7 +10,6 @@ import "OpenEditionNFT"
 // - deploy
 // - scriptExecutor
 // - txExecutor
-// - getErrorMessagePointer
 
 access(all) fun scriptExecutor(_ scriptName: String, _ arguments: [AnyStruct]): AnyStruct? {
     let scriptCode = loadCode(scriptName, "scripts")
@@ -34,7 +32,7 @@ access(all) fun expectScriptFailure(_ scriptName: String, _ arguments: [AnyStruc
     return scriptResult.error!.message
 }
 
-access(all) fun txExecutor(_ txName: String, _ signers: [Test.Account], _ arguments: [AnyStruct], _ expectedError: String?, _ expectedErrorType: ErrorType?): Test.TransactionResult {
+access(all) fun txExecutor(_ txName: String, _ signers: [Test.TestAccount], _ arguments: [AnyStruct], _ expectedError: String?, _ expectedErrorType: ErrorType?): Test.TransactionResult {
     let txCode = loadCode(txName, "transactions")
 
     let authorizers: [Address] = []
@@ -50,23 +48,8 @@ access(all) fun txExecutor(_ txName: String, _ signers: [Test.Account], _ argume
     )
 
     let txResult = Test.executeTransaction(tx)
-    if let err = txResult.error {
-        if let expectedErrorMessage = expectedError {
-            let ptr = getErrorMessagePointer(errorType: expectedErrorType!)
-            let errMessage = err.message
-            let hasEmittedCorrectMessage = contains(errMessage, expectedErrorMessage)
-            let failureMessage = "Expecting - "
-                .concat(expectedErrorMessage)
-                .concat("\n")
-                .concat("But received - ")
-                .concat(err.message)
-            assert(hasEmittedCorrectMessage, message: failureMessage)
-        }
-        panic(err.message)
-    } else {
-        if let expectedErrorMessage = expectedError {
-            panic("Expecting error - ".concat(expectedErrorMessage).concat(". While no error triggered"))
-        }
+    if txResult.error != nil  {
+        panic(txResult.error!.message)
     }
 
     return txResult
@@ -81,54 +64,6 @@ access(all) enum ErrorType: UInt8 {
     access(all) case TX_ASSERT
     access(all) case TX_PRE
 }
-
-access(all) fun getErrorMessagePointer(errorType: ErrorType): Int {
-    switch errorType {
-        case ErrorType.TX_PANIC: return 159
-        case ErrorType.TX_ASSERT: return 170
-        case ErrorType.TX_PRE: return 174
-        default: panic("Invalid error type")
-    }
-
-    return 0
-}
-
-// Copied functions from flow-utils so we can assert on error conditions
-// https://github.com/green-goo-dao/flow-utils/blob/main/cadence/contracts/StringUtils.cdc
-access(all) fun contains(_ s: String, _ substr: String): Bool {
-    if let index = index(s, substr, 0) {
-        return true
-    }
-    return false
-}
-
-// https://github.com/green-goo-dao/flow-utils/blob/main/cadence/contracts/StringUtils.cdc
-access(all) fun index(_ s: String, _ substr: String, _ startIndex: Int): Int? {
-    for i in range(startIndex, s.length - substr.length + 1) {
-        if s[i] == substr[0] && s.slice(from: i, upTo: i + substr.length) == substr {
-            return i
-        }
-    }
-    return nil
-}
-
-// https://github.com/green-goo-dao/flow-utils/blob/main/cadence/contracts/ArrayUtils.cdc
-access(all) fun rangeFunc(_ start: Int, _ end: Int, _ f: ((Int): Void)) {
-    var current = start
-    while current < end {
-        f(current)
-        current = current + 1
-    }
-}
-
-access(all) fun range(_ start: Int, _ end: Int): [Int] {
-    let res: [Int] = []
-    rangeFunc(start, end, fun (i: Int) {
-        res.append(i)
-    })
-    return res
-}
-
 
 // the cadence testing framework allocates 4 addresses for system acounts,
 // and 10 pre-created accounts for us to use for deployments:
@@ -197,7 +132,7 @@ access(all) fun getCurrentTime(): UFix64 {
 }
 
 access(all) fun mintFromDrop(
-    minter: Test.Account,
+    minter: Test.TestAccount,
     contractAddress: Address,
     contractName: String,
     numToMint: Int,
@@ -234,7 +169,7 @@ access(all) fun getDropIDs(
 }
 
 access(all) fun createEndlessOpenEditionDrop(
-    acct: Test.Account,
+    acct: Test.TestAccount,
     name: String,
     description: String,
     ipfsCid: String,
@@ -253,7 +188,7 @@ access(all) fun createEndlessOpenEditionDrop(
 }
 
 access(all) fun createTimebasedOpenEditionDrop(
-    acct: Test.Account,
+    acct: Test.TestAccount,
     name: String,
     description: String,
     ipfsCid: String,
@@ -273,20 +208,20 @@ access(all) fun createTimebasedOpenEditionDrop(
     return e.id
 }
 
-access(all) fun sendFlowTokens(fromAccount: Test.Account, toAccount: Test.Account, amount: UFix64) {
+access(all) fun sendFlowTokens(fromAccount: Test.TestAccount, toAccount: Test.TestAccount, amount: UFix64) {
     txExecutor("util/send_flow_tokens.cdc", [fromAccount], [toAccount.address, amount], nil, nil)
 }
 
-access(all) fun setupExampleToken(_ acct: Test.Account) {
+access(all) fun setupExampleToken(_ acct: Test.TestAccount) {
     txExecutor("example-token/setup.cdc", [acct], [], nil, nil)
 }
 
-access(all) fun mintExampleTokens(_ acct: Test.Account, _ amount: UFix64) {
+access(all) fun mintExampleTokens(_ acct: Test.TestAccount, _ amount: UFix64) {
     txExecutor("example-token/mint.cdc", [exampleTokenAccount], [acct.address, amount], nil, nil)
 }
 
-access(all) fun exampleTokenIdentifier(): String {
-    return Type<@ExampleToken.Vault>().identifier
+access(all) fun flowTokenIdentifier(): String {
+    return Type<@FlowToken.Vault>().identifier
 }
 
 access(all) fun openEditionNftIdentifier(): String {
