@@ -2,11 +2,11 @@ import Test
 import "test_helpers.cdc"
 import "FlowtySwitchers"
 
-pub fun setup() {
+access(all) fun setup() {
     deployAll()
 }
 
-pub fun test_FlowtySwitchers_AlwaysOn() {
+access(all) fun test_FlowtySwitchers_AlwaysOn() {
     let s = FlowtySwitchers.AlwaysOn()
     Test.assert(s.hasStarted(), message: "AlwaysOn switcher should always be started")
     Test.assert(!s.hasEnded(), message: "AlwaysOn switcher never ends")
@@ -15,7 +15,7 @@ pub fun test_FlowtySwitchers_AlwaysOn() {
     Test.assertEqual(nil, s.getEnd())
 }
 
-pub fun test_FlowtySwitchers_ManualSwitch() {
+access(all) fun test_FlowtySwitchers_ManualSwitch() {
     let s = FlowtySwitchers.ManualSwitch()
 
     Test.assertEqual(false, s.hasStarted())
@@ -33,7 +33,7 @@ pub fun test_FlowtySwitchers_ManualSwitch() {
     Test.assertEqual(true, s.hasEnded())
 }
 
-pub fun test_FlowtySwitchers_TimestampSwitch_StartIsNil() {
+access(all) fun test_FlowtySwitchers_TimestampSwitch_StartIsNil() {
     let end = UInt64(getCurrentBlock().timestamp) + 10
     let s = FlowtySwitchers.TimestampSwitch(start: nil, end: end)
 
@@ -44,7 +44,7 @@ pub fun test_FlowtySwitchers_TimestampSwitch_StartIsNil() {
     Test.assertEqual(end, s.getEnd()!)
 }
 
-pub fun test_FlowtySwitchers_TimestampSwitch_StartAfterNow() {
+access(all) fun test_FlowtySwitchers_TimestampSwitch_StartAfterNow() {
     let start = UInt64(getCurrentBlock().timestamp) + 1
     let end = UInt64(getCurrentBlock().timestamp) + 10
     let s = FlowtySwitchers.TimestampSwitch(start: start, end: end)
@@ -56,7 +56,7 @@ pub fun test_FlowtySwitchers_TimestampSwitch_StartAfterNow() {
     Test.assertEqual(end, s.getEnd()!)
 }
 
-pub fun test_FlowtySwitchers_TimestampSwitch_StartBeforeNow() {
+access(all) fun test_FlowtySwitchers_TimestampSwitch_StartBeforeNow() {
     let start = UInt64(getCurrentBlock().timestamp) - 1
     let end = UInt64(getCurrentBlock().timestamp) + 10
     let s = FlowtySwitchers.TimestampSwitch(start: start, end: end)
@@ -68,7 +68,7 @@ pub fun test_FlowtySwitchers_TimestampSwitch_StartBeforeNow() {
     Test.assertEqual(end, s.getEnd()!)
 }
 
-pub fun test_FlowtySwitchers_TimestampSwitch_Ended() {
+access(all) fun test_FlowtySwitchers_TimestampSwitch_Ended() {
     let start = UInt64(getCurrentBlock().timestamp) - 10
     let end = UInt64(getCurrentBlock().timestamp) - 1
     let s = FlowtySwitchers.TimestampSwitch(start: start, end: end)
@@ -77,7 +77,7 @@ pub fun test_FlowtySwitchers_TimestampSwitch_Ended() {
     Test.assertEqual(true, s.hasEnded())
 }
 
-pub fun test_FlowtySwitchers_TimestampSwitch_InvalidStartEnd() {
+access(all) fun test_FlowtySwitchers_TimestampSwitch_InvalidStartEnd() {
     let start: UInt64 = 10
     let end: UInt64 = 9
 

@@ -18,7 +18,7 @@ pub fun test_FlowtyPricers_FlatPrice() {
     let price = 1.1
     let pricer = FlowtyPricers.FlatPrice(price: price, paymentTokenType: Type<@FlowToken.Vault>())
 
-    Test.assertEqual(pricer.getPaymentTypes()[0], Type<@FlowToken.Vault>())
+    Test.assertEqual(pricer.access(all)()[0], Type<@FlowToken.Vault>())
 
     let num = 2
     let cost = pricer.getPrice(num: num, paymentTokenType: Type<@FlowToken.Vault>(), minter: placeholder.address)

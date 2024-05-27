@@ -6,21 +6,21 @@ import "OpenEditionNFT"
 import "ExampleToken"
 import "DropTypes"
 
-pub let defaultEndlessOpenEditionName = "Default Endless Open Edition"
+access(all) let defaultEndlessOpenEditionName = "Default Endless Open Edition"
 
-pub fun setup() {
+access(all) fun setup() {
     deployAll()
 }
 
-pub fun afterEach() {
+access(all) fun afterEach() {
     txExecutor("drops/remove_all_drops.cdc", [openEditionAccount], [], nil, nil)
 }
 
-pub fun testImports() {
+access(all) fun testImports() {
     Test.assert(scriptExecutor("import_all.cdc", [])! as! Bool, message: "failed to import all")
 }
 
-pub fun test_OpenEditionNFT_getPrice() {
+access(all) fun test_OpenEditionNFT_getPrice() {
     let minter = Test.createAccount()
 
     let dropID = createDefaultEndlessOpenEditionDrop()
@@ -35,13 +35,13 @@ pub fun test_OpenEditionNFT_getPrice() {
     Test.assertEqual(10.0, priceMultiple)
 }
 
-pub fun test_OpenEditionNFT_getDetails() {
+access(all) fun test_OpenEditionNFT_getDetails() {
     let dropID = createDefaultEndlessOpenEditionDrop()
     let details = getDropDetails(contractAddress: openEditionAccount.address, contractName: "OpenEditionNFT", dropID: dropID)
     Test.assertEqual(details.display.name, defaultEndlessOpenEditionName)
 }
 
-pub fun test_OpenEditionNFT_mint() {
+access(all) fun test_OpenEditionNFT_mint() {
     let dropID = createDefaultEndlessOpenEditionDrop()
     let details = getDropDetails(contractAddress: openEditionAccount.address, contractName: "OpenEditionNFT", dropID: dropID)
 
@@ -85,7 +85,7 @@ pub fun test_OpenEditionNFT_mint() {
     Test.assertEqual(openEditionAccount.address, minterFee.to!)
 }
 
-pub fun test_OpenEditionNFT_EditPhaseDetails() {
+access(all) fun test_OpenEditionNFT_EditPhaseDetails() {
     let dropID = createDefaultTimeBasedOpenEditionDrop()
     Test.assertEqual(true, hasDropPhaseStarted(contractAddress: openEditionAccount.address, contractName: "OpenEditionNFT", dropID: dropID, phaseIndex: 0))
     Test.assertEqual(false, hasDropPhaseEnded(contractAddress: openEditionAccount.address, contractName: "OpenEditionNFT", dropID: dropID, phaseIndex: 0))
@@ -108,7 +108,7 @@ pub fun test_OpenEditionNFT_EditPhaseDetails() {
     Test.assertEqual(true, hasDropPhaseEnded(contractAddress: openEditionAccount.address, contractName: "OpenEditionNFT", dropID: dropID, phaseIndex: 0))
 }
 
-pub fun test_OpenEditionNFT_EditPrice() {
+access(all) fun test_OpenEditionNFT_EditPrice() {
     let dropID = createDefaultTimeBasedOpenEditionDrop()
     Test.assertEqual(1.0, getPriceAtPhase(contractAddress: openEditionAccount.address, contractName: "OpenEditionNFT", dropID: dropID, phaseIndex: 0, minter: openEditionAccount.address, numToMint: 1, paymentIdentifier: exampleTokenIdentifier()))
 
@@ -116,7 +116,7 @@ pub fun test_OpenEditionNFT_EditPrice() {
     Test.assertEqual(2.0, getPriceAtPhase(contractAddress: openEditionAccount.address, contractName: "OpenEditionNFT", dropID: dropID, phaseIndex: 0, minter: openEditionAccount.address, numToMint: 1, paymentIdentifier: exampleTokenIdentifier()))
 }
 
-pub fun test_OpenEditionNFT_EditMaxPerMint() {
+access(all) fun test_OpenEditionNFT_EditMaxPerMint() {
     let dropID = createDefaultTimeBasedOpenEditionDrop()
     Test.assertEqual(true, canMintAtPhase(contractAddress: openEditionAccount.address, contractName: "OpenEditionNFT", dropID: dropID, phaseIndex: 0, minter: openEditionAccount.address, numToMint: 10, totalMinted: 0, paymentIdentifier: exampleTokenIdentifier()))
     txExecutor("drops/edit_address_verifier_max_per_mint.cdc", [openEditionAccount], [dropID, 0, 5], nil, nil)
@@ -125,13 +125,13 @@ pub fun test_OpenEditionNFT_EditMaxPerMint() {
     Test.assertEqual(true, canMintAtPhase(contractAddress: openEditionAccount.address, contractName: "OpenEditionNFT", dropID: dropID, phaseIndex: 0, minter: openEditionAccount.address, numToMint: 5, totalMinted: 0, paymentIdentifier: exampleTokenIdentifier()))
 }
 
-pub fun test_OpenEditionNFT_GetActivePhases() {
+access(all) fun test_OpenEditionNFT_GetActivePhases() {
     let dropID = createDefaultTimeBasedOpenEditionDrop()
     let activePhaseIDs = scriptExecutor("get_active_phases.cdc", [openEditionAccount.address, "OpenEditionNFT", dropID])! as! [UInt64]
     Test.assert(activePhaseIDs.length == 1, message: "unexpected active phase length")
 }
 
-pub fun test_OpenEditionNFT_addPhase() {
+access(all) fun test_OpenEditionNFT_addPhase() {
     let dropID = createDefaultTimeBasedOpenEditionDrop()
 
     txExecutor("drops/add_free_phase.cdc", [openEditionAccount], [dropID, nil, nil], nil, nil)
@@ -145,7 +145,7 @@ pub fun test_OpenEditionNFT_addPhase() {
     Test.assert(!activePhaseIDs.contains(phaseEvent.id), message: "unexpected active phase length")
 }
 
-pub fun test_OpenEditionNFT_getDropSummary() {
+access(all) fun test_OpenEditionNFT_getDropSummary() {
     let dropID = createDefaultTimeBasedOpenEditionDrop()
 
     let minter = Test.createAccount()
@@ -185,7 +185,7 @@ pub fun test_OpenEditionNFT_getDropSummary() {
     Test.assertEqual(1, summaries[0].phases.length)
 }
 
-pub fun test_OpenEditionNFT_getDropSummary_noMinter() {
+access(all) fun test_OpenEditionNFT_getDropSummary_noMinter() {
     let dropID = createDefaultTimeBasedOpenEditionDrop()
 
     let summaries = scriptExecutor("get_drop_summaries.cdc", [openEditionAccount.address, "OpenEditionNFT", nil, 1, exampleTokenIdentifier()])! as! [DropTypes.DropSummary]
@@ -197,7 +197,7 @@ pub fun test_OpenEditionNFT_getDropSummary_noMinter() {
 // ------------------------------------------------------------------------
 //                      Helper functions section
 
-pub fun createDefaultEndlessOpenEditionDrop(): UInt64 {
+access(all) fun createDefaultEndlessOpenEditionDrop(): UInt64 {
     return createEndlessOpenEditionDrop(
         acct: openEditionAccount,
         name: "Default Endless Open Edition",
@@ -211,7 +211,7 @@ pub fun createDefaultEndlessOpenEditionDrop(): UInt64 {
     )
 }
 
-pub fun createDefaultTimeBasedOpenEditionDrop(): UInt64 {
+access(all) fun createDefaultTimeBasedOpenEditionDrop(): UInt64 {
     let currentTime = getCurrentTime()
 
     return createTimebasedOpenEditionDrop(
@@ -229,15 +229,15 @@ pub fun createDefaultTimeBasedOpenEditionDrop(): UInt64 {
     )
 }
 
-pub fun getPriceAtPhase(contractAddress: Address, contractName: String, dropID: UInt64, phaseIndex: Int, minter: Address, numToMint: Int, paymentIdentifier: String): UFix64 {
+access(all) fun getPriceAtPhase(contractAddress: Address, contractName: String, dropID: UInt64, phaseIndex: Int, minter: Address, numToMint: Int, paymentIdentifier: String): UFix64 {
     return scriptExecutor("get_price_at_phase.cdc", [contractAddress, contractName, dropID, phaseIndex, minter, numToMint, paymentIdentifier])! as! UFix64
 }
 
-pub fun getDropDetails(contractAddress: Address, contractName: String, dropID: UInt64): FlowtyDrops.DropDetails {
+access(all) fun getDropDetails(contractAddress: Address, contractName: String, dropID: UInt64): FlowtyDrops.DropDetails {
     return scriptExecutor("get_drop_details.cdc", [contractAddress, contractName, dropID])! as! FlowtyDrops.DropDetails
 }
 
-pub fun mintDrop(
+access(all) fun mintDrop(
     minter: Test.Account,
     contractAddress: Address,
     contractName: String,
