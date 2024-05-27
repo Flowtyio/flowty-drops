@@ -63,7 +63,7 @@ access(all) contract OpenEditionNFT: NonFungibleToken, ViewResolver {
         /// @return An array of Types defining the implemented views. This value will be used by
         ///         developers to know which parameter to pass to the resolveView() method.
         ///
-        access(all) fun getViews(): [Type] {
+        access(all) view fun getViews(): [Type] {
             return [
                 Type<MetadataViews.Display>(),
                 Type<MetadataViews.ExternalURL>(),
@@ -95,6 +95,10 @@ access(all) contract OpenEditionNFT: NonFungibleToken, ViewResolver {
             }
 
             return nil
+        }
+
+        access(all) fun createEmptyCollection(): @{NonFungibleToken.Collection} {
+            return <- create Collection()
         }
     }
 
@@ -223,7 +227,7 @@ access(all) contract OpenEditionNFT: NonFungibleToken, ViewResolver {
     /// @param view: The Type of the desired view.
     /// @return A structure representing the requested view.
     ///
-    access(all) fun resolveContractView(resourceType: Type, viewType: Type): AnyStruct? {
+    access(all) fun resolveContractView(resourceType: Type?, viewType: Type): AnyStruct? {
         switch viewType {
             case Type<MetadataViews.NFTCollectionData>():
                 return MetadataViews.NFTCollectionData(
@@ -232,7 +236,7 @@ access(all) contract OpenEditionNFT: NonFungibleToken, ViewResolver {
                     publicCollection: Type<&{NonFungibleToken.Collection}>(),
                     publicLinkedType: Type<&{NonFungibleToken.Collection}>(),
                     createEmptyCollectionFunction: (fun (): @{NonFungibleToken.Collection} {
-                        return <-OpenEditionNFT.createEmptyCollection(nftType: resourceType)
+                        return <-OpenEditionNFT.createEmptyCollection(nftType: resourceType ?? Type<@NFT>())
                     })
                 )
             case Type<MetadataViews.NFTCollectionDisplay>():
@@ -273,7 +277,7 @@ access(all) contract OpenEditionNFT: NonFungibleToken, ViewResolver {
     /// @return An array of Types defining the implemented views. This value will be used by
     ///         developers to know which parameter to pass to the resolveView() method.
     ///
-    access(all) fun getContractViews(): [Type] {
+    access(all) view fun getContractViews(resourceType: Type?): [Type] {
         return [
             Type<MetadataViews.NFTCollectionData>(),
             Type<MetadataViews.NFTCollectionDisplay>()
