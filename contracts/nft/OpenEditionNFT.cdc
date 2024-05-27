@@ -14,7 +14,6 @@ import "MetadataViews"
 import "ViewResolver"
 import "FungibleToken"
 import "FlowToken"
-import "ExampleToken"
 
 import "FlowtyDrops"
 import "FlowtySwitchers"
@@ -22,31 +21,31 @@ import "FlowtyAddressVerifiers"
 import "FlowtyPricers"
 import "DropFactory"
 
-pub contract OpenEditionNFT: NonFungibleToken, ViewResolver {
+access(all) contract OpenEditionNFT: NonFungibleToken, ViewResolver {
 
     /// Total supply of ExampleNFTs in existence
-    pub var totalSupply: UInt64
+    access(all) var totalSupply: UInt64
 
     /// The event that is emitted when the contract is created
-    pub event ContractInitialized()
+    access(all) event ContractInitialized()
 
     /// The event that is emitted when an NFT is withdrawn from a Collection
-    pub event Withdraw(id: UInt64, from: Address?)
+    access(all) event Withdraw(id: UInt64, from: Address?)
 
     /// The event that is emitted when an NFT is deposited to a Collection
-    pub event Deposit(id: UInt64, to: Address?)
+    access(all) event Deposit(id: UInt64, to: Address?)
 
     /// Storage and Public Paths
-    pub let CollectionStoragePath: StoragePath
-    pub let CollectionPublicPath: PublicPath
+    access(all) let CollectionStoragePath: StoragePath
+    access(all) let CollectionPublicPath: PublicPath
 
     /// The core resource that represents a Non Fungible Token.
     /// New instances will be created using the NFTMinter resource
     /// and stored in the Collection resource
     ///
-    pub resource NFT: NonFungibleToken.INFT, MetadataViews.Resolver {
-        pub let id: UInt64
-        pub let display: MetadataViews.Display
+    access(all) resource NFT: NonFungibleToken.NFT {
+        access(all) let id: UInt64
+        access(all) let display: MetadataViews.Display
 
         init() {
             OpenEditionNFT.totalSupply = OpenEditionNFT.totalSupply + 1
@@ -64,7 +63,7 @@ pub contract OpenEditionNFT: NonFungibleToken, ViewResolver {
         /// @return An array of Types defining the implemented views. This value will be used by
         ///         developers to know which parameter to pass to the resolveView() method.
         ///
-        pub fun getViews(): [Type] {
+        access(all) fun getViews(): [Type] {
             return [
                 Type<MetadataViews.Display>(),
                 Type<MetadataViews.ExternalURL>(),
@@ -79,7 +78,7 @@ pub contract OpenEditionNFT: NonFungibleToken, ViewResolver {
         /// @param view: The Type of the desired view.
         /// @return A structure representing the requested view.
         ///
-        pub fun resolveView(_ view: Type): AnyStruct? {
+        access(all) fun resolveView(_ view: Type): AnyStruct? {
             switch view {
                 case Type<MetadataViews.Display>():
                     return self.display
@@ -90,10 +89,11 @@ pub contract OpenEditionNFT: NonFungibleToken, ViewResolver {
                 case Type<MetadataViews.ExternalURL>():
                     return MetadataViews.ExternalURL("https://flowty.io/asset/".concat(OpenEditionNFT.account.address.toString()).concat("/OpenEditionNFT/").concat(self.id.toString()))
                 case Type<MetadataViews.NFTCollectionData>():
-                    return OpenEditionNFT.resolveView(view)
+                    return OpenEditionNFT.resolveContractView(resourceType: self.getType(), viewType: view)
                 case Type<MetadataViews.NFTCollectionDisplay>():
-                    return OpenEditionNFT.resolveView(view)
+                    return OpenEditionNFT.resolveContractView(resourceType: self.getType(), viewType: view)
             }
+
             return nil
         }
     }
@@ -102,10 +102,10 @@ pub contract OpenEditionNFT: NonFungibleToken, ViewResolver {
     /// In order to be able to manage NFTs any account will need to create
     /// an empty collection first
     ///
-    pub resource Collection: NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection {
+    access(all) resource Collection: NonFungibleToken.Collection {
         // dictionary of NFT conforming tokens
         // NFT is a resource type with an `UInt64` ID field
-        pub var ownedNFTs: @{UInt64: NonFungibleToken.NFT}
+        access(all) var ownedNFTs: @{UInt64: {NonFungibleToken.NFT}}
 
         init () {
             self.ownedNFTs <- {}
@@ -116,7 +116,7 @@ pub contract OpenEditionNFT: NonFungibleToken, ViewResolver {
         /// @param withdrawID: The ID of the NFT that wants to be withdrawn
         /// @return The NFT resource that has been taken out of the collection
         ///
-        pub fun withdraw(withdrawID: UInt64): @NonFungibleToken.NFT {
+        access(NonFungibleToken.Withdraw) fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT} {
             let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
 
             emit Withdraw(id: token.id, from: self.owner?.address)
@@ -128,8 +128,8 @@ pub contract OpenEditionNFT: NonFungibleToken, ViewResolver {
         ///
         /// @param token: The NFT resource to be included in the collection
         ///
-        pub fun deposit(token: @NonFungibleToken.NFT) {
-            let token <- token as! @OpenEditionNFT.NFT
+        access(all) fun deposit(token: @{NonFungibleToken.NFT}) {
+            assert(token.getType() == Type<@NFT>(), message: "invalid deposited nft type")
 
             let id: UInt64 = token.id
 
@@ -141,11 +141,19 @@ pub contract OpenEditionNFT: NonFungibleToken, ViewResolver {
             destroy oldToken
         }
 
+        access(all) view fun getSupportedNFTTypes(): {Type: Bool} {
+            return {Type<@NFT>(): true}
+        }
+
+        access(all) view fun isSupportedNFTType(type: Type): Bool {
+            return type == Type<@NFT>()
+        }
+
         /// Helper method for getting the collection IDs
         ///
         /// @return An array containing the IDs of the NFTs in the collection
         ///
-        pub fun getIDs(): [UInt64] {
+        access(all) view fun getIDs(): [UInt64] {
             return self.ownedNFTs.keys
         }
 
@@ -155,24 +163,8 @@ pub contract OpenEditionNFT: NonFungibleToken, ViewResolver {
         /// @param id: The ID of the wanted NFT
         /// @return A reference to the wanted NFT resource
         ///
-        pub fun borrowNFT(id: UInt64): &NonFungibleToken.NFT {
-            return (&self.ownedNFTs[id] as &NonFungibleToken.NFT?)!
-        }
-
-        /// Gets a reference to an NFT in the collection so that
-        /// the caller can read its metadata and call its methods
-        ///
-        /// @param id: The ID of the wanted NFT
-        /// @return A reference to the wanted NFT resource
-        ///
-        pub fun borrowExampleNFT(id: UInt64): &OpenEditionNFT.NFT? {
-            if self.ownedNFTs[id] != nil {
-                // Create an authorized reference to allow downcasting
-                let ref = (&self.ownedNFTs[id] as auth &NonFungibleToken.NFT?)!
-                return ref as! &OpenEditionNFT.NFT
-            }
-
-            return nil
+        access(all) view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}? {
+            return &self.ownedNFTs[id]
         }
 
         /// Gets a reference to the NFT only conforming to the `{MetadataViews.Resolver}`
@@ -182,14 +174,14 @@ pub contract OpenEditionNFT: NonFungibleToken, ViewResolver {
         /// @param id: The ID of the wanted NFT
         /// @return The resource reference conforming to the Resolver interface
         ///
-        pub fun borrowViewResolver(id: UInt64): &{MetadataViews.Resolver} {
-            let nft = (&self.ownedNFTs[id] as auth &NonFungibleToken.NFT?)!
-            let OpenEditionNFT = nft as! &OpenEditionNFT.NFT
-            return OpenEditionNFT
+        access(all) view fun borrowViewResolver(id: UInt64): &{ViewResolver.Resolver} {
+            let tmp = (&self.ownedNFTs[id] as &{NonFungibleToken.NFT}?)!
+            let nft = tmp as! &OpenEditionNFT.NFT
+            return tmp
         }
 
-        destroy() {
-            destroy self.ownedNFTs
+        access(all) fun createEmptyCollection(): @{NonFungibleToken.Collection} {
+            return <- create Collection()
         }
     }
 
@@ -197,27 +189,24 @@ pub contract OpenEditionNFT: NonFungibleToken, ViewResolver {
     ///
     /// @return The new Collection resource
     ///
-    pub fun createEmptyCollection(): @NonFungibleToken.Collection {
+    access(all) fun createEmptyCollection(nftType: Type): @{NonFungibleToken.Collection} {
         return <- create Collection()
     }
 
     /// Resource that an admin or something similar would own to be
     /// able to mint new NFTs
     ///
-    pub resource NFTMinter: FlowtyDrops.Minter {
-        pub fun mint(payment: @FungibleToken.Vault, amount: Int, phase: &FlowtyDrops.Phase, data: {String: AnyStruct}): @[NonFungibleToken.NFT] {
+    access(all) resource NFTMinter: FlowtyDrops.Minter {
+        access(all) fun mint(payment: @{FungibleToken.Vault}, amount: Int, phase: &FlowtyDrops.Phase, data: {String: AnyStruct}): @[{NonFungibleToken.NFT}] {
             switch(payment.getType()) {
                 case Type<@FlowToken.Vault>():
-                    OpenEditionNFT.account.borrow<&{FungibleToken.Receiver}>(from: /storage/flowTokenVault)!.deposit(from: <-payment)
-                    break
-                case Type<@ExampleToken.Vault>():
-                    OpenEditionNFT.account.borrow<&{FungibleToken.Receiver}>(from: /storage/exampleTokenVault)!.deposit(from: <-payment)
+                    OpenEditionNFT.account.storage.borrow<&{FungibleToken.Receiver}>(from: /storage/flowTokenVault)!.deposit(from: <-payment)
                     break
                 default:
                     panic("unsupported payment token type")
             }
 
-            let nfts: @[NonFungibleToken.NFT] <- []
+            let nfts: @[{NonFungibleToken.NFT}] <- []
 
             var count = 0
             while count < amount {
@@ -234,18 +223,16 @@ pub contract OpenEditionNFT: NonFungibleToken, ViewResolver {
     /// @param view: The Type of the desired view.
     /// @return A structure representing the requested view.
     ///
-    pub fun resolveView(_ view: Type): AnyStruct? {
-        switch view {
+    access(all) fun resolveContractView(resourceType: Type, viewType: Type): AnyStruct? {
+        switch viewType {
             case Type<MetadataViews.NFTCollectionData>():
                 return MetadataViews.NFTCollectionData(
                     storagePath: OpenEditionNFT.CollectionStoragePath,
                     publicPath: OpenEditionNFT.CollectionPublicPath,
-                    providerPath: /private/openEditionNFT,
-                    publicCollection: Type<&OpenEditionNFT.Collection{NonFungibleToken.CollectionPublic}>(),
-                    publicLinkedType: Type<&OpenEditionNFT.Collection{NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(),
-                    providerLinkedType: Type<&OpenEditionNFT.Collection{NonFungibleToken.CollectionPublic,NonFungibleToken.Provider,MetadataViews.ResolverCollection}>(),
-                    createEmptyCollectionFunction: (fun (): @NonFungibleToken.Collection {
-                        return <-OpenEditionNFT.createEmptyCollection()
+                    publicCollection: Type<&{NonFungibleToken.Collection}>(),
+                    publicLinkedType: Type<&{NonFungibleToken.Collection}>(),
+                    createEmptyCollectionFunction: (fun (): @{NonFungibleToken.Collection} {
+                        return <-OpenEditionNFT.createEmptyCollection(nftType: resourceType)
                     })
                 )
             case Type<MetadataViews.NFTCollectionDisplay>():
@@ -276,7 +263,7 @@ pub contract OpenEditionNFT: NonFungibleToken, ViewResolver {
                     }
                 )
             case Type<FlowtyDrops.DropResolver>():
-                return FlowtyDrops.DropResolver(cap: OpenEditionNFT.account.getCapability<&{FlowtyDrops.ContainerPublic}>(FlowtyDrops.ContainerPublicPath))
+                return FlowtyDrops.DropResolver(cap: OpenEditionNFT.account.capabilities.get<&{FlowtyDrops.ContainerPublic}>(FlowtyDrops.ContainerPublicPath))
         }
         return nil
     }
@@ -286,7 +273,7 @@ pub contract OpenEditionNFT: NonFungibleToken, ViewResolver {
     /// @return An array of Types defining the implemented views. This value will be used by
     ///         developers to know which parameter to pass to the resolveView() method.
     ///
-    pub fun getViews(): [Type] {
+    access(all) fun getContractViews(): [Type] {
         return [
             Type<MetadataViews.NFTCollectionData>(),
             Type<MetadataViews.NFTCollectionDisplay>()
@@ -303,19 +290,18 @@ pub contract OpenEditionNFT: NonFungibleToken, ViewResolver {
 
         // Create a Collection resource and save it to storage
         let collection <- create Collection()
-        self.account.save(<-collection, to: self.CollectionStoragePath)
+        self.account.storage.save(<-collection, to: self.CollectionStoragePath)
 
         // create a public capability for the collection
-        self.account.link<&OpenEditionNFT.Collection{NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection}>(
-            self.CollectionPublicPath,
-            target: self.CollectionStoragePath
+        self.account.capabilities.publish(
+            self.account.capabilities.storage.issue<&{NonFungibleToken.Collection}>(self.CollectionStoragePath),
+            at: self.CollectionPublicPath
         )
 
         // Create a Minter resource and save it to storage
         let minter <- create NFTMinter()
-        self.account.save(<-minter, to: FlowtyDrops.MinterStoragePath)
-        let minterCap = self.account.link<&NFTMinter{FlowtyDrops.Minter}>(FlowtyDrops.MinterPrivatePath, target: FlowtyDrops.MinterStoragePath)
-            ?? panic("unable to link minter capability")
+        self.account.storage.save(<-minter, to: FlowtyDrops.MinterStoragePath)
+        self.account.capabilities.storage.issue<&{FlowtyDrops.Minter}>(FlowtyDrops.MinterStoragePath)
 
         emit ContractInitialized()
     }
