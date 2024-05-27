@@ -2,11 +2,11 @@ import "FlowtyDrops"
 import "MetadataViews"
 import "ViewResolver"
 
-pub contract DropTypes {
-    pub struct Display {
-        pub let name: String
-        pub let description: String
-        pub let url: String
+access(all) contract DropTypes {
+    access(all) struct Display {
+        access(all) let name: String
+        access(all) let description: String
+        access(all) let url: String
 
         init(_ display: MetadataViews.Display) {
             self.name = display.name
@@ -15,9 +15,9 @@ pub contract DropTypes {
         }
     }
 
-    pub struct Media {
-        pub let url: String
-        pub let mediaType: String
+    access(all) struct Media {
+        access(all) let url: String
+        access(all) let mediaType: String
 
         init(_ media: MetadataViews.Media) {
             self.url = media.file.uri()
@@ -25,22 +25,22 @@ pub contract DropTypes {
         }
     }
 
-    pub struct DropSummary {
-        pub let id: UInt64
-        pub let display: Display
-        pub let medias: [Media]
-        pub let totalMinted: Int
-        pub let minterCount: Int
-        pub let commissionRate: UFix64
-        pub let nftType: String
+    access(all) struct DropSummary {
+        access(all) let id: UInt64
+        access(all) let display: Display
+        access(all) let medias: [Media]
+        access(all) let totalMinted: Int
+        access(all) let minterCount: Int
+        access(all) let commissionRate: UFix64
+        access(all) let nftType: String
 
-        pub let address: Address?
-        pub let mintedByAddress: Int?
+        access(all) let address: Address?
+        access(all) let mintedByAddress: Int?
 
-        pub let phases: [PhaseSummary]
+        access(all) let phases: [PhaseSummary]
 
-        pub let blockTimestamp: UInt64
-        pub let blockHeight: UInt64
+        access(all) let blockTimestamp: UInt64
+        access(all) let blockHeight: UInt64
 
         init(
             id: UInt64,
@@ -77,11 +77,11 @@ pub contract DropTypes {
         }
     }
 
-    pub struct Quote {
-        pub let price: UFix64
-        pub let quantity: Int
-        pub let paymentIdentifier: String
-        pub let minter: Address?
+    access(all) struct Quote {
+        access(all) let price: UFix64
+        access(all) let quantity: Int
+        access(all) let paymentIdentifier: String
+        access(all) let minter: Address?
 
         init(price: UFix64, quantity: Int, paymentIdentifier: String, minter: Address?) {
             self.price = price
@@ -91,25 +91,25 @@ pub contract DropTypes {
         }
     }
 
-    pub struct PhaseSummary {
-        pub let id: UInt64
-        pub let index: Int
+    access(all) struct PhaseSummary {
+        access(all) let id: UInt64
+        access(all) let index: Int
 
-        pub let switcherType: String
-        pub let pricerType: String
-        pub let addressVerifierType: String
+        access(all) let switcherType: String
+        access(all) let pricerType: String
+        access(all) let addressVerifierType: String
 
-        pub let hasStarted: Bool
-        pub let hasEnded: Bool
-        pub let start: UInt64?
-        pub let end: UInt64?
+        access(all) let hasStarted: Bool
+        access(all) let hasEnded: Bool
+        access(all) let start: UInt64?
+        access(all) let end: UInt64?
 
-        pub let paymentTypes: [String]
+        access(all) let paymentTypes: [String]
         
-        pub let address: Address?
-        pub let remainingForAddress: Int?
+        access(all) let address: Address?
+        access(all) let remainingForAddress: Int?
 
-        pub let quote: Quote?
+        access(all) let quote: Quote?
 
         init(
             index: Int,
@@ -156,13 +156,13 @@ pub contract DropTypes {
         }
     }
 
-    pub fun getDropSummary(contractAddress: Address, contractName: String, dropID: UInt64, minter: Address?, quantity: Int?, paymentIdentifier: String?): DropSummary? {
-        let resolver = getAccount(contractAddress).contracts.borrow<&ViewResolver>(name: contractName)
+    access(all) fun getDropSummary(contractAddress: Address, contractName: String, dropID: UInt64, minter: Address?, quantity: Int?, paymentIdentifier: String?): DropSummary? {
+        let resolver = getAccount(contractAddress).contracts.borrow<&{ViewResolver}>(name: contractName)
         if resolver == nil {
             return nil
         }
 
-        let dropResolver = resolver!.resolveView(Type<FlowtyDrops.DropResolver>()) as! FlowtyDrops.DropResolver?
+        let dropResolver = resolver!.resolveContractView(resourceType: nil, viewType: Type<FlowtyDrops.DropResolver>()) as! FlowtyDrops.DropResolver?
         if dropResolver == nil {
             return nil
         }
@@ -209,13 +209,13 @@ pub contract DropTypes {
         return dropSummary
     }
 
-    pub fun getAllDropSummaries(contractAddress: Address, contractName: String, minter: Address?, quantity: Int?, paymentIdentifier: String?): [DropSummary] {
-        let resolver = getAccount(contractAddress).contracts.borrow<&ViewResolver>(name: contractName)
+    access(all) fun getAllDropSummaries(contractAddress: Address, contractName: String, minter: Address?, quantity: Int?, paymentIdentifier: String?): [DropSummary] {
+        let resolver = getAccount(contractAddress).contracts.borrow<&{ViewResolver}>(name: contractName)
         if resolver == nil {
             return []
         }
 
-        let dropResolver = resolver!.resolveView(Type<FlowtyDrops.DropResolver>()) as! FlowtyDrops.DropResolver?
+        let dropResolver = resolver!.resolveContractView(resourceType: nil, viewType: Type<FlowtyDrops.DropResolver>()) as! FlowtyDrops.DropResolver?
         if dropResolver == nil {
             return []
         }

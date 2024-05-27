@@ -5,25 +5,25 @@ import "FlowToken"
 This contract contains implementations of the FlowtyDrops.Pricer interface.
 You can use these, or any custom implementation for the phases of your drop.
 */
-pub contract FlowtyPricers {
+access(all) contract FlowtyPricers {
 
     /*
     The FlatPrice Pricer implementation has a set price and token type. Every mint is the same cost regardless of
     the number minter, or what address is minting
     */
-    pub struct FlatPrice: FlowtyDrops.Pricer {
-        pub var price: UFix64
-        pub let paymentTokenType: Type
+    access(all) struct FlatPrice: FlowtyDrops.Pricer {
+        access(all) var price: UFix64
+        access(all) let paymentTokenType: Type
 
-        pub fun getPrice(num: Int, paymentTokenType: Type, minter: Address?): UFix64 {
+        access(all) view fun getPrice(num: Int, paymentTokenType: Type, minter: Address?): UFix64 {
             return self.price * UFix64(num)
         }
 
-        pub fun getPaymentTypes(): [Type] {
+        access(all) view fun getPaymentTypes(): [Type] {
             return [self.paymentTokenType]
         }
 
-        pub fun setPrice(price: UFix64) {
+        access(Mutate) fun setPrice(price: UFix64) {
             self.price = price
         }
 
@@ -36,12 +36,12 @@ pub contract FlowtyPricers {
     /*
     The Free Pricer can be used for a free mint, it has no price and always marks its payment type as @FlowToken.Vault
     */
-    pub struct Free: FlowtyDrops.Pricer {
-        pub fun getPrice(num: Int, paymentTokenType: Type, minter: Address?): UFix64 {
+    access(all) struct Free: FlowtyDrops.Pricer {
+        access(all) fun getPrice(num: Int, paymentTokenType: Type, minter: Address?): UFix64 {
             return 0.0
         }
 
-        pub fun getPaymentTypes(): [Type] {
+        access(all) fun getPaymentTypes(): [Type] {
             return [Type<@FlowToken.Vault>()]
         }
     }

@@ -4,24 +4,24 @@ import "FlowtyDrops"
 This contract contains implementations for the FlowtyDrops.Switcher struct interface.
 You can use these implementations, or your own, for switches when configuring a drop
 */
-pub contract FlowtySwitchers {
+access(all) contract FlowtySwitchers {
     /*
     The AlwaysOn Switcher is always on and never ends.
     */
-    pub struct AlwaysOn: FlowtyDrops.Switcher {
-        pub fun hasStarted(): Bool {
+    access(all) struct AlwaysOn: FlowtyDrops.Switcher {
+        access(all) view fun hasStarted(): Bool {
             return true
         }
 
-        pub fun hasEnded(): Bool {
+        access(all) view fun hasEnded(): Bool {
             return false
         }
 
-        pub fun getStart(): UInt64? {
+        access(all) view fun getStart(): UInt64? {
             return nil
         }
 
-        pub fun getEnd(): UInt64? {
+        access(all) view fun getEnd(): UInt64? {
             return nil
         }
     }
@@ -30,31 +30,31 @@ pub contract FlowtySwitchers {
     The manual switcher is used to explicitly toggle a drop.
     This version of switcher allows a creator to turn on or off a drop at will
     */
-    pub struct ManualSwitch: FlowtyDrops.Switcher {
+    access(all) struct ManualSwitch: FlowtyDrops.Switcher {
         access(self) var started: Bool
         access(self) var ended: Bool
 
-        pub fun hasStarted(): Bool {
+        access(all) view fun hasStarted(): Bool {
             return self.started
         }
 
-        pub fun hasEnded(): Bool {
+        access(all) view fun hasEnded(): Bool {
             return self.ended
         }
 
-        pub fun getStart(): UInt64? {
+        access(all) view fun getStart(): UInt64? {
             return nil
         }
 
-        pub fun getEnd(): UInt64? {
+        access(all) view fun getEnd(): UInt64? {
             return nil
         }
 
-        pub fun setStarted(_ b: Bool) {
+        access(Mutate) fun setStarted(_ b: Bool) {
             self.started = b
         }
 
-        pub fun setEnded(_ b: Bool) {
+        access(Mutate) fun setEnded(_ b: Bool) {
             self.ended = b
         }
 
@@ -68,16 +68,16 @@ pub contract FlowtySwitchers {
     TimestampSwitch uses block timestamps to determine if a phase or drop is live or not.
     A timestamp switcher has a start and an end time.
     */
-    pub struct TimestampSwitch: FlowtyDrops.Switcher {
-        pub var start: UInt64?
-        pub var end: UInt64?
+    access(all) struct TimestampSwitch: FlowtyDrops.Switcher {
+        access(all) var start: UInt64?
+        access(all) var end: UInt64?
 
 
-        pub fun hasStarted(): Bool {
+        access(all) view fun hasStarted(): Bool {
             return self.start == nil || UInt64(getCurrentBlock().timestamp) >= self.start!
         }
 
-        pub fun hasEnded(): Bool {
+        access(all) view fun hasEnded(): Bool {
             if self.end == nil {
                 return false
             }
@@ -85,19 +85,19 @@ pub contract FlowtySwitchers {
             return UInt64(getCurrentBlock().timestamp) > self.end!
         }
 
-        pub fun getStart(): UInt64? {
+        access(all) view fun getStart(): UInt64? {
             return self.start
         }
 
-        pub fun getEnd(): UInt64? {
+        access(all) view fun getEnd(): UInt64? {
             return self.end
         }
 
-        pub fun setStart(start: UInt64?) {
+        access(Mutate) fun setStart(start: UInt64?) {
             self.start = start
         }
 
-        pub fun setEnd(end: UInt64?) {
+        access(Mutate) fun setEnd(end: UInt64?) {
             self.end = end
         }
 

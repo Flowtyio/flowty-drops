@@ -3,18 +3,18 @@ import "FlowtyDrops"
 /*
 This contract contains implementations of the FlowtyDrops.AddressVerifier struct interface
 */
-pub contract FlowtyAddressVerifiers {
+access(all) contract FlowtyAddressVerifiers {
     /*
     The AllowAll AddressVerifier allows any address to mint without any verification
     */
-    pub struct AllowAll: FlowtyDrops.AddressVerifier {
-        pub var maxPerMint: Int
+    access(all) struct AllowAll: FlowtyDrops.AddressVerifier {
+        access(all) var maxPerMint: Int
 
-        pub fun canMint(addr: Address, num: Int, totalMinted: Int, data: {String: AnyStruct}): Bool {
+        access(all) view fun canMint(addr: Address, num: Int, totalMinted: Int, data: {String: AnyStruct}): Bool {
             return num <= self.maxPerMint
         }
 
-        pub fun setMaxPerMint(_ value: Int) {
+        access(Mutate) fun setMaxPerMint(_ value: Int) {
             self.maxPerMint = value
         }
 
@@ -31,10 +31,10 @@ pub contract FlowtyAddressVerifiers {
     The AllowList Verifier only lets a configured set of addresses participate in a drop phase. The number
     of mints per address is specified to allow more granular control of what each address is permitted to do.
     */
-    pub struct AllowList: FlowtyDrops.AddressVerifier {
+    access(all) struct AllowList: FlowtyDrops.AddressVerifier {
         access(self) let allowedAddresses: {Address: Int}
 
-        pub fun canMint(addr: Address, num: Int, totalMinted: Int, data: {String: AnyStruct}): Bool {
+        access(all) view fun canMint(addr: Address, num: Int, totalMinted: Int, data: {String: AnyStruct}): Bool {
             if let allowedMints = self.allowedAddresses[addr] {
                 return allowedMints >= num + totalMinted
             }
@@ -42,18 +42,18 @@ pub contract FlowtyAddressVerifiers {
             return false
         }
 
-        pub fun remainingForAddress(addr: Address, totalMinted: Int): Int? {
+        access(all) view fun remainingForAddress(addr: Address, totalMinted: Int): Int? {
             if let allowedMints = self.allowedAddresses[addr] {
                 return allowedMints - totalMinted
             }
             return nil
         }
 
-        pub fun setAddress(addr: Address, value: Int) {
+        access(Mutate) fun setAddress(addr: Address, value: Int) {
             self.allowedAddresses[addr] = value
         }
 
-        pub fun removeAddress(addr: Address) {
+        access(Mutate) fun removeAddress(addr: Address) {
             self.allowedAddresses.remove(key: addr)
         }
 
