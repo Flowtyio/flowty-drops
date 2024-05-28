@@ -9,8 +9,8 @@ import "FlowtyPricers"
 /*
 The DropFactory is a contract that helps create common types of drops
 */
-pub contract DropFactory {
-    pub fun createEndlessOpenEditionDrop(
+access(all) contract DropFactory {
+    access(all) fun createEndlessOpenEditionDrop(
         price: UFix64,
         paymentTokenType: Type,
         dropDisplay: MetadataViews.Display,
@@ -18,7 +18,7 @@ pub contract DropFactory {
         nftTypeIdentifier: String
     ): @FlowtyDrops.Drop {
         pre {
-            paymentTokenType.isSubtype(of: Type<@FungibleToken.Vault>()): "paymentTokenType must be a FungibleToken"
+            paymentTokenType.isSubtype(of: Type<@{FungibleToken.Vault}>()): "paymentTokenType must be a FungibleToken"
         }
 
         // This drop is always on and never ends.
@@ -41,7 +41,7 @@ pub contract DropFactory {
         return <- drop
     }
 
-    pub fun createTimeBasedOpenEditionDrop(
+    access(all) fun createTimeBasedOpenEditionDrop(
         price: UFix64,
         paymentTokenType: Type,
         dropDisplay: MetadataViews.Display,
@@ -51,7 +51,7 @@ pub contract DropFactory {
         nftTypeIdentifier: String
     ): @FlowtyDrops.Drop {
         pre {
-            paymentTokenType.isSubtype(of: Type<@FungibleToken.Vault>()): "paymentTokenType must be a FungibleToken"
+            paymentTokenType.isSubtype(of: Type<@{FungibleToken.Vault}>()): "paymentTokenType must be a FungibleToken"
         }
 
         // This switcher turns on at a set unix timestamp (or is on by default if nil), and ends at the specified end date if provided

@@ -1,7 +1,7 @@
 import "FlowtyDrops"
 
 transaction {
-    prepare(acct: AuthAccount) {
-        destroy acct.load<@AnyResource>(from: FlowtyDrops.ContainerStoragePath)
+    prepare(acct: auth(LoadValue) &Account) {
+        destroy acct.storage.load<@AnyResource>(from: FlowtyDrops.ContainerStoragePath)
     }
 }

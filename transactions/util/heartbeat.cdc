@@ -1,3 +1,3 @@
 transaction {
-    prepare(acct: AuthAccount) {}
+    prepare(acct: &Account) {}
 }

@@ -18,33 +18,38 @@ transaction(
     nftIdentifier: String,
     commissionAddress: Address
 ) {
-    prepare(acct: AuthAccount) {
-        let resolver = getAccount(contractAddress).contracts.borrow<&ViewResolver>(name: contractName)
+    prepare(acct: auth(Capabilities, Storage) &Account) {
+        let resolver = getAccount(contractAddress).contracts.borrow<&{ViewResolver}>(name: contractName)
             ?? panic("ViewResolver contract interface not found on contract address + name")
         
-        let collectionData = resolver.resolveView(Type<MetadataViews.NFTCollectionData>())! as! MetadataViews.NFTCollectionData
-        if acct.borrow<&AnyResource>(from: collectionData.storagePath) == nil {
-            acct.save(<- collectionData.createEmptyCollection(), to: collectionData.storagePath)
+        let collectionData = resolver.resolveContractView(resourceType: nil, viewType: Type<MetadataViews.NFTCollectionData>())! as! MetadataViews.NFTCollectionData
+        if acct.storage.borrow<&AnyResource>(from: collectionData.storagePath) == nil {
+            acct.storage.save(<- collectionData.createEmptyCollection(), to: collectionData.storagePath)
 
-            acct.link<&{NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection}>(collectionData.publicPath, target: collectionData.storagePath)
-            acct.link<&{NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection, NonFungibleToken.Provider}>(collectionData.providerPath, target: collectionData.storagePath)
+            acct.capabilities.publish(
+                acct.capabilities.storage.issue<&{NonFungibleToken.Collection}>(collectionData.storagePath),
+                at: collectionData.publicPath
+            )
+
+            acct.capabilities.storage.issue<auth(NonFungibleToken.Withdraw) &{NonFungibleToken.Collection, NonFungibleToken.Provider}>(collectionData.storagePath)
         }
-        let receiverCap = acct.getCapability<&{NonFungibleToken.CollectionPublic}>(collectionData.publicPath)
+        let receiverCap = acct.capabilities.get<&{NonFungibleToken.CollectionPublic}>(collectionData.publicPath)
+        assert(receiverCap.check(), message: "invalid receiver capability")
 
         let expectedNftType = CompositeType(nftIdentifier) ?? panic("invalid nft identifier")
 
-        let vault = acct.borrow<&{FungibleToken.Provider}>(from: paymentStoragePath)
+        let vault = acct.storage.borrow<auth(FungibleToken.Withdraw) &{FungibleToken.Provider}>(from: paymentStoragePath)
             ?? panic("could not borrow token provider")
 
         let paymentVault <- vault.withdraw(amount: totalCost)
 
-        let dropResolver = resolver.resolveView(Type<FlowtyDrops.DropResolver>())! as! FlowtyDrops.DropResolver
+        let dropResolver = resolver.resolveContractView(resourceType: nil, viewType: Type<FlowtyDrops.DropResolver>())! as! FlowtyDrops.DropResolver
         let dropContainer = dropResolver.borrowContainer()
             ?? panic("unable to borrow drop container")
 
         let drop = dropContainer.borrowDropPublic(id: dropID) ?? panic("drop not found")
 
-        let commissionReceiver = getAccount(commissionAddress).getCapability<&{FungibleToken.Receiver}>(paymentReceiverPath)
+        let commissionReceiver = getAccount(commissionAddress).capabilities.get<&{FungibleToken.Receiver}>(paymentReceiverPath)
         let remainder <- drop.mint(
             payment: <-paymentVault,
             amount: numToMint,
@@ -56,7 +61,7 @@ transaction(
         )
 
         if remainder.balance > 0.0 {
-            acct.borrow<&{FungibleToken.Receiver}>(from: paymentStoragePath)!.deposit(from: <-remainder)
+            acct.storage.borrow<&{FungibleToken.Receiver}>(from: paymentStoragePath)!.deposit(from: <-remainder)
         } else {
             destroy remainder
         }
