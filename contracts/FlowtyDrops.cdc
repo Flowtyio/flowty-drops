@@ -14,6 +14,7 @@ access(all) contract FlowtyDrops {
     access(all) event PhaseRemoved(dropID: UInt64, dropAddress: Address, id: UInt64)
 
     access(all) entitlement Owner
+    access(all) entitlement EditPhase
 
     // Interface to expose all the components necessary to participate in a drop
     // and to ask questions about a drop.
@@ -99,7 +100,7 @@ access(all) contract FlowtyDrops {
             return <- payment
         }
 
-        access(Owner) fun borrowPhase(index: Int): auth(Mutate) &Phase {
+        access(Owner) fun borrowPhase(index: Int): auth(EditPhase) &Phase {
             return &self.phases[index]
         }
 
@@ -236,15 +237,15 @@ access(all) contract FlowtyDrops {
             return self.details
         }
 
-        access(Mutate) fun borrowSwitchAuth(): auth(Mutate) &{Switcher} {
+        access(EditPhase) fun borrowSwitchAuth(): auth(Mutate) &{Switcher} {
             return &self.details.switcher
         }
 
-        access(Mutate) fun borrowPricerAuth(): auth(Mutate) &{Pricer} {
+        access(EditPhase) fun borrowPricerAuth(): auth(Mutate) &{Pricer} {
             return &self.details.pricer
         }
 
-        access(Mutate) fun borrowAddressVerifierAuth(): auth(Mutate) &{AddressVerifier} {
+        access(EditPhase) fun borrowAddressVerifierAuth(): auth(Mutate) &{AddressVerifier} {
             return &self.details.addressVerifier
         }
 
@@ -254,13 +255,13 @@ access(all) contract FlowtyDrops {
     }
 
     access(all) resource interface PhasePublic {
-        access(all) fun getDetails(): PhaseDetails
-        access(all) fun isActive(): Bool
         // What does a phase need to be able to answer/manage?
         // - What are the details of the phase being interactive with?
         // - How many items are left in the current phase?
         // - Can Address x mint on a phase?
         // - What is the cost to mint for the phase I am interested in (for address x)?
+        access(all) fun getDetails(): PhaseDetails
+        access(all) fun isActive(): Bool
     }
 
     access(all) struct PhaseDetails {
