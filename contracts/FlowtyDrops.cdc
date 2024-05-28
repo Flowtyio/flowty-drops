@@ -35,6 +35,13 @@ access(all) contract FlowtyDrops {
     }
 
     access(all) resource Drop: DropPublic {
+        access(all) event ResourceDestroyed(
+            uuid: UInt64 = self.uuid,
+            minterAddress: Address = self.minterCap.address,
+            nftType: String = self.details.nftType.identifier,
+            totalMinted: Int = self.details.totalMinted
+        )
+
         // phases represent the stages of a drop. For example, a drop might have an allowlist and a public mint phase.
         access(self) let phases: @[Phase]
         // the details of a drop. This includes things like display information and total number of mints
@@ -174,11 +181,6 @@ access(all) contract FlowtyDrops {
             self.details = details
             self.minterCap = minterCap
         }
-
-        // TODO: burn callback
-        // destroy () {
-        //     destroy self.phases
-        // }
     }
 
     access(all) struct DropDetails {
@@ -226,6 +228,8 @@ access(all) contract FlowtyDrops {
     // phase, while others could have many. For example, a drop with an allow list
     // and a public mint would likely have two phases.
     access(all) resource Phase: PhasePublic {
+        access(all) event ResourceDestroyed(uuid: UInt64 = self.uuid)
+
         access(all) let details: PhaseDetails
 
         // returns whether this phase of a drop has started.
@@ -382,11 +386,6 @@ access(all) contract FlowtyDrops {
         init() {
             self.drops <- {}
         }
-
-        // TODO: burn callback?
-        // destroy () {
-        //     destroy self.drops
-        // }
     }
 
     access(all) fun createPhase(details: PhaseDetails): @Phase {
