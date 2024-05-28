@@ -7,7 +7,6 @@ access(all) contract FlowtyDrops {
     access(all) let ContainerPublicPath: PublicPath
 
     access(all) let MinterStoragePath: StoragePath
-    access(all) let MinterPrivatePath: PrivatePath
 
     access(all) event DropAdded(address: Address, id: UInt64, name: String, description: String, imageUrl: String, start: UInt64?, end: UInt64?)
     access(all) event Minted(address: Address, dropID: UInt64, phaseID: UInt64, nftID: UInt64, nftType: String)
@@ -100,7 +99,7 @@ access(all) contract FlowtyDrops {
             return <- payment
         }
 
-        access(all) fun borrowPhase(index: Int): &Phase {
+        access(Owner) fun borrowPhase(index: Int): auth(Mutate) &Phase {
             return &self.phases[index]
         }
 
@@ -237,16 +236,16 @@ access(all) contract FlowtyDrops {
             return self.details
         }
 
-        access(all) fun borrowSwitchAuth(): &{Switcher} {
-            return self.details.switcher as! &{Switcher}
+        access(Mutate) fun borrowSwitchAuth(): auth(Mutate) &{Switcher} {
+            return &self.details.switcher
         }
 
-        access(all) fun borrowPricer(): &{Pricer} {
-            return self.details.pricer as! &{Pricer}
+        access(Mutate) fun borrowPricerAuth(): auth(Mutate) &{Pricer} {
+            return &self.details.pricer
         }
 
-        access(all) fun borrowAddressVerifierAuth(): &{AddressVerifier} {
-            return self.details.addressVerifier as! &{AddressVerifier}
+        access(Mutate) fun borrowAddressVerifierAuth(): auth(Mutate) &{AddressVerifier} {
+            return &self.details.addressVerifier
         }
 
         init(details: PhaseDetails) {
@@ -367,7 +366,7 @@ access(all) contract FlowtyDrops {
             return <- self.drops.remove(key: id)!
         }
 
-        access(Owner) fun borrowDrop(id: UInt64): &Drop? {
+        access(Owner) fun borrowDrop(id: UInt64): auth(Owner) &Drop? {
             return &self.drops[id]
         }
 
@@ -409,7 +408,6 @@ access(all) contract FlowtyDrops {
         self.ContainerStoragePath = StoragePath(identifier: containerIdentifier)!
         self.ContainerPublicPath = PublicPath(identifier: containerIdentifier)!
 
-        self.MinterPrivatePath = PrivatePath(identifier: minterIdentifier)!
         self.MinterStoragePath = StoragePath(identifier: minterIdentifier)!
     }
 }

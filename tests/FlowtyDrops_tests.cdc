@@ -45,8 +45,7 @@ access(all) fun test_OpenEditionNFT_mint() {
     let details = getDropDetails(contractAddress: openEditionAccount.address, contractName: "OpenEditionNFT", dropID: dropID)
 
     let minter = Test.createAccount()
-    setupExampleToken(minter)
-    mintExampleTokens(minter, 100.0)
+    mintFlowTokens(minter, 100.0)
 
     let costPerItem = 1.0
     let numToMint = 2
@@ -59,8 +58,8 @@ access(all) fun test_OpenEditionNFT_mint() {
         numToMint: numToMint,
         totalCost: total,
         paymentIdentifier: flowTokenIdentifier(),
-        paymentStoragePath: exampleTokenStoragePath,
-        paymentReceiverPath: exampleTokenReceiverPath,
+        paymentStoragePath: flowTokenStoragePath,
+        paymentReceiverPath: flowTokenReceiverPath,
         dropID: dropID,
         dropPhaseIndex: 0,
         nftIdentifier: Type<@OpenEditionNFT.NFT>().identifier,
@@ -93,7 +92,7 @@ access(all) fun test_OpenEditionNFT_EditPhaseDetails() {
     let currentTime = getCurrentTime()
     let newStart = UInt64(currentTime + 5.0)
 
-    txExecutor("drops/edit_timebased_phase_start_and_end.cdc", [openEditionAccount], [dropID, 0, newStart, newStart + UInt64(5)], nil, nil)
+    txExecutor("drops/edit_timebased_phase_start_and_end.cdc", [openEditionAccount], [dropID, 0, newStart, newStart + 5], nil, nil)
     Test.assertEqual(false, hasDropPhaseStarted(contractAddress: openEditionAccount.address, contractName: "OpenEditionNFT", dropID: dropID, phaseIndex: 0))
     Test.assertEqual(false, hasDropPhaseEnded(contractAddress: openEditionAccount.address, contractName: "OpenEditionNFT", dropID: dropID, phaseIndex: 0))
 
@@ -133,7 +132,7 @@ access(all) fun test_OpenEditionNFT_GetActivePhases() {
 access(all) fun test_OpenEditionNFT_addPhase() {
     let dropID = createDefaultTimeBasedOpenEditionDrop()
 
-    txExecutor("drops/add_free_phase.cdc", [openEditionAccount], [dropID, nil, nil], nil, nil)
+    txExecutor("drops/add_free_phase.cdc", [openEditionAccount], [dropID, nil, nil, "https://example.com/fake_image.jpg"], nil, nil)
     let phaseEvent = Test.eventsOfType(Type<FlowtyDrops.PhaseAdded>()).removeLast() as! FlowtyDrops.PhaseAdded
 
     var activePhaseIDs = scriptExecutor("get_active_phases.cdc", [openEditionAccount.address, "OpenEditionNFT", dropID])! as! [UInt64]
@@ -148,8 +147,7 @@ access(all) fun test_OpenEditionNFT_getDropSummary() {
     let dropID = createDefaultTimeBasedOpenEditionDrop()
 
     let minter = Test.createAccount()
-    setupExampleToken(minter)
-    mintExampleTokens(minter, 100.0)
+    mintFlowTokens(minter, 100.0)
 
     let summary = scriptExecutor("get_drop_summary.cdc", [openEditionAccount.address, "OpenEditionNFT", dropID, minter.address, 1, flowTokenIdentifier()])! as! DropTypes.DropSummary
     Test.assertEqual(minter.address, summary.address!)
@@ -164,8 +162,8 @@ access(all) fun test_OpenEditionNFT_getDropSummary() {
         numToMint: numToMint,
         totalCost: totalCost,
         paymentIdentifier: flowTokenIdentifier(),
-        paymentStoragePath: exampleTokenStoragePath,
-        paymentReceiverPath: exampleTokenReceiverPath,
+        paymentStoragePath: flowTokenStoragePath,
+        paymentReceiverPath: flowTokenReceiverPath,
         dropID: dropID,
         dropPhaseIndex: 0,
         nftIdentifier: Type<@OpenEditionNFT.NFT>().identifier,
@@ -193,10 +191,13 @@ access(all) fun test_OpenEditionNFT_getDropSummary_noMinter() {
     Test.assertEqual(summaries[0].mintedByAddress, nil)
     Test.assertEqual(1, summaries[0].phases.length)
 }
+
 // ------------------------------------------------------------------------
 //                      Helper functions section
 
 access(all) fun createDefaultEndlessOpenEditionDrop(): UInt64 {
+    let controllerID = getMinterControllerID(acct: openEditionAccount)!
+
     return createEndlessOpenEditionDrop(
         acct: openEditionAccount,
         name: "Default Endless Open Edition",
@@ -205,13 +206,15 @@ access(all) fun createDefaultEndlessOpenEditionDrop(): UInt64 {
         ipfsPath: nil,
         price: 1.0,
         paymentIdentifier: flowTokenIdentifier(),
-        minterPrivatePath: FlowtyDrops.MinterPrivatePath,
+        minterControllerID: controllerID,
         nftTypeIdentifier: openEditionNftIdentifier()
     )
 }
 
 access(all) fun createDefaultTimeBasedOpenEditionDrop(): UInt64 {
     let currentTime = getCurrentTime()
+
+    let controllerID = getMinterControllerID(acct: openEditionAccount)!
 
     return createTimebasedOpenEditionDrop(
         acct: openEditionAccount,
@@ -223,7 +226,7 @@ access(all) fun createDefaultTimeBasedOpenEditionDrop(): UInt64 {
         paymentIdentifier: flowTokenIdentifier(),
         startUnix: UInt64(getCurrentTime()),
         endUnix: UInt64(currentTime + 5.0),
-        minterPrivatePath: FlowtyDrops.MinterPrivatePath,
+        minterControllerID: controllerID,
         nftTypeIdentifier: openEditionNftIdentifier()
     )
 }

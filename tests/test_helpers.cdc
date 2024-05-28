@@ -67,11 +67,6 @@ access(all) enum ErrorType: UInt8 {
 
 // the cadence testing framework allocates 4 addresses for system acounts,
 // and 10 pre-created accounts for us to use for deployments:
-access(all) let Account0x1 = Address(0x0000000000000001)
-access(all) let Account0x2 = Address(0x0000000000000002)
-access(all) let Account0x3 = Address(0x0000000000000003)
-access(all) let Account0x4 = Address(0x0000000000000004)
-access(all) let Account0x5 = Address(0x0000000000000005)
 access(all) let Account0x6 = Address(0x0000000000000006)
 access(all) let Account0x7 = Address(0x0000000000000007)
 access(all) let Account0x8 = Address(0x0000000000000008)
@@ -82,24 +77,16 @@ access(all) let Account0xc = Address(0x000000000000000c)
 access(all) let Account0xd = Address(0x000000000000000d)
 access(all) let Account0xe = Address(0x000000000000000e)
 
-// Example Token constants
-access(all) let exampleTokenStoragePath = /storage/exampleTokenVault
-access(all) let exampleTokenReceiverPath = /public/exampleTokenReceiver
-access(all) let exampleTokenProviderPath = /private/exampleTokenProvider
-access(all) let exampleTokenBalancePath = /public/exampleTokenBalance
-
-access(all) let serviceAccount = Test.getAccount(Account0x5)
-access(all) let flowtyDropsAccount = Test.getAccount(Account0x6)
-access(all) let openEditionAccount = Test.getAccount(Account0x7)
-access(all) let exampleTokenAccount = Test.getAccount(Account0x8)
-
 // Flow Token constants
 access(all) let flowTokenStoragePath = /storage/flowTokenVault
 access(all) let flowTokenReceiverPath = /public/flowTokenReceiver
 
-access(all) fun deployAll() {
-    deploy("ExampleToken", "../contracts/standard/ExampleToken.cdc", [])
+access(all) let serviceAccount = Test.serviceAccount()
+access(all) let flowtyDropsAccount = Test.getAccount(Account0x6)
+access(all) let openEditionAccount = Test.getAccount(Account0x7)
+access(all) let exampleTokenAccount = Test.getAccount(Account0x8)
 
+access(all) fun deployAll() {
     // 0x6
     deploy("FlowtyDrops", "../contracts/FlowtyDrops.cdc", [])
     deploy("FlowtySwitchers", "../contracts/FlowtySwitchers.cdc", [])
@@ -112,10 +99,6 @@ access(all) fun deployAll() {
 
     // 0x7
     deploy("OpenEditionNFT", "../contracts/nft/OpenEditionNFT.cdc", [])
-
-
-    setupExampleToken(flowtyDropsAccount)
-    setupExampleToken(openEditionAccount)
 }
 
 access(all) fun deploy(_ name: String, _ path: String, _ arguments: [AnyStruct]) {
@@ -176,11 +159,11 @@ access(all) fun createEndlessOpenEditionDrop(
     ipfsPath: String?,
     price: UFix64,
     paymentIdentifier: String,
-    minterPrivatePath: PrivatePath,
+    minterControllerID: UInt64,
     nftTypeIdentifier: String
 ): UInt64 {
     txExecutor("drops/add_endless_open_edition.cdc", [acct], [
-        name, description, ipfsCid, ipfsPath, price, paymentIdentifier, minterPrivatePath, nftTypeIdentifier
+        name, description, ipfsCid, ipfsPath, price, paymentIdentifier, minterControllerID, nftTypeIdentifier
     ], nil, nil)
     
     let e = Test.eventsOfType(Type<FlowtyDrops.DropAdded>()).removeLast() as! FlowtyDrops.DropAdded
@@ -197,11 +180,11 @@ access(all) fun createTimebasedOpenEditionDrop(
     paymentIdentifier: String,
     startUnix: UInt64?,
     endUnix: UInt64?,
-    minterPrivatePath: PrivatePath,
+    minterControllerID: UInt64,
     nftTypeIdentifier: String
 ): UInt64 {
     txExecutor("drops/add_time_based_open_edition.cdc", [acct], [
-        name, description, ipfsCid, ipfsPath, price, paymentIdentifier, startUnix, endUnix, minterPrivatePath, nftTypeIdentifier
+        name, description, ipfsCid, ipfsPath, price, paymentIdentifier, startUnix, endUnix, minterControllerID, nftTypeIdentifier
     ], nil, nil)
 
     let e = Test.eventsOfType(Type<FlowtyDrops.DropAdded>()).removeLast() as! FlowtyDrops.DropAdded
@@ -212,12 +195,8 @@ access(all) fun sendFlowTokens(fromAccount: Test.TestAccount, toAccount: Test.Te
     txExecutor("util/send_flow_tokens.cdc", [fromAccount], [toAccount.address, amount], nil, nil)
 }
 
-access(all) fun setupExampleToken(_ acct: Test.TestAccount) {
-    txExecutor("example-token/setup.cdc", [acct], [], nil, nil)
-}
-
-access(all) fun mintExampleTokens(_ acct: Test.TestAccount, _ amount: UFix64) {
-    txExecutor("example-token/mint.cdc", [exampleTokenAccount], [acct.address, amount], nil, nil)
+access(all) fun mintFlowTokens(_ acct: Test.TestAccount, _ amount: UFix64) {
+    txExecutor("flow-token/mint.cdc", [serviceAccount], [acct.address, amount], nil, nil)
 }
 
 access(all) fun flowTokenIdentifier(): String {
@@ -240,4 +219,8 @@ access(all) fun canMintAtPhase(contractAddress: Address, contractName: String, d
     return scriptExecutor("can_mint_at_phase.cdc", [
         contractAddress, contractName, dropID, phaseIndex, minter, numToMint, totalMinted, paymentIdentifier
     ])! as! Bool
+}
+
+access(all) fun getMinterControllerID(acct: Test.TestAccount): UInt64? {
+    return scriptExecutor("util/get_minter_controller_id.cdc", [acct.address]) as! UInt64?
 }
