@@ -19,79 +19,27 @@ import "FlowtySwitchers"
 import "FlowtyAddressVerifiers"
 import "FlowtyPricers"
 import "DropFactory"
-import "BaseCollection"
+import "BaseNFT"
 import "BaseNFTVars"
+import "NFTMetadata"
 
-access(all) contract OpenEditionNFT: NonFungibleToken, BaseCollection, BaseNFTVars {
-    access(all) let collectionDisplay: MetadataViews.NFTCollectionDisplay
-    access(all) var totalMinted: UInt64
+access(all) contract OpenEditionNFT: NonFungibleToken, BaseNFT, BaseNFTVars {
+    access(all) var MetadataCap: Capability<&NFTMetadata.Container>
+    access(all) var totalSupply: UInt64
 
-    access(all) resource NFT: NonFungibleToken.NFT {
+    access(all) resource NFT: BaseNFT.NFT {
         access(all) let id: UInt64
-        access(all) let display: MetadataViews.Display
+        access(all) let metadataID: UInt64
 
         init() {
-            OpenEditionNFT.totalMinted = OpenEditionNFT.totalMinted + 1
-            self.id = OpenEditionNFT.totalMinted
-
-            self.display = MetadataViews.Display(
-                name: "Fluid #".concat(self.id.toString()),
-                description: "This is a sample open-edition NFT utilizing flowty drops for minting",
-                thumbnail: MetadataViews.IPFSFile(cid: "QmWWLhnkPR3ejavNtzeJcdG9fwcBHKwBVEP4pZ9rGbdHEM", path: nil)
-            )
-        }
-
-        access(all) view fun getViews(): [Type] {
-            return [
-                Type<MetadataViews.Display>(),
-                Type<MetadataViews.ExternalURL>(),
-                Type<MetadataViews.NFTCollectionData>(),
-                Type<MetadataViews.NFTCollectionDisplay>(),
-                Type<MetadataViews.Serial>()
-            ]
-        }
-
-        access(all) fun resolveView(_ view: Type): AnyStruct? {
-            switch view {
-                case Type<MetadataViews.Display>():
-                    return self.display
-                case Type<MetadataViews.Serial>():
-                    return MetadataViews.Serial(
-                        self.id
-                    )
-                case Type<MetadataViews.ExternalURL>():
-                    return MetadataViews.ExternalURL("https://flowty.io/asset/".concat(OpenEditionNFT.account.address.toString()).concat("/OpenEditionNFT/").concat(self.id.toString()))
-                case Type<MetadataViews.NFTCollectionData>():
-                    return OpenEditionNFT.resolveContractView(resourceType: self.getType(), viewType: view)
-                case Type<MetadataViews.NFTCollectionDisplay>():
-                    return OpenEditionNFT.resolveContractView(resourceType: self.getType(), viewType: view)
-            }
-
-            return nil
+            OpenEditionNFT.totalSupply = OpenEditionNFT.totalSupply + 1
+            self.id = OpenEditionNFT.totalSupply
+            self.metadataID = 0
         }
 
         access(all) fun createEmptyCollection(): @{NonFungibleToken.Collection} {
             return <- create Collection()
         }
-    }
-
-    // DONE
-    access(all) resource Collection: BaseCollection.Collection {
-        access(all) var ownedNFTs: @{UInt64: {NonFungibleToken.NFT}}
-        access(all) var nftType: Type
-
-        access(all) fun createEmptyCollection(): @{NonFungibleToken.Collection} {
-            return <- create Collection()
-        }
-
-        init () {
-            self.ownedNFTs <- {}
-            self.nftType = Type<@NFT>()
-        }
-    }
-
-    access(all) fun createEmptyCollection(nftType: Type): @{NonFungibleToken.Collection} {
-        return <- create Collection()
     }
 
     access(all) resource NFTMinter: FlowtyDrops.Minter {
@@ -116,7 +64,27 @@ access(all) contract OpenEditionNFT: NonFungibleToken, BaseCollection, BaseNFTVa
         }
     }
 
+    access(all) resource Collection: BaseNFT.Collection {
+        access(all) var ownedNFTs: @{UInt64: {NonFungibleToken.NFT}}
+        access(all) var nftType: Type
+
+        access(all) fun createEmptyCollection(): @{NonFungibleToken.Collection} {
+            return <- create Collection()
+        }
+
+        init () {
+            self.ownedNFTs <- {}
+            self.nftType = Type<@NFT>()
+        }
+    }
+
+    access(all) fun createEmptyCollection(nftType: Type): @{NonFungibleToken.Collection} {
+        return <- create Collection()
+    }
+
     init() {
+        self.totalSupply = 0
+
         let square = MetadataViews.Media(
             file: MetadataViews.IPFSFile(
                 cid: "QmWWLhnkPR3ejavNtzeJcdG9fwcBHKwBVEP4pZ9rGbdHEM",
@@ -133,7 +101,7 @@ access(all) contract OpenEditionNFT: NonFungibleToken, BaseCollection, BaseNFTVa
             mediaType: "image/png"
         )
         
-        self.collectionDisplay = MetadataViews.NFTCollectionDisplay(
+        let collectionDisplay = MetadataViews.NFTCollectionDisplay(
             name: "The Open Edition Collection",
             description: "This collection is used as an example to help you develop your next Open Edition Flow NFT",
             externalURL: MetadataViews.ExternalURL("https://flowty.io"),
@@ -143,19 +111,23 @@ access(all) contract OpenEditionNFT: NonFungibleToken, BaseCollection, BaseNFTVa
                 "twitter": MetadataViews.ExternalURL("https://twitter.com/flowty_io")
             }
         )
+        let collectionInfo = NFTMetadata.CollectionInfo(collectionDisplay: collectionDisplay)
 
-        self.totalMinted = 0
-        let cd: MetadataViews.NFTCollectionData = self.resolveContractView(resourceType: Type<@NFT>(), viewType: Type<MetadataViews.NFTCollectionData>())! as! MetadataViews.NFTCollectionData
+        let acct: auth(Storage, Contracts, Keys, Inbox, Capabilities) &Account = Account(payer: self.account)
+        let cap = acct.capabilities.account.issue<auth(Storage, Contracts, Keys, Inbox, Capabilities) &Account>()
+        self.account.storage.save(cap, to: /storage/metadataAuthAccount)
 
-        // Create a Collection resource and save it to storage
-        let collection <- create Collection()
-        self.account.storage.save(<-collection, to: cd.storagePath)
-
-        // create a public capability for the collection
-        self.account.capabilities.publish(
-            self.account.capabilities.storage.issue<&{NonFungibleToken.Collection}>(cd.storagePath),
-            at: cd.publicPath
-        )
+        let caps = NFTMetadata.initialize(acct: acct.capabilities.account.issue<auth(SaveValue, IssueStorageCapabilityController, PublishCapability) &Account>().borrow()!, collectionInfo: collectionInfo)
+        self.MetadataCap = caps.pubCap
+        caps.ownerCap.borrow()!.addMetadata(id: 0, data: NFTMetadata.Metadata(
+            name: "Fluid",
+            description: "This is a sample open-edition NFT utilizing flowty drops for minting",
+            thumbnail: MetadataViews.IPFSFile(cid: "QmWWLhnkPR3ejavNtzeJcdG9fwcBHKwBVEP4pZ9rGbdHEM", path: nil),
+            traits: nil,
+            editions: nil,
+            externalURL: nil,
+            data: {}
+        ))
 
         // Create a Minter resource and save it to storage
         let minter <- create NFTMinter()

@@ -93,8 +93,9 @@ access(all) fun deployAll() {
 
     deploy("FlowtyDrops", "../contracts/FlowtyDrops.cdc", [])
 
+    deploy("NFTMetadata", "../contracts/nft/NFTMetadata.cdc", [])
     deploy("BaseNFTVars", "../contracts/nft/BaseNFTVars.cdc", [])
-    deploy("BaseCollection", "../contracts/nft/BaseCollection.cdc", [])
+    deploy("BaseNFT", "../contracts/nft/BaseNFT.cdc", [])
     deploy("FlowtySwitchers", "../contracts/FlowtySwitchers.cdc", [])
     deploy("FlowtyPricers", "../contracts/FlowtyPricers.cdc", [])
     deploy("FlowtyAddressVerifiers", "../contracts/FlowtyAddressVerifiers.cdc", [])

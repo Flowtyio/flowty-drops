@@ -5,7 +5,7 @@ import "ViewResolver"
 import "MetadataViews"
 import "BaseNFTVars"
 import "FlowtyDrops"
-
+import "NFTMetadata"
 
 // A few primary challenges that have come up in thinking about how to define base-level interfaces
 // for collections and NFTs:
@@ -21,7 +21,86 @@ import "FlowtyDrops"
 // pieces to and modify the code to their liking. This could achieve the best of both worlds where there is minimal work to get something
 // off the ground, but doesn't close the door to customization in the future. This could come at the cost of duplicated resource definitions,
 // or could have the risk of circular imports depending on how we resolve certain pieces of information about a collection.
-access(all) contract interface BaseCollection: ViewResolver {
+access(all) contract interface BaseNFT: ViewResolver {
+    
+
+    access(all) resource interface NFT: NonFungibleToken.NFT {
+        // This is the id entry that corresponds to an NFTs NFTMetadata.Container entry.
+        // Some NFTs might share the same data, so we want to permit reusing storage where possible
+        access(all) metadataID: UInt64
+
+        access(all) view fun getViews(): [Type] {
+            return [
+                Type<MetadataViews.Display>(),
+                Type<MetadataViews.Serial>(),
+                Type<MetadataViews.Traits>(),
+                Type<MetadataViews.Editions>(),
+                Type<MetadataViews.ExternalURL>(),
+                Type<MetadataViews.NFTCollectionData>(),
+                Type<MetadataViews.NFTCollectionDisplay>()
+            ]
+        }
+
+        access(all) fun resolveView(_ view: Type): AnyStruct? {
+            if view == Type<MetadataViews.Serial>() {
+                return self.id
+            }
+
+            let rt = self.getType()
+            let segments = rt.identifier.split(separator: ".")
+            let addr = AddressUtils.parseAddress(rt)!
+            let tmp = getAccount(addr).contracts.borrow<&{BaseNFTVars}>(name: segments[2])
+            if tmp == nil {
+                return nil
+            }
+            
+            let c = tmp!
+            let tmpMd = c.MetadataCap.borrow()
+            if tmpMd == nil {
+                return nil
+            }
+
+            let md = tmpMd!
+            switch view {
+                case Type<MetadataViews.NFTCollectionData>():
+                    let pathIdentifier = StringUtils.join([segments[2], segments[1]], "_")
+                    return MetadataViews.NFTCollectionData(
+                        storagePath: StoragePath(identifier: pathIdentifier)!,
+                        publicPath: PublicPath(identifier: pathIdentifier)!,
+                        publicCollection: Type<&{NonFungibleToken.Collection}>(),
+                        publicLinkedType: Type<&{NonFungibleToken.Collection}>(),
+                        createEmptyCollectionFunction: fun(): @{NonFungibleToken.Collection} {
+                            let addr = AddressUtils.parseAddress(rt)!
+                            let c = getAccount(addr).contracts.borrow<&{BaseNFTVars}>(name: segments[2])!
+                            return <- c.createEmptyCollection(nftType: rt)
+                        }
+                    )
+                case Type<MetadataViews.NFTCollectionDisplay>():
+                    return md.collectionInfo.collectionDisplay
+            }
+
+            if let entry = md.borrowMetadata(id: self.metadataID) {
+                switch view {
+                    case Type<MetadataViews.Traits>():
+                        return entry.traits
+                    case Type<MetadataViews.Editions>():
+                        return entry.editions
+                    case Type<MetadataViews.Display>():
+                        let num = (entry.editions?.infoList?.length ?? 0) > 0 ? entry.editions!.infoList[0].number : self.id
+
+                        return MetadataViews.Display(
+                            name: entry.name.concat(" #").concat(num.toString()),
+                            description: entry.description,
+                            thumbnail: NFTMetadata.UriFile(entry.thumbnail.uri())
+                        )
+                    case Type<MetadataViews.ExternalURL>():
+                        return entry.externalURL
+                }
+            }
+
+            return nil
+        }
+    }
 
     // The base collection is an interface that attmepts to take more boilerplate
     // off of NFT-standard compliant definitions.
@@ -93,7 +172,12 @@ access(all) contract interface BaseCollection: ViewResolver {
                 )
             case Type<MetadataViews.NFTCollectionDisplay>():
                 let c = getAccount(addr).contracts.borrow<&{BaseNFTVars}>(name: segments[2])!
-                return c.collectionDisplay
+                let md = c.MetadataCap.borrow()
+                if md == nil {
+                    return nil
+                }
+
+                return md!.collectionInfo.collectionDisplay
             case Type<FlowtyDrops.DropResolver>():
                 return FlowtyDrops.DropResolver(cap: acct.capabilities.get<&{FlowtyDrops.ContainerPublic}>(FlowtyDrops.ContainerPublicPath))
         }

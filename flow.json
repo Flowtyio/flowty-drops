@@ -59,14 +59,20 @@
     }
   },
   "contracts": {
-    "BaseCollection": {
-      "source": "./contracts/nft/BaseCollection.cdc",
+    "BaseNFT": {
+      "source": "./contracts/nft/BaseNFT.cdc",
       "aliases": {
         "testing": "0x0000000000000006"
       }
     },
     "BaseNFTVars": {
       "source": "./contracts/nft/BaseNFTVars.cdc",
+      "aliases": {
+        "testing": "0x0000000000000006"
+      }
+    },
+    "NFTMetadata": {
+      "source": "./contracts/nft/NFTMetadata.cdc",
       "aliases": {
         "testing": "0x0000000000000006"
       }
@@ -206,8 +212,9 @@
   "deployments": {
     "emulator": {
       "emulator-account": [
+        "NFTMetadata",
         "BaseNFTVars",
-        "BaseCollection",
+        "BaseNFT",
         "FlowtyDrops",
         "FlowtySwitchers",
         "FlowtyAddressVerifiers",
