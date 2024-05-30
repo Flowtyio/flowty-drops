@@ -95,11 +95,14 @@ access(all) fun deployAll() {
 
     deploy("NFTMetadata", "../contracts/nft/NFTMetadata.cdc", [])
     deploy("BaseNFTVars", "../contracts/nft/BaseNFTVars.cdc", [])
+    deploy("BaseCollection", "../contracts/nft/BaseCollection.cdc", [])
+    deploy("UniversalCollection", "../contracts/nft/UniversalCollection.cdc", [])
     deploy("BaseNFT", "../contracts/nft/BaseNFT.cdc", [])
     deploy("FlowtySwitchers", "../contracts/FlowtySwitchers.cdc", [])
     deploy("FlowtyPricers", "../contracts/FlowtyPricers.cdc", [])
     deploy("FlowtyAddressVerifiers", "../contracts/FlowtyAddressVerifiers.cdc", [])
     deploy("DropFactory", "../contracts/DropFactory.cdc", [])
+    deploy("FlowtyMinters", "../contracts/FlowtyMinters.cdc", [])
 
     // 0x8
     deploy("DropTypes", "../contracts/DropTypes.cdc", [])

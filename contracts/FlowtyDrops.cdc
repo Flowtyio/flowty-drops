@@ -1,6 +1,7 @@
 import "NonFungibleToken"
 import "FungibleToken"
 import "MetadataViews"
+import "AddressUtils"
 
 access(all) contract FlowtyDrops {
     access(all) let ContainerStoragePath: StoragePath
@@ -83,6 +84,8 @@ access(all) contract FlowtyDrops {
             // mint the nfts
             let minter = self.minterCap.borrow() ?? panic("minter capability could not be borrowed")
             let mintedNFTs <- minter.mint(payment: <-withdrawn, amount: amount, phase: phase, data: data)
+            assert(phase.details.switcher.hasStarted() && !phase.details.switcher.hasEnded(), message: "phase is not active")
+            assert(mintedNFTs.length == amount, message: "incorrect number of items returned")
 
             // distribute to receiver
             let receiver = receiverCap.borrow() ?? panic("could not borrow receiver capability")
@@ -310,12 +313,24 @@ access(all) contract FlowtyDrops {
     }
 
     access(all) resource interface Minter {
-        access(all) fun mint(payment: @{FungibleToken.Vault}, amount: Int, phase: &Phase, data: {String: AnyStruct}): @[{NonFungibleToken.NFT}] {
-            post {
-                phase.details.switcher.hasStarted() && !phase.details.switcher.hasEnded(): "phase is not active"
-                result.length == amount: "incorrect number of items returned"
+        access(contract) fun mint(payment: @{FungibleToken.Vault}, amount: Int, phase: &FlowtyDrops.Phase, data: {String: AnyStruct}): @[{NonFungibleToken.NFT}] {
+            let resourceAddress = AddressUtils.parseAddress(self.getType())!
+            let receiver = getAccount(resourceAddress).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver).borrow()
+                ?? panic("invalid flow token receiver")
+            receiver.deposit(from: <-payment)
+
+            let nfts: @[{NonFungibleToken.NFT}] <- []
+
+            var count = 0
+            while count < amount {
+                count = count + 1
+                nfts.append(<- self.createNextNFT())
             }
+
+            return <- nfts
         }
+
+        access(contract) fun createNextNFT(): @{NonFungibleToken.NFT}
     }
     
     access(all) struct DropResolver {

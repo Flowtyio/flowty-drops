@@ -6,6 +6,7 @@ import "MetadataViews"
 import "BaseNFTVars"
 import "FlowtyDrops"
 import "NFTMetadata"
+import "UniversalCollection"
 
 // A few primary challenges that have come up in thinking about how to define base-level interfaces
 // for collections and NFTs:
@@ -22,8 +23,6 @@ import "NFTMetadata"
 // off the ground, but doesn't close the door to customization in the future. This could come at the cost of duplicated resource definitions,
 // or could have the risk of circular imports depending on how we resolve certain pieces of information about a collection.
 access(all) contract interface BaseNFT: ViewResolver {
-    
-
     access(all) resource interface NFT: NonFungibleToken.NFT {
         // This is the id entry that corresponds to an NFTs NFTMetadata.Container entry.
         // Some NFTs might share the same data, so we want to permit reusing storage where possible
@@ -100,89 +99,10 @@ access(all) contract interface BaseNFT: ViewResolver {
 
             return nil
         }
-    }
 
-    // The base collection is an interface that attmepts to take more boilerplate
-    // off of NFT-standard compliant definitions.
-    access(all) resource interface Collection: NonFungibleToken.Collection {
-        access(all) var ownedNFTs: @{UInt64: {NonFungibleToken.NFT}}
-        access(all) var nftType: Type
-
-        access(all) fun deposit(token: @{NonFungibleToken.NFT}) {
-            pre {
-                token.getType() == self.nftType: "unexpected nft type being deposited"
-            }
-
-            destroy self.ownedNFTs.insert(key: token.uuid, <-token)
+        access(all) fun createEmptyCollection(): @{NonFungibleToken.Collection} {
+            return <- UniversalCollection.createCollection(nftType: self.getType())
         }
-
-        access(all) view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}? {
-            return &self.ownedNFTs[id]
-        }
-
-        access(all) view fun getSupportedNFTTypes(): {Type: Bool} {
-            return {
-                self.nftType: true
-            }
-        }
-
-        access(all) view fun isSupportedNFTType(type: Type): Bool {
-            return type == self.nftType
-        }
-
-        access(NonFungibleToken.Withdraw) fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT} {
-            return <- self.ownedNFTs.remove(key: withdrawID)!
-        }
-    }
-
-    access(all) view fun getContractViews(resourceType: Type?): [Type] {
-        return [
-            Type<MetadataViews.NFTCollectionData>(),
-            Type<MetadataViews.NFTCollectionDisplay>()
-        ]
-    }
-
-    access(all) fun resolveContractView(resourceType: Type?, viewType: Type): AnyStruct? {
-        if resourceType == nil {
-            return nil
-        }
-
-        let rt = resourceType!
-        let segments = rt.identifier.split(separator: ".") 
-        let pathIdentifier = StringUtils.join([segments[2], segments[1]], "_")
-
-        let addr = AddressUtils.parseAddress(rt)!
-        let acct = getAccount(addr)
-        
-        switch viewType {
-            case Type<MetadataViews.NFTCollectionData>():
-                let segments = rt.identifier.split(separator: ".") 
-                let pathIdentifier = StringUtils.join([segments[2], segments[1]], "_")
-
-                return MetadataViews.NFTCollectionData(
-                    storagePath: StoragePath(identifier: pathIdentifier)!,
-                    publicPath: PublicPath(identifier: pathIdentifier)!,
-                    publicCollection: Type<&{NonFungibleToken.Collection}>(),
-                    publicLinkedType: Type<&{NonFungibleToken.Collection}>(),
-                    createEmptyCollectionFunction: fun(): @{NonFungibleToken.Collection} {
-                        let addr = AddressUtils.parseAddress(rt)!
-                        let c = getAccount(addr).contracts.borrow<&{BaseNFTVars}>(name: segments[2])!
-                        return <- c.createEmptyCollection(nftType: rt)
-                    }
-                )
-            case Type<MetadataViews.NFTCollectionDisplay>():
-                let c = getAccount(addr).contracts.borrow<&{BaseNFTVars}>(name: segments[2])!
-                let md = c.MetadataCap.borrow()
-                if md == nil {
-                    return nil
-                }
-
-                return md!.collectionInfo.collectionDisplay
-            case Type<FlowtyDrops.DropResolver>():
-                return FlowtyDrops.DropResolver(cap: acct.capabilities.get<&{FlowtyDrops.ContainerPublic}>(FlowtyDrops.ContainerPublicPath))
-        }
-
-        return nil
     }
 
     access(all) fun createEmptyCollection(nftType: Type): @{NonFungibleToken.Collection}

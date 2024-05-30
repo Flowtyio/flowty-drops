@@ -6,6 +6,10 @@
     "testnet": "access.devnet.nodes.onflow.org:9000"
   },
   "accounts": {
+    "temp": {
+      "address": "0xf3fcd2c1a78f5eee",
+      "key": "184e8b46cff5f9f19e4ebb4904739e99f3950fbdafc40247e665a0434f505c86"
+    },
     "emulator-account": {
       "address": "f8d6e0586b0a20c7",
       "key": {
@@ -59,6 +63,36 @@
     }
   },
   "contracts": {
+    "BaseCollection": {
+      "source": "./contracts/nft/BaseCollection.cdc",
+      "aliases": {
+        "testing": "0x0000000000000006"
+      }
+    },
+    "ContractFactoryTemplate": {
+      "source": "./contracts/nft/ContractFactoryTemplate.cdc",
+      "aliases": {
+        "testing": "0x0000000000000006"
+      }
+    },
+    "ContractFactory": {
+      "source": "./contracts/nft/ContractFactory.cdc",
+      "aliases": {
+        "testing": "0x0000000000000006"
+      }
+    },
+    "OpenEditionTemplate": {
+      "source": "./contracts/nft/OpenEditionTemplate.cdc",
+      "aliases": {
+        "testing": "0x0000000000000006"
+      }
+    },
+    "UniversalCollection": {
+      "source": "./contracts/nft/UniversalCollection.cdc",
+      "aliases": {
+        "testing": "0x0000000000000006"
+      }
+    },
     "BaseNFT": {
       "source": "./contracts/nft/BaseNFT.cdc",
       "aliases": {
@@ -73,6 +107,12 @@
     },
     "NFTMetadata": {
       "source": "./contracts/nft/NFTMetadata.cdc",
+      "aliases": {
+        "testing": "0x0000000000000006"
+      }
+    },
+    "FlowtyMinters": {
+      "source": "./contracts/FlowtyMinters.cdc",
       "aliases": {
         "testing": "0x0000000000000006"
       }
@@ -117,12 +157,6 @@
       "source": "./contracts/nft/OpenEditionNFT.cdc",
       "aliases": {
         "testing": "0x0000000000000007"
-      }
-    },
-    "ExampleToken": {
-      "source": "./contracts/standard/ExampleToken.cdc",
-      "aliases": {
-        "testing": "0x0000000000000008"
       }
     },
     "NonFungibleToken": {
@@ -212,9 +246,15 @@
   "deployments": {
     "emulator": {
       "emulator-account": [
+        "ContractFactoryTemplate",
+        "ContractFactory",
+        "OpenEditionTemplate",
         "NFTMetadata",
+        "FlowtyMinters",
         "BaseNFTVars",
         "BaseNFT",
+        "BaseCollection",
+        "UniversalCollection",
         "FlowtyDrops",
         "FlowtySwitchers",
         "FlowtyAddressVerifiers",
@@ -225,7 +265,6 @@
         "NonFungibleToken",
         "ViewResolver",
         "MetadataViews",
-        "ExampleToken",
         "Burner",
         "ArrayUtils",
         "StringUtils",

@@ -11,19 +11,15 @@
 import "NonFungibleToken"
 import "MetadataViews"
 import "ViewResolver"
-import "FungibleToken"
-import "FlowToken"
 
 import "FlowtyDrops"
-import "FlowtySwitchers"
-import "FlowtyAddressVerifiers"
-import "FlowtyPricers"
-import "DropFactory"
 import "BaseNFT"
 import "BaseNFTVars"
 import "NFTMetadata"
+import "UniversalCollection"
+import "BaseCollection"
 
-access(all) contract OpenEditionNFT: NonFungibleToken, BaseNFT, BaseNFTVars {
+access(all) contract OpenEditionNFT: BaseNFTVars, BaseCollection {
     access(all) var MetadataCap: Capability<&NFTMetadata.Container>
     access(all) var totalSupply: UInt64
 
@@ -36,50 +32,16 @@ access(all) contract OpenEditionNFT: NonFungibleToken, BaseNFT, BaseNFTVars {
             self.id = OpenEditionNFT.totalSupply
             self.metadataID = 0
         }
-
-        access(all) fun createEmptyCollection(): @{NonFungibleToken.Collection} {
-            return <- create Collection()
-        }
     }
 
     access(all) resource NFTMinter: FlowtyDrops.Minter {
-        access(all) fun mint(payment: @{FungibleToken.Vault}, amount: Int, phase: &FlowtyDrops.Phase, data: {String: AnyStruct}): @[{NonFungibleToken.NFT}] {
-            switch(payment.getType()) {
-                case Type<@FlowToken.Vault>():
-                    OpenEditionNFT.account.storage.borrow<&{FungibleToken.Receiver}>(from: /storage/flowTokenVault)!.deposit(from: <-payment)
-                    break
-                default:
-                    panic("unsupported payment token type")
-            }
-
-            let nfts: @[{NonFungibleToken.NFT}] <- []
-
-            var count = 0
-            while count < amount {
-                count = count + 1
-                nfts.append(<- create NFT())
-            }
-
-            return <- nfts
-        }
-    }
-
-    access(all) resource Collection: BaseNFT.Collection {
-        access(all) var ownedNFTs: @{UInt64: {NonFungibleToken.NFT}}
-        access(all) var nftType: Type
-
-        access(all) fun createEmptyCollection(): @{NonFungibleToken.Collection} {
-            return <- create Collection()
-        }
-
-        init () {
-            self.ownedNFTs <- {}
-            self.nftType = Type<@NFT>()
+        access(contract) fun createNextNFT(): @{NonFungibleToken.NFT} {
+            return <- create NFT()
         }
     }
 
     access(all) fun createEmptyCollection(nftType: Type): @{NonFungibleToken.Collection} {
-        return <- create Collection()
+        return <- UniversalCollection.createCollection(nftType: Type<@NFT>())
     }
 
     init() {
