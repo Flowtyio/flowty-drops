@@ -5,10 +5,14 @@ import "NFTMetadata"
 import "FlowtyDrops"
 import "AddressUtils"
 import "StringUtils"
-import "BaseNFTVars"
 
 access(all) contract interface BaseCollection: ViewResolver {
-        // The base collection is an interface that attmepts to take more boilerplate
+    access(all) var MetadataCap: Capability<&NFTMetadata.Container>
+    access(all) var totalSupply: UInt64
+
+    access(all) fun createEmptyCollection(nftType: Type): @{NonFungibleToken.Collection}
+
+    // The base collection is an interface that attmepts to take more boilerplate
     // off of NFT-standard compliant definitions.
     access(all) resource interface Collection: NonFungibleToken.Collection {
         access(all) var ownedNFTs: @{UInt64: {NonFungibleToken.NFT}}
@@ -72,12 +76,12 @@ access(all) contract interface BaseCollection: ViewResolver {
                     publicLinkedType: Type<&{NonFungibleToken.Collection}>(),
                     createEmptyCollectionFunction: fun(): @{NonFungibleToken.Collection} {
                         let addr = AddressUtils.parseAddress(rt)!
-                        let c = getAccount(addr).contracts.borrow<&{BaseNFTVars}>(name: segments[2])!
+                        let c = getAccount(addr).contracts.borrow<&{BaseCollection}>(name: segments[2])!
                         return <- c.createEmptyCollection(nftType: rt)
                     }
                 )
             case Type<MetadataViews.NFTCollectionDisplay>():
-                let c = getAccount(addr).contracts.borrow<&{BaseNFTVars}>(name: segments[2])!
+                let c = getAccount(addr).contracts.borrow<&{BaseCollection}>(name: segments[2])!
                 let md = c.MetadataCap.borrow()
                 if md == nil {
                     return nil

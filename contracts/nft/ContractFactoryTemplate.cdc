@@ -4,10 +4,9 @@ import "ViewResolver"
 
 import "FlowtyDrops"
 import "BaseNFT"
-import "BaseNFTVars"
+import "BaseCollection"
 import "NFTMetadata"
 import "UniversalCollection"
-import "BaseCollection"
 
 import "AddressUtils"
 
@@ -21,7 +20,7 @@ access(all) contract interface ContractFactoryTemplate {
             "ViewResolver": AddressUtils.parseAddress(Type<&{ViewResolver}>())!,
             "FlowtyDrops": AddressUtils.parseAddress(Type<&FlowtyDrops>())!,
             "BaseNFT": AddressUtils.parseAddress(Type<&{BaseNFT}>())!,
-            "BaseNFTVars": AddressUtils.parseAddress(Type<&{BaseNFTVars}>())!,
+            "BaseCollection": AddressUtils.parseAddress(Type<&{BaseCollection}>())!,
             "NFTMetadata": AddressUtils.parseAddress(Type<&NFTMetadata>())!,
             "UniversalCollection": AddressUtils.parseAddress(Type<&UniversalCollection>())!,
             "BaseCollection": AddressUtils.parseAddress(Type<&{BaseCollection}>())!,

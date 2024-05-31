@@ -3,7 +3,7 @@ import "StringUtils"
 import "AddressUtils"
 import "ViewResolver"
 import "MetadataViews"
-import "BaseNFTVars"
+import "BaseCollection"
 import "FlowtyDrops"
 import "NFTMetadata"
 import "UniversalCollection"
@@ -48,7 +48,7 @@ access(all) contract interface BaseNFT: ViewResolver {
             let rt = self.getType()
             let segments = rt.identifier.split(separator: ".")
             let addr = AddressUtils.parseAddress(rt)!
-            let tmp = getAccount(addr).contracts.borrow<&{BaseNFTVars}>(name: segments[2])
+            let tmp = getAccount(addr).contracts.borrow<&{BaseCollection}>(name: segments[2])
             if tmp == nil {
                 return nil
             }
@@ -70,7 +70,7 @@ access(all) contract interface BaseNFT: ViewResolver {
                         publicLinkedType: Type<&{NonFungibleToken.Collection}>(),
                         createEmptyCollectionFunction: fun(): @{NonFungibleToken.Collection} {
                             let addr = AddressUtils.parseAddress(rt)!
-                            let c = getAccount(addr).contracts.borrow<&{BaseNFTVars}>(name: segments[2])!
+                            let c = getAccount(addr).contracts.borrow<&{BaseCollection}>(name: segments[2])!
                             return <- c.createEmptyCollection(nftType: rt)
                         }
                     )
@@ -104,6 +104,4 @@ access(all) contract interface BaseNFT: ViewResolver {
             return <- UniversalCollection.createCollection(nftType: self.getType())
         }
     }
-
-    access(all) fun createEmptyCollection(nftType: Type): @{NonFungibleToken.Collection}
 }

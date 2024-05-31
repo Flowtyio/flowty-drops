@@ -7,8 +7,6 @@ access(all) contract FlowtyDrops {
     access(all) let ContainerStoragePath: StoragePath
     access(all) let ContainerPublicPath: PublicPath
 
-    access(all) let MinterStoragePath: StoragePath
-
     access(all) event DropAdded(address: Address, id: UInt64, name: String, description: String, imageUrl: String, start: UInt64?, end: UInt64?)
     access(all) event Minted(address: Address, dropID: UInt64, phaseID: UInt64, nftID: UInt64, nftType: String)
     access(all) event PhaseAdded(dropID: UInt64, dropAddress: Address, id: UInt64, index: Int, switcherType: String, pricerType: String, addressVerifierType: String)
@@ -415,6 +413,12 @@ access(all) contract FlowtyDrops {
         return <- create Container()
     }
 
+    access(all) fun getMinterStoragePath(type: Type): StoragePath {
+        let segments = type.identifier.split(separator: ".")
+        let identifier = "FlowtyDrops_Minter_".concat(segments[1]).concat(segments[2])
+        return StoragePath(identifier: identifier)!
+    }
+
     init() {
         let identifier = "FlowtyDrops_".concat(self.account.address.toString())
         let containerIdentifier = identifier.concat("_Container")
@@ -422,7 +426,5 @@ access(all) contract FlowtyDrops {
 
         self.ContainerStoragePath = StoragePath(identifier: containerIdentifier)!
         self.ContainerPublicPath = PublicPath(identifier: containerIdentifier)!
-
-        self.MinterStoragePath = StoragePath(identifier: minterIdentifier)!
     }
 }

@@ -63,6 +63,24 @@
     }
   },
   "contracts": {
+    "ContractInitializer": {
+      "source": "./contracts/initializers/ContractInitializer.cdc",
+      "aliases": {
+        "testing": "0x0000000000000006"
+      }
+    },
+    "ContractBorrower": {
+      "source": "./contracts/initializers/ContractBorrower.cdc",
+      "aliases": {
+        "testing": "0x0000000000000006"
+      }
+    },
+    "OpenEditionInitializer": {
+      "source": "./contracts/initializers/OpenEditionInitializer.cdc",
+      "aliases": {
+        "testing": "0x0000000000000006"
+      }
+    },
     "BaseCollection": {
       "source": "./contracts/nft/BaseCollection.cdc",
       "aliases": {
@@ -99,20 +117,8 @@
         "testing": "0x0000000000000006"
       }
     },
-    "BaseNFTVars": {
-      "source": "./contracts/nft/BaseNFTVars.cdc",
-      "aliases": {
-        "testing": "0x0000000000000006"
-      }
-    },
     "NFTMetadata": {
       "source": "./contracts/nft/NFTMetadata.cdc",
-      "aliases": {
-        "testing": "0x0000000000000006"
-      }
-    },
-    "FlowtyMinters": {
-      "source": "./contracts/FlowtyMinters.cdc",
       "aliases": {
         "testing": "0x0000000000000006"
       }
@@ -246,12 +252,13 @@
   "deployments": {
     "emulator": {
       "emulator-account": [
+        "ContractInitializer",
+        "OpenEditionInitializer",
+        "ContractBorrower",
         "ContractFactoryTemplate",
         "ContractFactory",
         "OpenEditionTemplate",
         "NFTMetadata",
-        "FlowtyMinters",
-        "BaseNFTVars",
         "BaseNFT",
         "BaseCollection",
         "UniversalCollection",
@@ -261,14 +268,22 @@
         "FlowtyPricers",
         "DropFactory",
         "DropTypes",
-        "OpenEditionNFT",
         "NonFungibleToken",
         "ViewResolver",
         "MetadataViews",
         "Burner",
         "ArrayUtils",
         "StringUtils",
-        "AddressUtils"
+        "AddressUtils",
+        {
+          "name": "OpenEditionNFT",
+          "args": [
+            {
+              "type": "Dictionary",
+              "value": []
+            }
+          ]
+        }
       ],
       "emulator-ft": [
         "FungibleToken",

@@ -4,6 +4,9 @@ import "NonFungibleToken"
 import "FlowToken"
 import "FlowtyDrops"
 import "OpenEditionNFT"
+import "NFTMetadata"
+import "MetadataViews"
+import "OpenEditionInitializer"
 
 // Helper functions. All of the following were taken from
 // https://github.com/onflow/Offers/blob/fd380659f0836e5ce401aa99a2975166b2da5cb0/lib/cadence/test/Offers.cdc
@@ -92,9 +95,11 @@ access(all) fun deployAll() {
     deploy("AddressUtils", "../node_modules/@flowtyio/flow-contracts/contracts/flow-utils/AddressUtils.cdc", [])
 
     deploy("FlowtyDrops", "../contracts/FlowtyDrops.cdc", [])
-
     deploy("NFTMetadata", "../contracts/nft/NFTMetadata.cdc", [])
-    deploy("BaseNFTVars", "../contracts/nft/BaseNFTVars.cdc", [])
+    deploy("ContractInitializer", "../contracts/initializers/ContractInitializer.cdc", [])
+    deploy("ContractBorrower", "../contracts/initializers/ContractBorrower.cdc", [])
+    deploy("OpenEditionInitializer", "../contracts/initializers/OpenEditionInitializer.cdc", [])
+
     deploy("BaseCollection", "../contracts/nft/BaseCollection.cdc", [])
     deploy("UniversalCollection", "../contracts/nft/UniversalCollection.cdc", [])
     deploy("BaseNFT", "../contracts/nft/BaseNFT.cdc", [])
@@ -102,13 +107,60 @@ access(all) fun deployAll() {
     deploy("FlowtyPricers", "../contracts/FlowtyPricers.cdc", [])
     deploy("FlowtyAddressVerifiers", "../contracts/FlowtyAddressVerifiers.cdc", [])
     deploy("DropFactory", "../contracts/DropFactory.cdc", [])
-    deploy("FlowtyMinters", "../contracts/FlowtyMinters.cdc", [])
 
     // 0x8
     deploy("DropTypes", "../contracts/DropTypes.cdc", [])
 
     // 0x7
-    deploy("OpenEditionNFT", "../contracts/nft/OpenEditionNFT.cdc", [])
+    // OpenEditionNFT requires some setup to be able to actually run fully.
+    // its input arguments are: params: {String: AnyStruct}, initializerIdentifier: String
+    // params needs to have an instance of NFTMetadata.Data in the "data" key,
+    // and an instance of NFTMetadata.CollectionInfo in the "collectionInfo" key
+    // 
+    // the initializer is OpenEditionInitializer
+    let collectionInfo = NFTMetadata.CollectionInfo(
+        collectionDisplay: MetadataViews.NFTCollectionDisplay(
+            name: "The Open Edition Collection",
+            description: "This collection is used as an example to help you develop your next Open Edition Flow NFT",
+            externalURL: MetadataViews.ExternalURL("https://flowty.io"),
+            squareImage: MetadataViews.Media(
+                file: MetadataViews.IPFSFile(
+                    cid: "QmWWLhnkPR3ejavNtzeJcdG9fwcBHKwBVEP4pZ9rGbdHEM",
+                    path: nil
+                ),
+                mediaType: "image/png"
+            ),
+            bannerImage: MetadataViews.Media(
+                file: MetadataViews.IPFSFile(
+                    cid: "QmYD8e5s59qYFFQXref1YzyqW1WKYUMPxfqVDEis2s23BF",
+                    path: nil
+                ),
+                mediaType: "image/png"
+            ),
+            socials: {
+                "twitter": MetadataViews.ExternalURL("https://twitter.com/flowty_io")
+            }
+        )
+    )
+
+    let data = NFTMetadata.Metadata(
+        name: "Fluid",
+        description: "This is a description",
+        thumbnail: MetadataViews.IPFSFile(
+            cid: "QmWWLhnkPR3ejavNtzeJcdG9fwcBHKwBVEP4pZ9rGbdHEM",
+            path: nil
+        ),
+        traits: nil,
+        editions: nil,
+        externalURL: nil,
+        data: {}
+    )
+
+    let params: {String: AnyStruct} = {
+        "collectionInfo": collectionInfo,
+        "data": data
+    }
+    deploy("OpenEditionNFT", "../contracts/nft/OpenEditionNFT.cdc", [params])
 }
 
 access(all) fun deploy(_ name: String, _ path: String, _ arguments: [AnyStruct]) {

@@ -10,13 +10,13 @@ access(all) contract OpenEditionTemplate: ContractFactoryTemplate {
             "ViewResolver",
             "FlowtyDrops",
             "BaseNFT",
-            "BaseNFTVars",
+            "BaseCollection",
             "NFTMetadata",
             "UniversalCollection",
             "BaseCollection",
             "AddressUtils"
         ]).concat("\n\n"
-        .concat("access(all) contract ").concat(name).concat(": BaseNFTVars, BaseCollection {\n")
+        .concat("access(all) contract ").concat(name).concat(": BaseCollection {\n")
         .concat("    access(all) var MetadataCap: Capability<&NFTMetadata.Container>\n")
         .concat("    access(all) var totalSupply: UInt64\n")
         .concat("\n\n")
@@ -54,8 +54,8 @@ access(all) contract OpenEditionTemplate: ContractFactoryTemplate {
         .concat("        caps.ownerCap.borrow()!.addMetadata(id: 0, data: data)\n")
         .concat("\n\n")
         .concat("        let minter <- create NFTMinter()\n")
-        .concat("        self.account.storage.save(<-minter, to: FlowtyDrops.MinterStoragePath)\n")
-        .concat("        self.account.capabilities.storage.issue<&{FlowtyDrops.Minter}>(FlowtyDrops.MinterStoragePath)\n")
+        .concat("        self.account.storage.save(<-minter, to: FlowtyDrops.getMinterStoragePath(type: self.getType()))\n")
+        .concat("        self.account.capabilities.storage.issue<&{FlowtyDrops.Minter}>(FlowtyDrops.getMinterStoragePath(type: self.getType()))\n")
         .concat("    }\n")
         .concat("}\n")
 

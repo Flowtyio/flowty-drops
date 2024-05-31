@@ -2,9 +2,6 @@ import "NonFungibleToken"
 import "MetadataViews"
 
 access(all) contract NFTMetadata {
-    access(all) let StoragePath: StoragePath
-    access(all) let PublicPath: PublicPath
-
     access(all) entitlement Owner
 
     access(all) event MetadataFrozen(uuid: UInt64, owner: Address?)
@@ -80,7 +77,7 @@ access(all) contract NFTMetadata {
         }
     }
 
-    access(all) struct InitializeCaps {
+    access(all) struct InitializedCaps {
         access(all) let pubCap: Capability<&Container>
         access(all) let ownerCap: Capability<auth(Owner) &Container>
 
@@ -94,12 +91,13 @@ access(all) contract NFTMetadata {
         return <- create Container(collectionInfo: collectionInfo)
     }
 
-    access(all) fun initialize(acct: auth(SaveValue, IssueStorageCapabilityController, PublishCapability) &Account, collectionInfo: CollectionInfo): InitializeCaps {
+    access(all) fun initialize(acct: auth(Storage, Capabilities) &Account, collectionInfo: CollectionInfo, collectionType: Type): InitializedCaps {
+        let storagePath = self.getCollectionStoragePath(type: collectionType)
         let container <- self.createContainer(collectionInfo: collectionInfo)
-        acct.storage.save(<-container, to: self.StoragePath)
-        let pubCap = acct.capabilities.storage.issue<&Container>(self.StoragePath)
-        let ownerCap = acct.capabilities.storage.issue<auth(Owner) &Container>(self.StoragePath)
-        return InitializeCaps(pubCap: pubCap, ownerCap: ownerCap)
+        acct.storage.save(<-container, to: storagePath)
+        let pubCap = acct.capabilities.storage.issue<&Container>(storagePath)
+        let ownerCap = acct.capabilities.storage.issue<auth(Owner) &Container>(storagePath)
+        return InitializedCaps(pubCap: pubCap, ownerCap: ownerCap)
     }
 
     access(all) struct UriFile: MetadataViews.File {
@@ -114,9 +112,8 @@ access(all) contract NFTMetadata {
         }
     }
 
-    init() {
-        let identifier = "NFTMetadata_".concat(self.account.address.toString())
-        self.StoragePath = StoragePath(identifier: identifier)!
-        self.PublicPath = PublicPath(identifier: identifier)!
+    access(all) fun getCollectionStoragePath(type: Type): StoragePath {
+        let segments = type.identifier.split(separator: ".")
+        return StoragePath(identifier: "NFTMetadataContainer_".concat(segments[2]).concat("_").concat(segments[1]))!
     }
 }
