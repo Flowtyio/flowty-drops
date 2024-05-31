@@ -7,11 +7,12 @@ import "BaseNFT"
 import "BaseCollection"
 import "NFTMetadata"
 import "UniversalCollection"
+import "ContractBorrower"
 
 import "AddressUtils"
 
 access(all) contract interface ContractFactoryTemplate {
-    access(all) fun createContract(acct: auth(AddContract) &Account, name: String, params: {String: AnyStruct})
+    access(all) fun createContract(acct: auth(AddContract) &Account, name: String, params: {String: AnyStruct}, initializeIdentifier: String)
 
     access(all) fun getContractAddresses(): {String: Address} {
         let d: {String: Address} = {
@@ -24,7 +25,8 @@ access(all) contract interface ContractFactoryTemplate {
             "NFTMetadata": AddressUtils.parseAddress(Type<&NFTMetadata>())!,
             "UniversalCollection": AddressUtils.parseAddress(Type<&UniversalCollection>())!,
             "BaseCollection": AddressUtils.parseAddress(Type<&{BaseCollection}>())!,
-            "AddressUtils": AddressUtils.parseAddress(Type<&AddressUtils>())!
+            "AddressUtils": AddressUtils.parseAddress(Type<&AddressUtils>())!,
+            "ContractBorrower": AddressUtils.parseAddress(Type<ContractBorrower>())!
         }
 
         return d

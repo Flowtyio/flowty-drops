@@ -2,9 +2,10 @@ import "ContractFactory"
 import "ContractFactoryTemplate"
 import "OpenEditionTemplate"
 import "MetadataViews"
+import "OpenEditionInitializer"
 
 transaction(name: String, params: {String: AnyStruct}) {
     prepare(acct: auth(AddContract) &Account) {
-        ContractFactory.createContract(templateType: Type<OpenEditionTemplate>(), acct: acct, name: name, params: params)
+        ContractFactory.createContract(templateType: Type<OpenEditionTemplate>(), acct: acct, name: name, params: params, initializeIdentifier: Type<OpenEditionInitializer>().identifier)
     }
 }
