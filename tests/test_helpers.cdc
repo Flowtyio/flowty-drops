@@ -160,7 +160,7 @@ access(all) fun deployAll() {
         "collectionInfo": collectionInfo,
         "data": data
     }
-    deploy("OpenEditionNFT", "../contracts/nft/OpenEditionNFT.cdc", [params])
+    deploy("OpenEditionNFT", "../contracts/nft/OpenEditionNFT.cdc", [params, Type<OpenEditionInitializer>().identifier])
 }
 
 access(all) fun deploy(_ name: String, _ path: String, _ arguments: [AnyStruct]) {

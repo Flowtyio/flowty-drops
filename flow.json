@@ -274,16 +274,7 @@
         "Burner",
         "ArrayUtils",
         "StringUtils",
-        "AddressUtils",
-        {
-          "name": "OpenEditionNFT",
-          "args": [
-            {
-              "type": "Dictionary",
-              "value": []
-            }
-          ]
-        }
+        "AddressUtils"
       ],
       "emulator-ft": [
         "FungibleToken",

@@ -1,14 +1,10 @@
 import "NonFungibleToken"
-import "MetadataViews"
-import "ViewResolver"
-
 import "FlowtyDrops"
 import "BaseNFT"
 import "NFTMetadata"
 import "UniversalCollection"
 import "ContractBorrower"
 import "BaseCollection"
-import "OpenEditionInitializer"
 
 access(all) contract OpenEditionNFT: BaseCollection {
     access(all) var MetadataCap: Capability<&NFTMetadata.Container>
@@ -35,9 +31,9 @@ access(all) contract OpenEditionNFT: BaseCollection {
         return <- UniversalCollection.createCollection(nftType: Type<@NFT>())
     }
 
-    init(params: {String: AnyStruct}) {
+    init(params: {String: AnyStruct}, initializeIdentifier: String) {
         self.totalSupply = 0
-        self.MetadataCap = ContractBorrower.borrowInitializer(typeIdentifier: Type<OpenEditionInitializer>().identifier).initialize(contractAcct: self.account, params: params).pubCap
+        self.MetadataCap = ContractBorrower.borrowInitializer(typeIdentifier: initializeIdentifier).initialize(contractAcct: self.account, params: params).pubCap
 
         let minter <- create NFTMinter()
         self.account.storage.save(<-minter, to: FlowtyDrops.getMinterStoragePath(type: self.getType()))
