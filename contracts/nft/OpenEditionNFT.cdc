@@ -33,10 +33,11 @@ access(all) contract OpenEditionNFT: BaseCollection {
 
     init(params: {String: AnyStruct}, initializeIdentifier: String) {
         self.totalSupply = 0
-        self.MetadataCap = ContractBorrower.borrowInitializer(typeIdentifier: initializeIdentifier).initialize(contractAcct: self.account, params: params).pubCap
-
         let minter <- create NFTMinter()
         self.account.storage.save(<-minter, to: FlowtyDrops.getMinterStoragePath(type: self.getType()))
-        self.account.capabilities.storage.issue<&{FlowtyDrops.Minter}>(FlowtyDrops.getMinterStoragePath(type: self.getType()))
+        params["minterController"] = self.account.capabilities.storage.issue<&{FlowtyDrops.Minter}>(FlowtyDrops.getMinterStoragePath(type: self.getType()))
+
+        self.MetadataCap = ContractBorrower.borrowInitializer(typeIdentifier: initializeIdentifier).initialize(contractAcct: self.account, params: params).pubCap
+
     }
 }

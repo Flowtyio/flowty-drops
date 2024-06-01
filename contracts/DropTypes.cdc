@@ -207,7 +207,7 @@ access(all) contract DropTypes {
             minterCount: dropDetails.minters.keys.length,
             mintedByAddress: minter != nil ? dropDetails.minters[minter!] : nil,
             commissionRate: dropDetails.commissionRate,
-            nftType: dropDetails.nftType,
+            nftType: CompositeType(dropDetails.nftType)!,
             address: minter,
             phases: phaseSummaries
         )
@@ -267,7 +267,7 @@ access(all) contract DropTypes {
                 minterCount: dropDetails.minters.keys.length,
                 mintedByAddress: minter != nil ? dropDetails.minters[minter!] : nil,
                 commissionRate: dropDetails.commissionRate,
-                nftType: dropDetails.nftType,
+                nftType: CompositeType(dropDetails.nftType)!,
                 address: minter,
                 phases: phaseSummaries
             ))

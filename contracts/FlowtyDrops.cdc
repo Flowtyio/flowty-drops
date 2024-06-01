@@ -37,7 +37,7 @@ access(all) contract FlowtyDrops {
         access(all) event ResourceDestroyed(
             uuid: UInt64 = self.uuid,
             minterAddress: Address = self.minterCap.address,
-            nftType: String = self.details.nftType.identifier,
+            nftType: String = self.details.nftType,
             totalMinted: Int = self.details.totalMinted
         )
 
@@ -58,6 +58,7 @@ access(all) contract FlowtyDrops {
         ): @{FungibleToken.Vault} {
             pre {
                 expectedType.isSubtype(of: Type<@{NonFungibleToken.NFT}>()): "expected type must be an NFT"
+                expectedType.identifier == self.details.nftType: "expected type does not match drop details type"
                 self.phases.length > phaseIndex: "phase index is too high"
                 receiverCap.check(): "receiver capability is not valid"
             }
@@ -190,7 +191,7 @@ access(all) contract FlowtyDrops {
         access(all) var totalMinted: Int
         access(all) var minters: {Address: Int}
         access(all) let commissionRate: UFix64
-        access(all) let nftType: Type
+        access(all) let nftType: String
 
         access(contract) fun addMinted(num: Int, addr: Address) {
             self.totalMinted = self.totalMinted + num
@@ -201,7 +202,7 @@ access(all) contract FlowtyDrops {
             self.minters[addr] = self.minters[addr]! + num
         }
 
-        init(display: MetadataViews.Display, medias: MetadataViews.Medias?, commissionRate: UFix64, nftType: Type) {
+        init(display: MetadataViews.Display, medias: MetadataViews.Medias?, commissionRate: UFix64, nftType: String) {
             self.display = display
             self.medias = medias
             self.totalMinted = 0

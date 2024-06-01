@@ -13,14 +13,14 @@ access(all) contract FlowtyPricers {
     */
     access(all) struct FlatPrice: FlowtyDrops.Pricer {
         access(all) var price: UFix64
-        access(all) let paymentTokenType: Type
+        access(all) let paymentTokenType: String
 
         access(all) view fun getPrice(num: Int, paymentTokenType: Type, minter: Address?): UFix64 {
             return self.price * UFix64(num)
         }
 
         access(all) view fun getPaymentTypes(): [Type] {
-            return [self.paymentTokenType]
+            return [CompositeType(self.paymentTokenType)!]
         }
 
         access(Mutate) fun setPrice(price: UFix64) {
@@ -29,7 +29,7 @@ access(all) contract FlowtyPricers {
 
         init(price: UFix64, paymentTokenType: Type) {
             self.price = price
-            self.paymentTokenType = paymentTokenType
+            self.paymentTokenType = paymentTokenType.identifier
         }
     }
 
