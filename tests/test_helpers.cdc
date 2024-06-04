@@ -4,6 +4,9 @@ import "NonFungibleToken"
 import "FlowToken"
 import "FlowtyDrops"
 import "OpenEditionNFT"
+import "NFTMetadata"
+import "MetadataViews"
+import "OpenEditionInitializer"
 
 // Helper functions. All of the following were taken from
 // https://github.com/onflow/Offers/blob/fd380659f0836e5ce401aa99a2975166b2da5cb0/lib/cadence/test/Offers.cdc
@@ -87,8 +90,20 @@ access(all) let openEditionAccount = Test.getAccount(Account0x7)
 access(all) let exampleTokenAccount = Test.getAccount(Account0x8)
 
 access(all) fun deployAll() {
-    // 0x6
+    deploy("ArrayUtils", "../node_modules/@flowtyio/flow-contracts/contracts/flow-utils/ArrayUtils.cdc", [])
+    deploy("StringUtils", "../node_modules/@flowtyio/flow-contracts/contracts/flow-utils/StringUtils.cdc", [])
+    deploy("AddressUtils", "../node_modules/@flowtyio/flow-contracts/contracts/flow-utils/AddressUtils.cdc", [])
+
+    deploy("ContractManager", "../contracts/ContractManager.cdc", [])
     deploy("FlowtyDrops", "../contracts/FlowtyDrops.cdc", [])
+    deploy("NFTMetadata", "../contracts/nft/NFTMetadata.cdc", [])
+    deploy("ContractInitializer", "../contracts/initializers/ContractInitializer.cdc", [])
+    deploy("ContractBorrower", "../contracts/initializers/ContractBorrower.cdc", [])
+    deploy("OpenEditionInitializer", "../contracts/initializers/OpenEditionInitializer.cdc", [])
+
+    deploy("BaseCollection", "../contracts/nft/BaseCollection.cdc", [])
+    deploy("UniversalCollection", "../contracts/nft/UniversalCollection.cdc", [])
+    deploy("BaseNFT", "../contracts/nft/BaseNFT.cdc", [])
     deploy("FlowtySwitchers", "../contracts/FlowtySwitchers.cdc", [])
     deploy("FlowtyPricers", "../contracts/FlowtyPricers.cdc", [])
     deploy("FlowtyAddressVerifiers", "../contracts/FlowtyAddressVerifiers.cdc", [])
@@ -98,7 +113,55 @@ access(all) fun deployAll() {
     deploy("DropTypes", "../contracts/DropTypes.cdc", [])
 
     // 0x7
-    deploy("OpenEditionNFT", "../contracts/nft/OpenEditionNFT.cdc", [])
+    // OpenEditionNFT requires some setup to be able to actually run fully.
+    // its input arguments are: params: {String: AnyStruct}, initializerIdentifier: String
+    // params needs to have an instance of NFTMetadata.Data in the "data" key,
+    // and an instance of NFTMetadata.CollectionInfo in the "collectionInfo" key
+    // 
+    // the initializer is OpenEditionInitializer
+    let collectionInfo = NFTMetadata.CollectionInfo(
+        collectionDisplay: MetadataViews.NFTCollectionDisplay(
+            name: "The Open Edition Collection",
+            description: "This collection is used as an example to help you develop your next Open Edition Flow NFT",
+            externalURL: MetadataViews.ExternalURL("https://flowty.io"),
+            squareImage: MetadataViews.Media(
+                file: MetadataViews.IPFSFile(
+                    cid: "QmWWLhnkPR3ejavNtzeJcdG9fwcBHKwBVEP4pZ9rGbdHEM",
+                    path: nil
+                ),
+                mediaType: "image/png"
+            ),
+            bannerImage: MetadataViews.Media(
+                file: MetadataViews.IPFSFile(
+                    cid: "QmYD8e5s59qYFFQXref1YzyqW1WKYUMPxfqVDEis2s23BF",
+                    path: nil
+                ),
+                mediaType: "image/png"
+            ),
+            socials: {
+                "twitter": MetadataViews.ExternalURL("https://twitter.com/flowty_io")
+            }
+        )
+    )
+
+    let data = NFTMetadata.Metadata(
+        name: "Fluid",
+        description: "This is a description",
+        thumbnail: MetadataViews.IPFSFile(
+            cid: "QmWWLhnkPR3ejavNtzeJcdG9fwcBHKwBVEP4pZ9rGbdHEM",
+            path: nil
+        ),
+        traits: nil,
+        editions: nil,
+        externalURL: nil,
+        data: {}
+    )
+
+    let params: {String: AnyStruct} = {
+        "collectionInfo": collectionInfo,
+        "data": data
+    }
+    deploy("OpenEditionNFT", "../contracts/nft/OpenEditionNFT.cdc", [params, Type<OpenEditionInitializer>().identifier])
 }
 
 access(all) fun deploy(_ name: String, _ path: String, _ arguments: [AnyStruct]) {
@@ -116,8 +179,7 @@ access(all) fun getCurrentTime(): UFix64 {
 
 access(all) fun mintFromDrop(
     minter: Test.TestAccount,
-    contractAddress: Address,
-    contractName: String,
+    nftTypeIdentifier: String,
     numToMint: Int,
     totalCost: UFix64,
     paymentIdentifier: String,
@@ -129,8 +191,7 @@ access(all) fun mintFromDrop(
     commissionReceiver: Address
 ) {
     let args = [
-        contractAddress,
-        contractName,
+        nftTypeIdentifier,
         numToMint,
         totalCost,
         paymentIdentifier,
@@ -145,10 +206,9 @@ access(all) fun mintFromDrop(
 }
 
 access(all) fun getDropIDs(
-    contractAddress: Address,
-    contractName: String
+    nftTypeIdentifier: String
 ): [UInt64] {
-    return scriptExecutor("get_drop_ids.cdc", [contractAddress, contractName])! as! [UInt64]
+    return scriptExecutor("get_drop_ids.cdc", [nftTypeIdentifier])! as! [UInt64]
 }
 
 access(all) fun createEndlessOpenEditionDrop(
@@ -207,17 +267,17 @@ access(all) fun openEditionNftIdentifier(): String {
     return Type<@OpenEditionNFT.NFT>().identifier
 }
 
-access(all) fun hasDropPhaseStarted(contractAddress: Address, contractName: String, dropID: UInt64, phaseIndex: Int): Bool {
-    return scriptExecutor("has_phase_started.cdc", [contractAddress, contractName, dropID, phaseIndex])! as! Bool
+access(all) fun hasDropPhaseStarted(nftTypeIdentifier: String, dropID: UInt64, phaseIndex: Int): Bool {
+    return scriptExecutor("has_phase_started.cdc", [nftTypeIdentifier, dropID, phaseIndex])! as! Bool
 }
 
-access(all) fun hasDropPhaseEnded(contractAddress: Address, contractName: String, dropID: UInt64, phaseIndex: Int): Bool {
-    return scriptExecutor("has_phase_ended.cdc", [contractAddress, contractName, dropID, phaseIndex])! as! Bool
+access(all) fun hasDropPhaseEnded(nftTypeIdentifier: String, dropID: UInt64, phaseIndex: Int): Bool {
+    return scriptExecutor("has_phase_ended.cdc", [nftTypeIdentifier, dropID, phaseIndex])! as! Bool
 }
 
-access(all) fun canMintAtPhase(contractAddress: Address, contractName: String, dropID: UInt64, phaseIndex: Int, minter: Address, numToMint: Int, totalMinted: Int, paymentIdentifier: String): Bool {
+access(all) fun canMintAtPhase(nftTypeIdentifier: String, dropID: UInt64, phaseIndex: Int, minter: Address, numToMint: Int, totalMinted: Int, paymentIdentifier: String): Bool {
     return scriptExecutor("can_mint_at_phase.cdc", [
-        contractAddress, contractName, dropID, phaseIndex, minter, numToMint, totalMinted, paymentIdentifier
+        nftTypeIdentifier, dropID, phaseIndex, minter, numToMint, totalMinted, paymentIdentifier
     ])! as! Bool
 }
 

@@ -1,0 +1,192 @@
+[
+    {
+        "type": "Dictionary",
+        "value": [
+            {
+                "key": {
+                    "type": "String",
+                    "value": "dropDetails"
+                },
+                "value": {
+                    "type": "Struct",
+                    "value": {
+                        "id": "A.f8d6e0586b0a20c7.FlowtyDrops.DropDetails",
+                        "fields": [
+                            {
+                                "name": "display",
+                                "value": {
+                                    "type": "Struct",
+                                    "value": {
+                                        "id": "A.f8d6e0586b0a20c7.MetadataViews.Display",
+                                        "fields": [
+                                            {
+                                                "name": "name",
+                                                "value": {
+                                                    "type": "String",
+                                                    "value": "My First Drop"
+                                                }
+                                            },
+                                            {
+                                                "name": "description",
+                                                "value": {
+                                                    "type": "String",
+                                                    "value": "This is a description for my first drop"
+                                                }
+                                            },
+                                            {
+                                                "name": "thumbnail",
+                                                "value": {
+                                                    "type": "Struct",
+                                                    "value": {
+                                                        "id": "A.f8d6e0586b0a20c7.MetadataViews.IPFSFile",
+                                                        "fields": [
+                                                            {
+                                                                "name": "cid",
+                                                                "value": {
+                                                                    "type": "String",
+                                                                    "value": "QmWWLhnkPR3ejavNtzeJcdG9fwcBHKwBVEP4pZ9rGbdHEM"
+                                                                }
+                                                            },
+                                                            {
+                                                                "name": "path",
+                                                                "value": {
+                                                                    "type": "Optional",
+                                                                    "value": null
+                                                                }
+                                                            }
+                                                        ]
+                                                    }
+                                                }
+                                            }
+                                        ]
+                                    }
+                                }
+                            },
+                            {
+                                "name": "medias",
+                                "value": {
+                                    "type": "Optional",
+                                    "value": null
+                                }
+                            },
+                            {
+                                "name": "totalMinted",
+                                "value": {
+                                    "type": "Int",
+                                    "value": "0"
+                                }
+                            },
+                            {
+                                "name": "minters",
+                                "value": {
+                                    "type": "Dictionary",
+                                    "value": []
+                                }
+                            },
+                            {
+                                "name": "commissionRate",
+                                "value": {
+                                    "type": "UFix64",
+                                    "value": "0.05"
+                                }
+                            },
+                            {
+                                "name": "nftType",
+                                "value": {
+                                    "type": "String",
+                                    "value": "A.f8d6e0586b0a20c7.MyCollection.NFT"
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
+            {
+                "key": {
+                    "type": "String",
+                    "value": "phaseDetails"
+                },
+                "value": {
+                    "type": "Array",
+                    "value": [
+                        {
+                            "type": "Struct",
+                            "value": {
+                                "id": "A.f8d6e0586b0a20c7.FlowtyDrops.PhaseDetails",
+                                "fields": [
+                                    {
+                                        "name": "switcher",
+                                        "value": {
+                                            "type": "Struct",
+                                            "value": {
+                                                "id": "A.f8d6e0586b0a20c7.FlowtySwitchers.AlwaysOn",
+                                                "fields": []
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "name": "display",
+                                        "value": {
+                                            "type": "Optional",
+                                            "value": null
+                                        }
+                                    },
+                                    {
+                                        "name": "pricer",
+                                        "value": {
+                                            "type": "Struct",
+                                            "value": {
+                                                "id": "A.f8d6e0586b0a20c7.FlowtyPricers.FlatPrice",
+                                                "fields": [
+                                                    {
+                                                        "name": "price",
+                                                        "value": {
+                                                            "type": "UFix64",
+                                                            "value": "1.0"
+                                                        }
+                                                    },
+                                                    {
+                                                        "name": "paymentTokenType",
+                                                        "value": {
+                                                            "type": "String",
+                                                            "value": "A.0ae53cb6e3f42a79.FlowToken.Vault"
+                                                        }
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "name": "addressVerifier",
+                                        "value": {
+                                            "type": "Struct",
+                                            "value": {
+                                                "id": "A.f8d6e0586b0a20c7.FlowtyAddressVerifiers.AllowAll",
+                                                "fields": [
+                                                    {
+                                                        "name": "maxPerMint",
+                                                        "value": {
+                                                            "type": "Int",
+                                                            "value": "100"
+                                                        }
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "name": "data",
+                                        "value": {
+                                            "type": "Dictionary",
+                                            "value": []
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+]

@@ -2,12 +2,12 @@ import "ViewResolver"
 import "MetadataViews"
 import "NonFungibleToken"
 import "FungibleToken"
+import "AddressUtils"
 
 import "FlowtyDrops"
 
 transaction(
-    contractAddress: Address,
-    contractName: String,
+    nftTypeIdentifier: String,
     numToMint: Int,
     totalCost: UFix64,
     paymentIdentifier: String,
@@ -19,10 +19,15 @@ transaction(
     commissionAddress: Address
 ) {
     prepare(acct: auth(Capabilities, Storage) &Account) {
+        let nftType = CompositeType(nftTypeIdentifier) ?? panic("invalid nft type identifier")
+        let segments = nftTypeIdentifier.split(separator: ".")
+        let contractAddress = AddressUtils.parseAddress(nftType)!
+        let contractName = segments[2]
+
         let resolver = getAccount(contractAddress).contracts.borrow<&{ViewResolver}>(name: contractName)
             ?? panic("ViewResolver contract interface not found on contract address + name")
         
-        let collectionData = resolver.resolveContractView(resourceType: nil, viewType: Type<MetadataViews.NFTCollectionData>())! as! MetadataViews.NFTCollectionData
+        let collectionData = resolver.resolveContractView(resourceType: nftType, viewType: Type<MetadataViews.NFTCollectionData>())! as! MetadataViews.NFTCollectionData
         if acct.storage.borrow<&AnyResource>(from: collectionData.storagePath) == nil {
             acct.storage.save(<- collectionData.createEmptyCollection(), to: collectionData.storagePath)
 
@@ -43,7 +48,7 @@ transaction(
 
         let paymentVault <- vault.withdraw(amount: totalCost)
 
-        let dropResolver = resolver.resolveContractView(resourceType: nil, viewType: Type<FlowtyDrops.DropResolver>())! as! FlowtyDrops.DropResolver
+        let dropResolver = resolver.resolveContractView(resourceType: nftType, viewType: Type<FlowtyDrops.DropResolver>())! as! FlowtyDrops.DropResolver
         let dropContainer = dropResolver.borrowContainer()
             ?? panic("unable to borrow drop container")
 

@@ -1,13 +1,19 @@
 import "FlowtyDrops"
 import "ViewResolver"
+import "AddressUtils"
 
-access(all) fun main(contractAddress: Address, contractName: String): [UInt64] {
+access(all) fun main(nftTypeIdentifier: String): [UInt64] {
+    let nftType = CompositeType(nftTypeIdentifier) ?? panic("invalid nft type identifier")
+    let segments = nftTypeIdentifier.split(separator: ".")
+    let contractAddress = AddressUtils.parseAddress(nftType)!
+    let contractName = segments[2]
+
     let resolver = getAccount(contractAddress).contracts.borrow<&{ViewResolver}>(name: contractName)
     if resolver == nil {
         return []
     }
 
-    let tmp = resolver!.resolveContractView(resourceType: nil, viewType: Type<FlowtyDrops.DropResolver>())
+    let tmp = resolver!.resolveContractView(resourceType: nftType, viewType: Type<FlowtyDrops.DropResolver>())
     if tmp == nil {
         return []
     }

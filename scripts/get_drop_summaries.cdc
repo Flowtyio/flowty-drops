@@ -1,5 +1,5 @@
 import "DropTypes"
 
-access(all) fun main(contractAddress: Address, contractName: String, minter: Address?, quantity: Int?, paymentIdentifier: String?): [DropTypes.DropSummary] {
-    return DropTypes.getAllDropSummaries(contractAddress: contractAddress, contractName: contractName, minter: minter, quantity: quantity, paymentIdentifier: paymentIdentifier)
+access(all) fun main(nftTypeIdentifier: String, minter: Address?, quantity: Int?, paymentIdentifier: String?): [DropTypes.DropSummary] {
+    return DropTypes.getAllDropSummaries(nftTypeIdentifier: nftTypeIdentifier, minter: minter, quantity: quantity, paymentIdentifier: paymentIdentifier)
 }
