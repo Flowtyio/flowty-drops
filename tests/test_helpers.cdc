@@ -94,6 +94,7 @@ access(all) fun deployAll() {
     deploy("StringUtils", "../node_modules/@flowtyio/flow-contracts/contracts/flow-utils/StringUtils.cdc", [])
     deploy("AddressUtils", "../node_modules/@flowtyio/flow-contracts/contracts/flow-utils/AddressUtils.cdc", [])
 
+    deploy("ContractManager", "../contracts/ContractManager.cdc", [])
     deploy("FlowtyDrops", "../contracts/FlowtyDrops.cdc", [])
     deploy("NFTMetadata", "../contracts/nft/NFTMetadata.cdc", [])
     deploy("ContractInitializer", "../contracts/initializers/ContractInitializer.cdc", [])

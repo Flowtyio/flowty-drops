@@ -3,7 +3,7 @@ import "MetadataViews"
 import "NFTMetadata"
 
 access(all) contract OpenEditionTemplate: ContractFactoryTemplate {
-    access(all) fun createContract(acct: auth(AddContract) &Account, name: String, params: {String: AnyStruct}, initializeIdentifier: String) {
+    access(all) fun createContract(acct: auth(Contracts) &Account, name: String, params: {String: AnyStruct}, initializeIdentifier: String) {
         let code = self.generateImports(names: [
             "NonFungibleToken",
             "FlowtyDrops",

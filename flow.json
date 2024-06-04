@@ -63,6 +63,12 @@
     }
   },
   "contracts": {
+    "ContractManager": {
+      "source": "./contracts/ContractManager.cdc",
+      "aliases": {
+        "testing": "0x0000000000000006"
+      }
+    },
     "ContractInitializer": {
       "source": "./contracts/initializers/ContractInitializer.cdc",
       "aliases": {
@@ -252,6 +258,7 @@
   "deployments": {
     "emulator": {
       "emulator-account": [
+        "ContractManager",
         "ContractInitializer",
         "OpenEditionInitializer",
         "ContractBorrower",

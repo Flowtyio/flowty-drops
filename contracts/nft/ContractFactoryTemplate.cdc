@@ -12,7 +12,7 @@ import "ContractBorrower"
 import "AddressUtils"
 
 access(all) contract interface ContractFactoryTemplate {
-    access(all) fun createContract(acct: auth(AddContract) &Account, name: String, params: {String: AnyStruct}, initializeIdentifier: String)
+    access(all) fun createContract(acct: auth(Contracts) &Account, name: String, params: {String: AnyStruct}, initializeIdentifier: String)
 
     access(all) fun getContractAddresses(): {String: Address} {
         let d: {String: Address} = {

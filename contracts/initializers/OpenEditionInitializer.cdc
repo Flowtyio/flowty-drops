@@ -23,15 +23,11 @@ access(all) contract OpenEditionInitializer: ContractInitializer {
         self.account.storage.save(cap, to: StoragePath(identifier: "metadataAuthAccount_".concat(contractName))!)
 
         // do we have information to setup a drop as well?
-        log(params.keys)
         if params.containsKey("dropDetails") && params.containsKey("phaseDetails") && params.containsKey("minterController") {
             // extract expected keys
             let minterCap = params["minterController"]! as! Capability<&{FlowtyDrops.Minter}>
             let dropDetails = params["dropDetails"]! as! FlowtyDrops.DropDetails
             let phaseDetails = params["phaseDetails"]! as! [FlowtyDrops.PhaseDetails]
-
-            log(dropDetails)
-            log(phaseDetails)
 
             assert(minterCap.check(), message: "invalid minter capability")
 
@@ -55,8 +51,6 @@ access(all) contract OpenEditionInitializer: ContractInitializer {
             let container = acct.storage.borrow<auth(FlowtyDrops.Owner) &FlowtyDrops.Container>(from: FlowtyDrops.ContainerStoragePath)
                 ?? panic("drops container not found")
             container.addDrop(<- drop)
-        } else {
-            log("missing keys to setup drop")
         }
         
         return NFTMetadata.initialize(acct: acct, collectionInfo: collectionInfo, collectionType: self.getType())
