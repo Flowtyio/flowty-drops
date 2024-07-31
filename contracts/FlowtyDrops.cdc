@@ -1,12 +1,11 @@
 import "NonFungibleToken"
 import "FungibleToken"
 import "MetadataViews"
+import "AddressUtils"
 
 access(all) contract FlowtyDrops {
     access(all) let ContainerStoragePath: StoragePath
     access(all) let ContainerPublicPath: PublicPath
-
-    access(all) let MinterStoragePath: StoragePath
 
     access(all) event DropAdded(address: Address, id: UInt64, name: String, description: String, imageUrl: String, start: UInt64?, end: UInt64?)
     access(all) event Minted(address: Address, dropID: UInt64, phaseID: UInt64, nftID: UInt64, nftType: String)
@@ -38,7 +37,7 @@ access(all) contract FlowtyDrops {
         access(all) event ResourceDestroyed(
             uuid: UInt64 = self.uuid,
             minterAddress: Address = self.minterCap.address,
-            nftType: String = self.details.nftType.identifier,
+            nftType: String = self.details.nftType,
             totalMinted: Int = self.details.totalMinted
         )
 
@@ -59,6 +58,7 @@ access(all) contract FlowtyDrops {
         ): @{FungibleToken.Vault} {
             pre {
                 expectedType.isSubtype(of: Type<@{NonFungibleToken.NFT}>()): "expected type must be an NFT"
+                expectedType.identifier == self.details.nftType: "expected type does not match drop details type"
                 self.phases.length > phaseIndex: "phase index is too high"
                 receiverCap.check(): "receiver capability is not valid"
             }
@@ -83,6 +83,8 @@ access(all) contract FlowtyDrops {
             // mint the nfts
             let minter = self.minterCap.borrow() ?? panic("minter capability could not be borrowed")
             let mintedNFTs <- minter.mint(payment: <-withdrawn, amount: amount, phase: phase, data: data)
+            assert(phase.details.switcher.hasStarted() && !phase.details.switcher.hasEnded(), message: "phase is not active")
+            assert(mintedNFTs.length == amount, message: "incorrect number of items returned")
 
             // distribute to receiver
             let receiver = receiverCap.borrow() ?? panic("could not borrow receiver capability")
@@ -189,7 +191,7 @@ access(all) contract FlowtyDrops {
         access(all) var totalMinted: Int
         access(all) var minters: {Address: Int}
         access(all) let commissionRate: UFix64
-        access(all) let nftType: Type
+        access(all) let nftType: String
 
         access(contract) fun addMinted(num: Int, addr: Address) {
             self.totalMinted = self.totalMinted + num
@@ -200,7 +202,7 @@ access(all) contract FlowtyDrops {
             self.minters[addr] = self.minters[addr]! + num
         }
 
-        init(display: MetadataViews.Display, medias: MetadataViews.Medias?, commissionRate: UFix64, nftType: Type) {
+        init(display: MetadataViews.Display, medias: MetadataViews.Medias?, commissionRate: UFix64, nftType: String) {
             self.display = display
             self.medias = medias
             self.totalMinted = 0
@@ -310,12 +312,24 @@ access(all) contract FlowtyDrops {
     }
 
     access(all) resource interface Minter {
-        access(all) fun mint(payment: @{FungibleToken.Vault}, amount: Int, phase: &Phase, data: {String: AnyStruct}): @[{NonFungibleToken.NFT}] {
-            post {
-                phase.details.switcher.hasStarted() && !phase.details.switcher.hasEnded(): "phase is not active"
-                result.length == amount: "incorrect number of items returned"
+        access(contract) fun mint(payment: @{FungibleToken.Vault}, amount: Int, phase: &FlowtyDrops.Phase, data: {String: AnyStruct}): @[{NonFungibleToken.NFT}] {
+            let resourceAddress = AddressUtils.parseAddress(self.getType())!
+            let receiver = getAccount(resourceAddress).capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver).borrow()
+                ?? panic("invalid flow token receiver")
+            receiver.deposit(from: <-payment)
+
+            let nfts: @[{NonFungibleToken.NFT}] <- []
+
+            var count = 0
+            while count < amount {
+                count = count + 1
+                nfts.append(<- self.createNextNFT())
             }
+
+            return <- nfts
         }
+
+        access(contract) fun createNextNFT(): @{NonFungibleToken.NFT}
     }
     
     access(all) struct DropResolver {
@@ -400,6 +414,12 @@ access(all) contract FlowtyDrops {
         return <- create Container()
     }
 
+    access(all) fun getMinterStoragePath(type: Type): StoragePath {
+        let segments = type.identifier.split(separator: ".")
+        let identifier = "FlowtyDrops_Minter_".concat(segments[1]).concat(segments[2])
+        return StoragePath(identifier: identifier)!
+    }
+
     init() {
         let identifier = "FlowtyDrops_".concat(self.account.address.toString())
         let containerIdentifier = identifier.concat("_Container")
@@ -407,7 +427,5 @@ access(all) contract FlowtyDrops {
 
         self.ContainerStoragePath = StoragePath(identifier: containerIdentifier)!
         self.ContainerPublicPath = PublicPath(identifier: containerIdentifier)!
-
-        self.MinterStoragePath = StoragePath(identifier: minterIdentifier)!
     }
 }

@@ -1,6 +1,7 @@
 import "FlowtyDrops"
 import "MetadataViews"
 import "ViewResolver"
+import "AddressUtils"
 
 access(all) contract DropTypes {
     access(all) struct Display {
@@ -156,13 +157,18 @@ access(all) contract DropTypes {
         }
     }
 
-    access(all) fun getDropSummary(contractAddress: Address, contractName: String, dropID: UInt64, minter: Address?, quantity: Int?, paymentIdentifier: String?): DropSummary? {
+    access(all) fun getDropSummary(nftTypeIdentifier: String, dropID: UInt64, minter: Address?, quantity: Int?, paymentIdentifier: String?): DropSummary? {
+        let nftType = CompositeType(nftTypeIdentifier) ?? panic("invalid nft type identifier")
+        let segments = nftTypeIdentifier.split(separator: ".")
+        let contractAddress = AddressUtils.parseAddress(nftType)!
+        let contractName = segments[2]
+
         let resolver = getAccount(contractAddress).contracts.borrow<&{ViewResolver}>(name: contractName)
         if resolver == nil {
             return nil
         }
 
-        let dropResolver = resolver!.resolveContractView(resourceType: nil, viewType: Type<FlowtyDrops.DropResolver>()) as! FlowtyDrops.DropResolver?
+        let dropResolver = resolver!.resolveContractView(resourceType: nftType, viewType: Type<FlowtyDrops.DropResolver>()) as! FlowtyDrops.DropResolver?
         if dropResolver == nil {
             return nil
         }
@@ -201,7 +207,7 @@ access(all) contract DropTypes {
             minterCount: dropDetails.minters.keys.length,
             mintedByAddress: minter != nil ? dropDetails.minters[minter!] : nil,
             commissionRate: dropDetails.commissionRate,
-            nftType: dropDetails.nftType,
+            nftType: CompositeType(dropDetails.nftType)!,
             address: minter,
             phases: phaseSummaries
         )
@@ -209,13 +215,18 @@ access(all) contract DropTypes {
         return dropSummary
     }
 
-    access(all) fun getAllDropSummaries(contractAddress: Address, contractName: String, minter: Address?, quantity: Int?, paymentIdentifier: String?): [DropSummary] {
+    access(all) fun getAllDropSummaries(nftTypeIdentifier: String, minter: Address?, quantity: Int?, paymentIdentifier: String?): [DropSummary] {
+        let nftType = CompositeType(nftTypeIdentifier) ?? panic("invalid nft type identifier")
+        let segments = nftTypeIdentifier.split(separator: ".")
+        let contractAddress = AddressUtils.parseAddress(nftType)!
+        let contractName = segments[2]
+        
         let resolver = getAccount(contractAddress).contracts.borrow<&{ViewResolver}>(name: contractName)
         if resolver == nil {
             return []
         }
 
-        let dropResolver = resolver!.resolveContractView(resourceType: nil, viewType: Type<FlowtyDrops.DropResolver>()) as! FlowtyDrops.DropResolver?
+        let dropResolver = resolver!.resolveContractView(resourceType: nftType, viewType: Type<FlowtyDrops.DropResolver>()) as! FlowtyDrops.DropResolver?
         if dropResolver == nil {
             return []
         }
@@ -256,7 +267,7 @@ access(all) contract DropTypes {
                 minterCount: dropDetails.minters.keys.length,
                 mintedByAddress: minter != nil ? dropDetails.minters[minter!] : nil,
                 commissionRate: dropDetails.commissionRate,
-                nftType: dropDetails.nftType,
+                nftType: CompositeType(dropDetails.nftType)!,
                 address: minter,
                 phases: phaseSummaries
             ))
