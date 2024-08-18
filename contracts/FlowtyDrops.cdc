@@ -146,7 +146,7 @@ access(all) contract FlowtyDrops {
             return arr
         }
 
-        access(all) fun addPhase(_ phase: @Phase) {
+        access(Owner) fun addPhase(_ phase: @Phase) {
             emit PhaseAdded(
                 dropID: self.uuid,
                 dropAddress: self.owner!.address,
@@ -159,7 +159,7 @@ access(all) contract FlowtyDrops {
             self.phases.append(<-phase)
         }
 
-        access(all) fun removePhase(index: Int): @Phase {
+        access(Owner) fun removePhase(index: Int): @Phase {
             pre {
                 self.phases.length > index: "index is greater than length of phases"
             }

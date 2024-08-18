@@ -32,7 +32,7 @@
       }
     },
     "flowty-drops-testnet": {
-      "address": "0x06f1e5cde6db0e70",
+      "address": "0xd20430774404a7e8",
       "key": {
         "type": "google-kms",
         "index": 0,
@@ -42,7 +42,7 @@
       }
     },
     "droptypes-testnet": {
-      "address": "0x9680721e43087f43",
+      "address": "0x3d49bb33997bd91e",
       "key": {
         "type": "google-kms",
         "index": 0,
@@ -52,7 +52,7 @@
       }
     },
     "sample-nfts-testnet": {
-      "address": "0xb1c92b8c73994e26",
+      "address": "0xd92e02ee8881d9c1",
       "key": {
         "type": "google-kms",
         "index": 0,
@@ -297,7 +297,17 @@
         "FlowtySwitchers",
         "FlowtyAddressVerifiers",
         "FlowtyPricers",
-        "DropFactory"
+        "DropFactory",
+        "BaseCollection",
+        "BaseNFT",
+        "ContractFactory",
+        "ContractFactoryTemplate",
+        "NFTMetadata",
+        "OpenEditionTemplate",
+        "UniversalCollection",
+        "ContractBorrower",
+        "ContractInitializer",
+        "OpenEditionInitializer"
       ],
       "droptypes-testnet": [
         "DropTypes"
