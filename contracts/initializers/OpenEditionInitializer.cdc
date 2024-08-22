@@ -20,7 +20,7 @@ access(all) contract OpenEditionInitializer: ContractInitializer {
         let t = self.getType()
         let contractName = t.identifier.split(separator: ".")[2]
 
-        self.account.storage.save(cap, to: StoragePath(identifier: "metadataAuthAccount_".concat(contractName))!)
+        contractAcct.storage.save(cap, to: StoragePath(identifier: "metadataAuthAccount_".concat(contractName))!)
 
         // do we have information to setup a drop as well?
         if params.containsKey("dropDetails") && params.containsKey("phaseDetails") && params.containsKey("minterController") {
