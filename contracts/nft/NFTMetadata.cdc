@@ -9,6 +9,10 @@ access(all) contract NFTMetadata {
     access(all) struct CollectionInfo {
         access(all) var collectionDisplay: MetadataViews.NFTCollectionDisplay
 
+        access(all) fun getDisplay(): MetadataViews.NFTCollectionDisplay {
+            return self.collectionDisplay
+        }
+
         init(collectionDisplay: MetadataViews.NFTCollectionDisplay) {
             self.collectionDisplay = collectionDisplay
         }
