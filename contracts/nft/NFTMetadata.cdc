@@ -95,8 +95,8 @@ access(all) contract NFTMetadata {
         return <- create Container(collectionInfo: collectionInfo)
     }
 
-    access(all) fun initialize(acct: auth(Storage, Capabilities) &Account, collectionInfo: CollectionInfo, collectionType: Type): InitializedCaps {
-        let storagePath = self.getCollectionStoragePath(type: collectionType)
+    access(all) fun initialize(acct: auth(Storage, Capabilities) &Account, collectionInfo: CollectionInfo, nftType: Type): InitializedCaps {
+        let storagePath = self.getCollectionStoragePath(type: nftType)
         let container <- self.createContainer(collectionInfo: collectionInfo)
         acct.storage.save(<-container, to: storagePath)
         let pubCap = acct.capabilities.storage.issue<&Container>(storagePath)
