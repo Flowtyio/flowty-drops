@@ -7,7 +7,7 @@ access(all) contract FlowtyDrops {
     access(all) let ContainerStoragePath: StoragePath
     access(all) let ContainerPublicPath: PublicPath
 
-    access(all) event DropAdded(address: Address, id: UInt64, name: String, description: String, imageUrl: String, start: UInt64?, end: UInt64?)
+    access(all) event DropAdded(address: Address, id: UInt64, name: String, description: String, imageUrl: String, start: UInt64?, end: UInt64?, nftType: String)
     access(all) event Minted(address: Address, dropID: UInt64, phaseID: UInt64, nftID: UInt64, nftType: String)
     access(all) event PhaseAdded(dropID: UInt64, dropAddress: Address, id: UInt64, index: Int, switcherType: String, pricerType: String, addressVerifierType: String)
     access(all) event PhaseRemoved(dropID: UInt64, dropAddress: Address, id: UInt64)
@@ -203,6 +203,10 @@ access(all) contract FlowtyDrops {
         }
 
         init(display: MetadataViews.Display, medias: MetadataViews.Medias?, commissionRate: UFix64, nftType: String) {
+            pre {
+                nftType != "": "nftType should be a composite type identifier"
+            }
+
             self.display = display
             self.medias = medias
             self.totalMinted = 0
@@ -372,7 +376,8 @@ access(all) contract FlowtyDrops {
                 description: details.display.description,
                 imageUrl: details.display.thumbnail.uri(),
                 start: firstPhaseDetails.switcher.getStart(),
-                end: firstPhaseDetails.switcher.getEnd()
+                end: firstPhaseDetails.switcher.getEnd(),
+                nftType: details.nftType
             )
             destroy self.drops.insert(key: drop.uuid, <-drop)
         }
@@ -416,7 +421,7 @@ access(all) contract FlowtyDrops {
 
     access(all) fun getMinterStoragePath(type: Type): StoragePath {
         let segments = type.identifier.split(separator: ".")
-        let identifier = "FlowtyDrops_Minter_".concat(segments[1]).concat(segments[2])
+        let identifier = "FlowtyDrops_Minter_".concat(segments[1]).concat("_").concat(segments[2])
         return StoragePath(identifier: identifier)!
     }
 

@@ -42,6 +42,7 @@ access(all) contract OpenEditionTemplate: ContractFactoryTemplate {
         .concat("        let minter <- create NFTMinter()\n")
         .concat("        self.account.storage.save(<-minter, to: FlowtyDrops.getMinterStoragePath(type: self.getType()))\n")
         .concat("        params[\"minterController\"] = self.account.capabilities.storage.issue<&{FlowtyDrops.Minter}>(FlowtyDrops.getMinterStoragePath(type: self.getType()))\n")
+        .concat("        params[\"type\"] = Type<@NFT>()\n")
         .concat("\n\n")
         .concat("        self.MetadataCap = ContractBorrower.borrowInitializer(typeIdentifier: initializeIdentifier).initialize(contractAcct: self.account, params: params).pubCap\n")
         .concat("    }\n")

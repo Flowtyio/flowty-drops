@@ -259,6 +259,10 @@ access(all) contract DropTypes {
                 phaseSummaries.append(summary)
             }
 
+            if CompositeType(dropDetails.nftType) == nil {
+                continue
+            }
+
             summaries.append(DropSummary(
                 id: drop!.uuid,
                 display: dropDetails.display,
