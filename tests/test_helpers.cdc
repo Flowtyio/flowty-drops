@@ -94,15 +94,16 @@ access(all) fun deployAll() {
     deploy("StringUtils", "../node_modules/@flowtyio/flow-contracts/contracts/flow-utils/StringUtils.cdc", [])
     deploy("AddressUtils", "../node_modules/@flowtyio/flow-contracts/contracts/flow-utils/AddressUtils.cdc", [])
 
-    deploy("ContractManager", "../contracts/ContractManager.cdc", [])
     deploy("FlowtyDrops", "../contracts/FlowtyDrops.cdc", [])
     deploy("NFTMetadata", "../contracts/nft/NFTMetadata.cdc", [])
+    deploy("BaseCollection", "../contracts/nft/BaseCollection.cdc", [])
+
+    deploy("ContractManager", "../contracts/ContractManager.cdc", [])
+    deploy("UniversalCollection", "../contracts/nft/UniversalCollection.cdc", [])
     deploy("ContractInitializer", "../contracts/initializers/ContractInitializer.cdc", [])
     deploy("ContractBorrower", "../contracts/initializers/ContractBorrower.cdc", [])
     deploy("OpenEditionInitializer", "../contracts/initializers/OpenEditionInitializer.cdc", [])
 
-    deploy("BaseCollection", "../contracts/nft/BaseCollection.cdc", [])
-    deploy("UniversalCollection", "../contracts/nft/UniversalCollection.cdc", [])
     deploy("BaseNFT", "../contracts/nft/BaseNFT.cdc", [])
     deploy("FlowtySwitchers", "../contracts/FlowtySwitchers.cdc", [])
     deploy("FlowtyPricers", "../contracts/FlowtyPricers.cdc", [])
