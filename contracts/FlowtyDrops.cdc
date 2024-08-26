@@ -33,6 +33,40 @@ access(all) contract FlowtyDrops {
         access(all) fun getDetails(): DropDetails
     }
 
+    // A phase represents a stage of a drop. Some drops will only have one
+    // phase, while others could have many. For example, a drop with an allow list
+    // and a public mint would likely have two phases.
+    access(all) resource Phase: PhasePublic {
+        access(all) event ResourceDestroyed(uuid: UInt64 = self.uuid)
+
+        access(all) let details: PhaseDetails
+
+        // returns whether this phase of a drop has started.
+        access(all) fun isActive(): Bool {
+            return self.details.activeChecker.hasStarted() && !self.details.activeChecker.hasEnded()
+        }
+
+        access(all) fun getDetails(): PhaseDetails {
+            return self.details
+        }
+
+        access(EditPhase) fun borrowActiveCheckerAuth(): auth(Mutate) &{ActiveChecker} {
+            return &self.details.activeChecker
+        }
+
+        access(EditPhase) fun borrowPricerAuth(): auth(Mutate) &{Pricer} {
+            return &self.details.pricer
+        }
+
+        access(EditPhase) fun borrowAddressVerifierAuth(): auth(Mutate) &{AddressVerifier} {
+            return &self.details.addressVerifier
+        }
+
+        init(details: PhaseDetails) {
+            self.details = details
+        }
+    }
+
     access(all) resource Drop: DropPublic {
         access(all) event ResourceDestroyed(
             uuid: UInt64 = self.uuid,
@@ -228,40 +262,6 @@ access(all) contract FlowtyDrops {
 
         access(all) view fun getStart(): UInt64?
         access(all) view fun getEnd(): UInt64?
-    }
-
-    // A phase represents a stage of a drop. Some drops will only have one
-    // phase, while others could have many. For example, a drop with an allow list
-    // and a public mint would likely have two phases.
-    access(all) resource Phase: PhasePublic {
-        access(all) event ResourceDestroyed(uuid: UInt64 = self.uuid)
-
-        access(all) let details: PhaseDetails
-
-        // returns whether this phase of a drop has started.
-        access(all) fun isActive(): Bool {
-            return self.details.activeChecker.hasStarted() && !self.details.activeChecker.hasEnded()
-        }
-
-        access(all) fun getDetails(): PhaseDetails {
-            return self.details
-        }
-
-        access(EditPhase) fun borrowActiveCheckerAuth(): auth(Mutate) &{ActiveChecker} {
-            return &self.details.activeChecker
-        }
-
-        access(EditPhase) fun borrowPricerAuth(): auth(Mutate) &{Pricer} {
-            return &self.details.pricer
-        }
-
-        access(EditPhase) fun borrowAddressVerifierAuth(): auth(Mutate) &{AddressVerifier} {
-            return &self.details.addressVerifier
-        }
-
-        init(details: PhaseDetails) {
-            self.details = details
-        }
     }
 
     access(all) resource interface PhasePublic {
