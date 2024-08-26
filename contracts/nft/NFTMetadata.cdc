@@ -9,12 +9,16 @@ access(all) contract NFTMetadata {
     access(all) struct CollectionInfo {
         access(all) var collectionDisplay: MetadataViews.NFTCollectionDisplay
 
+        access(all) let data: {String: AnyStruct}
+
         access(all) fun getDisplay(): MetadataViews.NFTCollectionDisplay {
             return self.collectionDisplay
         }
 
         init(collectionDisplay: MetadataViews.NFTCollectionDisplay) {
             self.collectionDisplay = collectionDisplay
+
+            self.data = {}
         }
     }
 
@@ -30,7 +34,7 @@ access(all) contract NFTMetadata {
         access(all) let externalURL: MetadataViews.ExternalURL?
         access(all) let royalties: MetadataViews.Royalties?
 
-        access(all) let data: {String: AnyStruct} // general-purpose data bucket
+        access(all) let data: {String: AnyStruct}
 
         init(
             name: String,
@@ -60,6 +64,9 @@ access(all) contract NFTMetadata {
         access(all) let metadata: {UInt64: Metadata}
         access(all) var frozen: Bool
 
+        access(all) let data: {String: AnyStruct}
+        access(all) let resources: @{String: AnyResource}
+
         access(all) fun borrowMetadata(id: UInt64): &Metadata? {
             return &self.metadata[id]
         }
@@ -81,6 +88,9 @@ access(all) contract NFTMetadata {
             self.collectionInfo = collectionInfo
             self.metadata = {}
             self.frozen = false
+
+            self.data = {}
+            self.resources <- {}
         }
     }
 
@@ -88,9 +98,13 @@ access(all) contract NFTMetadata {
         access(all) let pubCap: Capability<&Container>
         access(all) let ownerCap: Capability<auth(Owner) &Container>
 
+        access(all) let data: {String: AnyStruct}
+
         init(pubCap: Capability<&Container>, ownerCap: Capability<auth(Owner) &Container>) {
             self.pubCap = pubCap
             self.ownerCap = ownerCap
+
+            self.data = {}
         }
     }
 

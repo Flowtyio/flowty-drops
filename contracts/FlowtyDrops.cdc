@@ -42,6 +42,9 @@ access(all) contract FlowtyDrops {
 
         access(all) let details: PhaseDetails
 
+        access(all) let data: {String: AnyStruct}
+        access(all) let resources: @{String: AnyResource}
+
         // returns whether this phase of a drop has started.
         access(all) fun isActive(): Bool {
             return self.details.activeChecker.hasStarted() && !self.details.activeChecker.hasEnded()
@@ -65,6 +68,9 @@ access(all) contract FlowtyDrops {
 
         init(details: PhaseDetails) {
             self.details = details
+
+            self.data = {}
+            self.resources <- {}
         }
     }
 
@@ -81,6 +87,9 @@ access(all) contract FlowtyDrops {
         // the details of a drop. This includes things like display information and total number of mints
         access(self) let details: DropDetails
         access(self) let minterCap: Capability<&{Minter}>
+
+        access(all) let data: {String: AnyStruct}
+        access(all) let resources: @{String: AnyResource}
 
         access(all) fun mint(
             payment: @{FungibleToken.Vault},
@@ -219,6 +228,9 @@ access(all) contract FlowtyDrops {
             self.phases <- phases
             self.details = details
             self.minterCap = minterCap
+
+            self.data = {}
+            self.resources <- {}
         }
     }
 
@@ -229,6 +241,8 @@ access(all) contract FlowtyDrops {
         access(all) var minters: {Address: Int}
         access(all) let commissionRate: UFix64
         access(all) let nftType: String
+
+        access(all) let data: {String: AnyStruct}
 
         access(contract) fun addMinted(num: Int, addr: Address) {
             self.totalMinted = self.totalMinted + num
@@ -250,6 +264,7 @@ access(all) contract FlowtyDrops {
             self.commissionRate = commissionRate
             self.minters = {}
             self.nftType = nftType
+            self.data = {}
         }
     }
 
@@ -364,6 +379,9 @@ access(all) contract FlowtyDrops {
     access(all) resource Container: ContainerPublic {
         access(self) let drops: @{UInt64: Drop}
 
+        access(all) let data: {String: AnyStruct}
+        access(all) let resources: @{String: AnyResource}
+
         access(Owner) fun addDrop(_ drop: @Drop) {
             let details = drop.getDetails()
 
@@ -407,6 +425,9 @@ access(all) contract FlowtyDrops {
 
         init() {
             self.drops <- {}
+
+            self.data = {}
+            self.resources <- {}
         }
     }
 

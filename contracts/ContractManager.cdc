@@ -12,6 +12,9 @@ access(all) contract ContractManager {
         access(self) let acct: Capability<auth(Storage, Contracts, Keys, Inbox, Capabilities) &Account>
         access(self) let switchboardCap: Capability<auth(FungibleTokenSwitchboard.Owner) &FungibleTokenSwitchboard.Switchboard>
 
+        access(all) let data: {String: AnyStruct}
+        access(all) let resources: @{String: AnyResource}
+
         access(Manage) fun borrowContractAccount(): auth(Contracts) &Account {
             return self.acct.borrow()!
         }
@@ -61,6 +64,9 @@ access(all) contract ContractManager {
             )
 
             self.switchboardCap = acct.capabilities.storage.issue<auth(FungibleTokenSwitchboard.Owner) &FungibleTokenSwitchboard.Switchboard>(FungibleTokenSwitchboard.StoragePath)
+
+            self.data = {}
+            self.resources <- {}
         }
     }
 
