@@ -1,6 +1,6 @@
 import "FlowtyDrops"
 import "FlowtyAddressVerifiers"
-import "FlowtySwitchers"
+import "FlowtyActiveCheckers"
 import "FlowtyPricers"
 import "OpenEditionNFT"
 

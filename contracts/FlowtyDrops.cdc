@@ -9,7 +9,7 @@ access(all) contract FlowtyDrops {
 
     access(all) event DropAdded(address: Address, id: UInt64, name: String, description: String, imageUrl: String, start: UInt64?, end: UInt64?, nftType: String)
     access(all) event Minted(address: Address, dropID: UInt64, phaseID: UInt64, nftID: UInt64, nftType: String)
-    access(all) event PhaseAdded(dropID: UInt64, dropAddress: Address, id: UInt64, index: Int, switcherType: String, pricerType: String, addressVerifierType: String)
+    access(all) event PhaseAdded(dropID: UInt64, dropAddress: Address, id: UInt64, index: Int, activeCheckerType: String, pricerType: String, addressVerifierType: String)
     access(all) event PhaseRemoved(dropID: UInt64, dropAddress: Address, id: UInt64)
 
     access(all) entitlement Owner
@@ -82,8 +82,8 @@ access(all) contract FlowtyDrops {
 
             // mint the nfts
             let minter = self.minterCap.borrow() ?? panic("minter capability could not be borrowed")
-            let mintedNFTs <- minter.mint(payment: <-withdrawn, amount: amount, phase: phase, data: data)
-            assert(phase.details.switcher.hasStarted() && !phase.details.switcher.hasEnded(), message: "phase is not active")
+            let mintedNFTs: @[{NonFungibleToken.NFT}] <- minter.mint(payment: <-withdrawn, amount: amount, phase: phase, data: data)
+            assert(phase.details.activeChecker.hasStarted() && !phase.details.activeChecker.hasEnded(), message: "phase is not active")
             assert(mintedNFTs.length == amount, message: "incorrect number of items returned")
 
             // distribute to receiver
@@ -123,8 +123,8 @@ access(all) contract FlowtyDrops {
             var count = 0
             while count < self.phases.length {
                 let ref = self.borrowPhasePublic(index: count)
-                let switcher = ref.getDetails().switcher
-                if switcher.hasStarted() && !switcher.hasEnded() {
+                let activeChecker = ref.getDetails().activeChecker
+                if activeChecker.hasStarted() && !activeChecker.hasEnded() {
                     arr.append(ref)
                 }
 
@@ -152,7 +152,7 @@ access(all) contract FlowtyDrops {
                 dropAddress: self.owner!.address,
                 id: phase.uuid,
                 index: self.phases.length,
-                switcherType: phase.details.switcher.getType().identifier,
+                activeCheckerType: phase.details.activeChecker.getType().identifier,
                 pricerType: phase.details.pricer.getType().identifier,
                 addressVerifierType: phase.details.addressVerifier.getType().identifier
             )
@@ -216,13 +216,13 @@ access(all) contract FlowtyDrops {
         }
     }
 
-    // A switcher represents a phase being on or off, and holds information
+    // An ActiveChecker represents a phase being on or off, and holds information
     // about whether a phase has started or not.
-    access(all) struct interface Switcher {
-        // Signal that a phase has started. If the phase has not ended, it means that this switcher's phase
+    access(all) struct interface ActiveChecker {
+        // Signal that a phase has started. If the phase has not ended, it means that this activeChecker's phase
         // is active
         access(all) view fun hasStarted(): Bool
-        // Signal that a phase has ended. If a switcher has ended, minting will not work. That could mean
+        // Signal that a phase has ended. If an ActiveChecker has ended, minting will not work. That could mean
         // the drop is over, or it could mean another phase has begun.
         access(all) view fun hasEnded(): Bool
 
@@ -240,15 +240,15 @@ access(all) contract FlowtyDrops {
 
         // returns whether this phase of a drop has started.
         access(all) fun isActive(): Bool {
-            return self.details.switcher.hasStarted() && !self.details.switcher.hasEnded()
+            return self.details.activeChecker.hasStarted() && !self.details.activeChecker.hasEnded()
         }
 
         access(all) fun getDetails(): PhaseDetails {
             return self.details
         }
 
-        access(EditPhase) fun borrowSwitchAuth(): auth(Mutate) &{Switcher} {
-            return &self.details.switcher
+        access(EditPhase) fun borrowActiveCheckerAuth(): auth(Mutate) &{ActiveChecker} {
+            return &self.details.activeChecker
         }
 
         access(EditPhase) fun borrowPricerAuth(): auth(Mutate) &{Pricer} {
@@ -276,7 +276,7 @@ access(all) contract FlowtyDrops {
 
     access(all) struct PhaseDetails {
         // handles whether a phase is on or not
-        access(all) let switcher: {Switcher}
+        access(all) let activeChecker: {ActiveChecker}
 
         // display information about a phase
         access(all) let display: MetadataViews.Display?
@@ -290,8 +290,8 @@ access(all) contract FlowtyDrops {
         // placecholder data dictionary to allow new fields to be accessed
         access(all) let data: {String: AnyStruct}
 
-        init(switcher: {Switcher}, display: MetadataViews.Display?, pricer: {Pricer}, addressVerifier: {AddressVerifier}) {
-            self.switcher = switcher
+        init(activeChecker: {ActiveChecker}, display: MetadataViews.Display?, pricer: {Pricer}, addressVerifier: {AddressVerifier}) {
+            self.activeChecker = activeChecker
             self.display = display
             self.pricer = pricer
             self.addressVerifier = addressVerifier
@@ -375,8 +375,8 @@ access(all) contract FlowtyDrops {
                 name: details.display.name,
                 description: details.display.description,
                 imageUrl: details.display.thumbnail.uri(),
-                start: firstPhaseDetails.switcher.getStart(),
-                end: firstPhaseDetails.switcher.getEnd(),
+                start: firstPhaseDetails.activeChecker.getStart(),
+                end: firstPhaseDetails.activeChecker.getEnd(),
                 nftType: details.nftType
             )
             destroy self.drops.insert(key: drop.uuid, <-drop)

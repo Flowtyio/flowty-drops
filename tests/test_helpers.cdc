@@ -105,7 +105,7 @@ access(all) fun deployAll() {
     deploy("OpenEditionInitializer", "../contracts/initializers/OpenEditionInitializer.cdc", [])
 
     deploy("BaseNFT", "../contracts/nft/BaseNFT.cdc", [])
-    deploy("FlowtySwitchers", "../contracts/FlowtySwitchers.cdc", [])
+    deploy("FlowtyActiveCheckers", "../contracts/FlowtyActiveCheckers.cdc", [])
     deploy("FlowtyPricers", "../contracts/FlowtyPricers.cdc", [])
     deploy("FlowtyAddressVerifiers", "../contracts/FlowtyAddressVerifiers.cdc", [])
     deploy("DropFactory", "../contracts/DropFactory.cdc", [])

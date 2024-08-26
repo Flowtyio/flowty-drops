@@ -141,8 +141,8 @@
         "testing": "0x0000000000000006"
       }
     },
-    "FlowtySwitchers": {
-      "source": "./contracts/FlowtySwitchers.cdc",
+    "FlowtyActiveCheckers": {
+      "source": "./contracts/FlowtyActiveCheckers.cdc",
       "aliases": {
         "testing": "0x0000000000000006"
       }
@@ -270,7 +270,7 @@
         "BaseCollection",
         "UniversalCollection",
         "FlowtyDrops",
-        "FlowtySwitchers",
+        "FlowtyActiveCheckers",
         "FlowtyAddressVerifiers",
         "FlowtyPricers",
         "DropFactory",
@@ -305,7 +305,7 @@
         "BaseCollection",
         "UniversalCollection",
         "FlowtyDrops",
-        "FlowtySwitchers",
+        "FlowtyActiveCheckers",
         "FlowtyAddressVerifiers",
         "FlowtyPricers",
         "DropFactory"

@@ -21,5 +21,5 @@ access(all) fun main(nftTypeIdentifier: String, dropID: UInt64, phaseIndex: Int)
 
     let phase = drop.borrowPhasePublic(index: phaseIndex)
 
-    return phase.getDetails().switcher.hasEnded()
+    return phase.getDetails().activeChecker.hasEnded()
 }
