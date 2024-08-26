@@ -27,7 +27,7 @@ access(all) contract FlowtyDrops {
             phaseIndex: Int,
             expectedType: Type,
             receiverCap: Capability<&{NonFungibleToken.CollectionPublic}>,
-            commissionReceiver: Capability<&{FungibleToken.Receiver}>,
+            commissionReceiver: Capability<&{FungibleToken.Receiver}>?,
             data: {String: AnyStruct}
         ): @{FungibleToken.Vault}
         access(all) fun getDetails(): DropDetails
@@ -87,7 +87,7 @@ access(all) contract FlowtyDrops {
             phaseIndex: Int,
             expectedType: Type,
             receiverCap: Capability<&{NonFungibleToken.CollectionPublic}>,
-            commissionReceiver: Capability<&{FungibleToken.Receiver}>,
+            commissionReceiver: Capability<&{FungibleToken.Receiver}>?,
             data: {String: AnyStruct}
         ): @{FungibleToken.Vault} {
             pre {
@@ -108,8 +108,10 @@ access(all) contract FlowtyDrops {
             let withdrawn <- payment.withdraw(amount: paymentAmount) // make sure that we have a fresh vault resource
 
             // take commission
-            let commission <- withdrawn.withdraw(amount: self.details.commissionRate * withdrawn.balance)
-            commissionReceiver.borrow()!.deposit(from: <-commission)
+            if commissionReceiver != nil && commissionReceiver!.check() {
+                let commission <- withdrawn.withdraw(amount: self.details.commissionRate * withdrawn.balance)
+                commissionReceiver!.borrow()!.deposit(from: <-commission)
+            }
 
             assert(phase.details.pricer.getPrice(num: amount, paymentTokenType: withdrawn.getType(), minter: receiverCap.address) * (1.0 - self.details.commissionRate) == withdrawn.balance, message: "incorrect payment amount")
             assert(phase.details.pricer.getPaymentTypes().contains(withdrawn.getType()), message: "unsupported payment type")
