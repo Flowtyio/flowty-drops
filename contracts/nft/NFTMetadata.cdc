@@ -28,6 +28,7 @@ access(all) contract NFTMetadata {
         access(all) let traits: MetadataViews.Traits?
         access(all) let editions: MetadataViews.Editions?
         access(all) let externalURL: MetadataViews.ExternalURL?
+        access(all) let royalties: MetadataViews.Royalties?
 
         access(all) let data: {String: AnyStruct} // general-purpose data bucket
 
@@ -38,6 +39,7 @@ access(all) contract NFTMetadata {
             traits: MetadataViews.Traits?,
             editions: MetadataViews.Editions?,
             externalURL: MetadataViews.ExternalURL?,
+            royalties: MetadataViews.Royalties?,
             data: {String: AnyStruct}
         ) {
             self.name = name
@@ -47,6 +49,7 @@ access(all) contract NFTMetadata {
             self.traits = traits
             self.editions = editions
             self.externalURL = externalURL
+            self.royalties = royalties
 
             self.data = {}
         }

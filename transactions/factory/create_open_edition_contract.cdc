@@ -23,6 +23,12 @@ transaction(name: String, params: {String: AnyStruct}, managerInitialTokenBalanc
 
         let manager = acct.storage.borrow<auth(ContractManager.Manage) &ContractManager.Manager>(from: ContractManager.StoragePath)
             ?? panic("manager was not borrowed successfully")
+
+        let sb = manager.getSwitchboard()
+        if !sb.isSupportedVaultType(type: Type<@FlowToken.Vault>()) {
+            manager.addFungibleTokenReceiver(acct.capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver))
+        }
+
         ContractFactory.createContract(templateType: Type<OpenEditionTemplate>(), acct: manager.borrowContractAccount(), name: name, params: params, initializeIdentifier: Type<OpenEditionInitializer>().identifier)
     }
 }

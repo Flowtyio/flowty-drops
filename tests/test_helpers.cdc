@@ -155,6 +155,7 @@ access(all) fun deployAll() {
         traits: nil,
         editions: nil,
         externalURL: nil,
+        royalties: nil,
         data: {}
     )
 
