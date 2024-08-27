@@ -141,8 +141,8 @@
         "testing": "0x0000000000000006"
       }
     },
-    "FlowtySwitchers": {
-      "source": "./contracts/FlowtySwitchers.cdc",
+    "FlowtyActiveCheckers": {
+      "source": "./contracts/FlowtyActiveCheckers.cdc",
       "aliases": {
         "testing": "0x0000000000000006"
       }
@@ -253,6 +253,14 @@
         "testnet": "0x31ad40c07a2a9788",
         "mainnet": "0xa340dc0a4ec828ab"
       }
+    },
+    "FungibleTokenSwitchboard": {
+      "source": "./node_modules/@flowtyio/flow-contracts/contracts/FungibleTokenSwitchboard.cdc",
+      "aliases": {
+        "emulator": "0xee82856bf20e2aa6",
+        "testnet": "0x9a0766d93b6608b7",
+        "mainnet": "0xf233dcee88fe0abe"
+      }
     }
   },
   "deployments": {
@@ -270,7 +278,7 @@
         "BaseCollection",
         "UniversalCollection",
         "FlowtyDrops",
-        "FlowtySwitchers",
+        "FlowtyActiveCheckers",
         "FlowtyAddressVerifiers",
         "FlowtyPricers",
         "DropFactory",
@@ -281,7 +289,8 @@
         "Burner",
         "ArrayUtils",
         "StringUtils",
-        "AddressUtils"
+        "AddressUtils",
+        "FungibleTokenSwitchboard"
       ],
       "emulator-ft": [
         "FungibleToken",
@@ -305,7 +314,7 @@
         "BaseCollection",
         "UniversalCollection",
         "FlowtyDrops",
-        "FlowtySwitchers",
+        "FlowtyActiveCheckers",
         "FlowtyAddressVerifiers",
         "FlowtyPricers",
         "DropFactory"

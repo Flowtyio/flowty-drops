@@ -1,5 +1,5 @@
 import "FlowtyDrops"
-import "FlowtySwitchers"
+import "FlowtyActiveCheckers"
 
 transaction(dropID: UInt64, phaseIndex: Int, start: UInt64?, end: UInt64?) {
     prepare(acct: auth(BorrowValue) &Account) {
@@ -8,8 +8,8 @@ transaction(dropID: UInt64, phaseIndex: Int, start: UInt64?, end: UInt64?) {
         let drop = container.borrowDrop(id: dropID) ?? panic("drop not found")
         let phase = drop.borrowPhase(index: phaseIndex)
 
-        let tmp = phase.borrowSwitchAuth()
-        let s = tmp as! auth(Mutate) &FlowtySwitchers.TimestampSwitch
+        let tmp = phase.borrowActiveCheckerAuth()
+        let s = tmp as! auth(Mutate) &FlowtyActiveCheckers.TimestampChecker
 
         s.setStart(start: start)
         s.setEnd(end: end)

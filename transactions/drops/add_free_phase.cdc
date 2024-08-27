@@ -1,6 +1,6 @@
 import "FlowtyDrops"
 import "FlowtyPricers"
-import "FlowtySwitchers"
+import "FlowtyActiveCheckers"
 import "FlowtyAddressVerifiers"
 
 import "MetadataViews"
@@ -12,7 +12,7 @@ transaction(dropID: UInt64, start: UInt64?, end: UInt64?, displayURL: String) {
         let drop = container.borrowDrop(id: dropID) ?? panic("drop not found")
         let firstPhase = drop.borrowPhase(index: 0)
 
-        let switcher = FlowtySwitchers.TimestampSwitch(start: start, end: end)
+        let checker = FlowtyActiveCheckers.TimestampChecker(start: start, end: end)
 
         var display: MetadataViews.Display? = nil
         if let tmpDisplay = firstPhase.details.display {
@@ -25,7 +25,7 @@ transaction(dropID: UInt64, start: UInt64?, end: UInt64?, displayURL: String) {
 
         let verifier = FlowtyAddressVerifiers.AllowAll(maxPerMint: 1000)
 
-        let details = FlowtyDrops.PhaseDetails(switcher: switcher, display: display, pricer: FlowtyPricers.Free(), addressVerifier: verifier)
+        let details = FlowtyDrops.PhaseDetails(activeChecker: checker, display: display, pricer: FlowtyPricers.Free(), addressVerifier: verifier)
         let phase <- FlowtyDrops.createPhase(details: details)
 
         drop.addPhase(<- phase)

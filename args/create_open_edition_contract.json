@@ -372,11 +372,11 @@
                                 "id": "A.f8d6e0586b0a20c7.FlowtyDrops.PhaseDetails",
                                 "fields": [
                                     {
-                                        "name": "switcher",
+                                        "name": "activeChecker",
                                         "value": {
                                             "type": "Struct",
                                             "value": {
-                                                "id": "A.f8d6e0586b0a20c7.FlowtySwitchers.AlwaysOn",
+                                                "id": "A.f8d6e0586b0a20c7.FlowtyActiveCheckers.AlwaysOn",
                                                 "fields": []
                                             }
                                         }
