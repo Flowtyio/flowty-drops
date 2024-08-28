@@ -11,9 +11,10 @@ access(all) contract OpenEditionTemplate: ContractFactoryTemplate {
             "NFTMetadata",
             "UniversalCollection",
             "ContractBorrower",
-            "BaseCollection"
+            "BaseCollection",
+            "ViewResolver"
         ]).concat("\n\n")
-        .concat("access(all) contract ").concat(name).concat(": BaseCollection {\n")
+        .concat("access(all) contract ").concat(name).concat(": BaseCollection, ViewResolver {\n")
         .concat("    access(all) var MetadataCap: Capability<&NFTMetadata.Container>\n")
         .concat("    access(all) var totalSupply: UInt64\n")
         .concat("\n\n")
