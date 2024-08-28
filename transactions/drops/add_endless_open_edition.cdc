@@ -2,7 +2,7 @@ import "FlowtyDrops"
 import "DropFactory"
 
 import "MetadataViews"
-import "FungibleTokenSwitchboard"
+import "FungibleTokenRouter"
 import "FungibleToken"
 
 transaction(
@@ -26,20 +26,13 @@ transaction(
             )
         }
 
-        if acct.storage.borrow<&AnyResource>(from: FungibleTokenSwitchboard.StoragePath) == nil {
-            let switchboard <- FungibleTokenSwitchboard.createSwitchboard()
-            switchboard.addNewVault(capability: acct.capabilities.get<&{FungibleToken.Receiver}>(/public/flowTokenReceiver))
-
-            acct.storage.save(<-switchboard, to: FungibleTokenSwitchboard.StoragePath)
+        if acct.storage.borrow<&AnyResource>(from: FungibleTokenRouter.StoragePath) == nil {
+            let switchboard <- FungibleTokenRouter.createRouter(defaultAddress: acct.address)
+            acct.storage.save(<-switchboard, to: FungibleTokenRouter.StoragePath)
 
             acct.capabilities.publish(
-                acct.capabilities.storage.issue<&{FungibleToken.Receiver}>(FungibleTokenSwitchboard.StoragePath),
-                at: FungibleTokenSwitchboard.ReceiverPublicPath
-            )
-
-            acct.capabilities.publish(
-                acct.capabilities.storage.issue<&FungibleTokenSwitchboard.Switchboard>(FungibleTokenSwitchboard.StoragePath),
-                at: FungibleTokenSwitchboard.PublicPath
+                acct.capabilities.storage.issue<&{FungibleToken.Receiver}>(FungibleTokenRouter.StoragePath),
+                at: FungibleTokenRouter.PublicPath
             )
         }
 

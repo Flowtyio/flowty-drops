@@ -254,12 +254,13 @@
         "mainnet": "0xa340dc0a4ec828ab"
       }
     },
-    "FungibleTokenSwitchboard": {
-      "source": "./node_modules/@flowtyio/flow-contracts/contracts/FungibleTokenSwitchboard.cdc",
+    "FungibleTokenRouter": {
+      "source": "./node_modules/@flowtyio/flow-contracts/contracts/fungible-token-router/FungibleTokenRouter.cdc",
       "aliases": {
-        "emulator": "0xee82856bf20e2aa6",
-        "testnet": "0x9a0766d93b6608b7",
-        "mainnet": "0xf233dcee88fe0abe"
+        "testing": "0x0000000000000007",
+        "emulator": "0xf8d6e0586b0a20c7",
+        "testnet": "0x83231f90a288bc35",
+        "mainnet": "0x707c0b39a8d689cb"
       }
     }
   },
@@ -290,7 +291,7 @@
         "ArrayUtils",
         "StringUtils",
         "AddressUtils",
-        "FungibleTokenSwitchboard"
+        "FungibleTokenRouter"
       ],
       "emulator-ft": [
         "FungibleToken",
