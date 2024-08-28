@@ -54,11 +54,6 @@ access(all) contract ContractManager {
             assert(receiver.check(), message: "invalid switchboard receiver capability")
             acct.capabilities.publish(receiver, at: FungibleTokenRouter.PublicPath)
 
-            acct.capabilities.publish(
-                acct.capabilities.storage.issue<&FungibleTokenRouter.Router>(FungibleTokenRouter.StoragePath),
-                at: FungibleTokenRouter.PublicPath
-            )
-
             self.routerCap = acct.capabilities.storage.issue<auth(FungibleTokenRouter.Owner) &FungibleTokenRouter.Router>(FungibleTokenRouter.StoragePath)
 
             self.data = {}
