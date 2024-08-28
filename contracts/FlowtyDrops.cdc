@@ -2,7 +2,8 @@ import "NonFungibleToken"
 import "FungibleToken"
 import "MetadataViews"
 import "AddressUtils"
-import "FungibleTokenSwitchboard"
+import "FungibleTokenMetadataViews"
+import "FungibleTokenRouter"
 
 access(all) contract FlowtyDrops {
     access(all) let ContainerStoragePath: StoragePath
@@ -336,8 +337,8 @@ access(all) contract FlowtyDrops {
     access(all) resource interface Minter {
         access(contract) fun mint(payment: @{FungibleToken.Vault}, amount: Int, phase: &FlowtyDrops.Phase, data: {String: AnyStruct}): @[{NonFungibleToken.NFT}] {
             let resourceAddress = AddressUtils.parseAddress(self.getType())!
-            let receiver = getAccount(resourceAddress).capabilities.get<&{FungibleToken.Receiver}>(FungibleTokenSwitchboard.ReceiverPublicPath).borrow()
-                ?? panic("invalid token receiver")
+            let receiver = getAccount(resourceAddress).capabilities.get<&{FungibleToken.Receiver}>(FungibleTokenRouter.PublicPath).borrow()
+                ?? panic("missing receiver at fungible token router path")
             receiver.deposit(from: <-payment)
 
             let nfts: @[{NonFungibleToken.NFT}] <- []
