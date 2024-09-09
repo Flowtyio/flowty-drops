@@ -26,6 +26,10 @@ access(all) contract UniversalCollection {
             return &self.ownedNFTs[id]
         }
 
+        access(NonFungibleToken.Withdraw) fun withdraw(withdrawID: UInt64): @{NonFungibleToken.NFT} {
+            return <- self.ownedNFTs.remove(key: withdrawID)!
+        }
+
         init (nftType: Type) {
             self.ownedNFTs <- {}
             self.nftType = nftType
