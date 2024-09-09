@@ -42,7 +42,7 @@
       }
     },
     "droptypes-testnet": {
-      "address": "0xa061e5b10252955d",
+      "address": "0x22f23883bf122007",
       "key": {
         "type": "google-kms",
         "index": 0,

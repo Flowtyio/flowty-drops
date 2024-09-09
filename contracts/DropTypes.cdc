@@ -112,6 +112,7 @@ access(all) contract DropTypes {
         
         access(all) let address: Address?
         access(all) let remainingForAddress: Int?
+        access(all) let maxPerMint: Int?
 
         access(all) let quote: Quote?
 
@@ -149,6 +150,8 @@ access(all) contract DropTypes {
                 self.address = nil
                 self.remainingForAddress = nil
             }
+
+            self.maxPerMint = d.addressVerifier.getMaxPerMint(addr: self.address, totalMinted: totalMinted ?? 0, data: {} as {String: AnyStruct})
 
             if paymentIdentifier != nil && quantity != nil {
                 let price = d.pricer.getPrice(num: quantity!, paymentTokenType: CompositeType(paymentIdentifier!)!, minter: minter)
