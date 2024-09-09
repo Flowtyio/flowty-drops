@@ -80,6 +80,8 @@ access(all) contract interface BaseCollection: ViewResolver {
                         return <- c.createEmptyCollection(nftType: rt)
                     }
                 )
+            case Type<FlowtyDrops.DropResolver>():
+                return FlowtyDrops.DropResolver(cap: acct.capabilities.get<&{FlowtyDrops.ContainerPublic}>(FlowtyDrops.ContainerPublicPath))
             case Type<MetadataViews.NFTCollectionDisplay>():
                 let c = getAccount(addr).contracts.borrow<&{BaseCollection}>(name: segments[2])!
                 let tmp = c.MetadataCap.borrow()
@@ -88,8 +90,33 @@ access(all) contract interface BaseCollection: ViewResolver {
                 }
 
                 return tmp!.collectionInfo.getDisplay()
-            case Type<FlowtyDrops.DropResolver>():
-                return FlowtyDrops.DropResolver(cap: acct.capabilities.get<&{FlowtyDrops.ContainerPublic}>(FlowtyDrops.ContainerPublicPath))
+            case Type<MetadataViews.Royalties>():
+                let c = getAccount(addr).contracts.borrow<&{BaseCollection}>(name: segments[2])!
+                let tmp = c.MetadataCap.borrow()
+                if tmp == nil {
+                    return nil
+                }
+
+                return tmp!.collectionInfo.getDisplay()
+        }
+
+        // These views require the {BaseCollection} interface
+        if let c = getAccount(addr).contracts.borrow<&{BaseCollection}>(name: segments[2]) {
+            let tmp = c.MetadataCap.borrow()
+            if tmp == nil {
+                return nil
+            }
+
+            switch viewType {
+                case Type<MetadataViews.NFTCollectionDisplay>():
+                    return tmp!.collectionInfo.getDisplay()
+                case Type<MetadataViews.Royalties>():
+                    let keys = tmp!.metadata.keys
+                    if keys.length == 0 || keys.length > 1 {
+                        return nil
+                    }
+                    return tmp!.borrowMetadata(id: keys[0])!.getRoyalties()
+            }
         }
 
         return nil
