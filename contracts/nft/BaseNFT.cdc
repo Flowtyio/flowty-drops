@@ -93,9 +93,9 @@ access(all) contract interface BaseNFT: ViewResolver {
                             thumbnail: entry.getThumbnail()
                         )
                     case Type<MetadataViews.ExternalURL>():
-                        return entry.externalURL
+                        return entry.getExternalURL()
                     case Type<MetadataViews.Royalties>():
-                        return entry.royalties
+                        return entry.getRoyalties()
                 }
             }
 
