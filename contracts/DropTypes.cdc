@@ -203,8 +203,8 @@ access(all) contract DropTypes {
         }
 
         var royaltyRate = 0.0
-        if let tmp = resolver!.resolveContractView(resourceType: nftType, viewType: Type<MetadataViews.Royalties>()) {
-            let royalties = tmp as! MetadataViews.Royalties
+        if let tmpRoyalties = resolver!.resolveContractView(resourceType: nftType, viewType: Type<MetadataViews.Royalties>()) {
+            let royalties = tmpRoyalties as! MetadataViews.Royalties
             for r in royalties.getRoyalties() {
                 royaltyRate = royaltyRate + r.cut
             }
@@ -276,8 +276,8 @@ access(all) contract DropTypes {
             }
 
             var royaltyRate = 0.0
-            if let tmp = resolver!.resolveContractView(resourceType: nftType, viewType: Type<MetadataViews.Royalties>()) {
-                let royalties = tmp as! MetadataViews.Royalties
+            if let tmpRoyalties = resolver!.resolveContractView(resourceType: nftType, viewType: Type<MetadataViews.Royalties>()) {
+                let royalties = tmpRoyalties as! MetadataViews.Royalties
                 for r in royalties.getRoyalties() {
                     royaltyRate = royaltyRate + r.cut
                 }
