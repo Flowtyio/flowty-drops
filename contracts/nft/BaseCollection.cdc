@@ -23,7 +23,7 @@ access(all) contract interface BaseCollection: ViewResolver {
                 token.getType() == self.nftType: "unexpected nft type being deposited"
             }
 
-            destroy self.ownedNFTs.insert(key: token.uuid, <-token)
+            destroy self.ownedNFTs.insert(key: token.id, <-token)
         }
 
         access(all) view fun borrowNFT(_ id: UInt64): &{NonFungibleToken.NFT}? {

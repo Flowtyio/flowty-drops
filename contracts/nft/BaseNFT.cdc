@@ -42,7 +42,7 @@ access(all) contract interface BaseNFT: ViewResolver {
 
         access(all) fun resolveView(_ view: Type): AnyStruct? {
             if view == Type<MetadataViews.Serial>() {
-                return self.id
+                return MetadataViews.Serial(self.id)
             }
 
             let rt = self.getType()
@@ -75,7 +75,7 @@ access(all) contract interface BaseNFT: ViewResolver {
                         }
                     )
                 case Type<MetadataViews.NFTCollectionDisplay>():
-                    return md.collectionInfo.collectionDisplay
+                    return md.collectionInfo.getDisplay()
             }
 
             if let entry = md.borrowMetadata(id: self.metadataID) {
