@@ -81,19 +81,21 @@ access(all) contract interface BaseNFT: ViewResolver {
             if let entry = md.borrowMetadata(id: self.metadataID) {
                 switch view {
                     case Type<MetadataViews.Traits>():
-                        return entry.traits
+                        return entry.getTraits()
                     case Type<MetadataViews.Editions>():
-                        return entry.editions
+                        return entry.getEditions()
                     case Type<MetadataViews.Display>():
                         let num = (entry.editions?.infoList?.length ?? 0) > 0 ? entry.editions!.infoList[0].number : self.id
 
                         return MetadataViews.Display(
                             name: entry.name.concat(" #").concat(num.toString()),
                             description: entry.description,
-                            thumbnail: NFTMetadata.UriFile(entry.thumbnail.uri())
+                            thumbnail: entry.getThumbnail()
                         )
                     case Type<MetadataViews.ExternalURL>():
                         return entry.externalURL
+                    case Type<MetadataViews.Royalties>():
+                        return entry.royalties
                 }
             }
 
