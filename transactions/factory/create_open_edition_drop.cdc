@@ -14,11 +14,12 @@ import "FlowtyAddressVerifiers"
     
 transaction(contractName: String, managerInitialTokenBalance: UFix64, start: UInt64?, end: UInt64?, price: UFix64, paymentTokenType: String, phaseArgs: {String: String}, metadataArgs: {String: String}, collectionInfoArgs: {String: String}, dropDetailArgs: {String: String}) {
     prepare(acct: auth(Storage, Capabilities) &Account) {
-        if acct.storage.borrow<&AnyResource>(from: ContractManager.StoragePath) == nil {
+        if acct.storage.type(at: ContractManager.StoragePath) == nil {
             let v = acct.storage.borrow<auth(FungibleToken.Withdraw) &FlowToken.Vault>(from: /storage/flowTokenVault)!
             let tokens <- v.withdraw(amount: managerInitialTokenBalance) as! @FlowToken.Vault
 
-            acct.storage.save(<- ContractManager.createManager(tokens: <-tokens), to: ContractManager.StoragePath)
+            acct.storage.save(<- ContractManager.createManager(tokens: <-tokens, defaultRouterAddress: acct.address), to: ContractManager.StoragePath)
+            acct.storage.borrow<auth(ContractManager.Manage) &ContractManager.Manager>(from: ContractManager.StoragePath)!.onSave()
 
             acct.capabilities.publish(
                 acct.capabilities.storage.issue<&ContractManager.Manager>(ContractManager.StoragePath),
