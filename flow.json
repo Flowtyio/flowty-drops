@@ -12,27 +12,18 @@
     },
     "emulator-account": {
       "address": "f8d6e0586b0a20c7",
-      "key": {
-        "type": "file",
-        "location": "emulator-account.pkey"
-      }
+      "key": "f2e846bd4c1fbf17839ae59e111c6b1c98579eda7a841412f102d6621ec671cb"
     },
     "emulator-ft": {
       "address": "ee82856bf20e2aa6",
-      "key": {
-        "type": "file",
-        "location": "emulator-account.pkey"
-      }
+      "key": "f2e846bd4c1fbf17839ae59e111c6b1c98579eda7a841412f102d6621ec671cb"
     },
     "emulator-flowtoken": {
       "address": "0ae53cb6e3f42a79",
-      "key": {
-        "type": "file",
-        "location": "emulator-account.pkey"
-      }
+      "key": "f2e846bd4c1fbf17839ae59e111c6b1c98579eda7a841412f102d6621ec671cb"
     },
     "flowty-drops-testnet": {
-      "address": "0x772a10c786851a1b",
+      "address": "0x155bce6ac93f3e00",
       "key": {
         "type": "google-kms",
         "index": 0,
@@ -42,7 +33,7 @@
       }
     },
     "droptypes-testnet": {
-      "address": "0x22f23883bf122007",
+      "address": "0x53ff16309e318ae2",
       "key": {
         "type": "google-kms",
         "index": 0,

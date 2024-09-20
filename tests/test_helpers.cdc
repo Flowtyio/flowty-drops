@@ -35,7 +35,7 @@ access(all) fun expectScriptFailure(_ scriptName: String, _ arguments: [AnyStruc
     return scriptResult.error!.message
 }
 
-access(all) fun txExecutor(_ txName: String, _ signers: [Test.TestAccount], _ arguments: [AnyStruct], _ expectedError: String?, _ expectedErrorType: ErrorType?): Test.TransactionResult {
+access(all) fun txExecutor(_ txName: String, _ signers: [Test.TestAccount], _ arguments: [AnyStruct]): Test.TransactionResult {
     let txCode = loadCode(txName, "transactions")
 
     let authorizers: [Address] = []
@@ -173,7 +173,7 @@ access(all) fun deploy(_ name: String, _ path: String, _ arguments: [AnyStruct])
 }
 
 access(all) fun heartbeat() {
-    txExecutor("util/heartbeat.cdc", [serviceAccount], [], nil, nil)
+    txExecutor("util/heartbeat.cdc", [serviceAccount], [])
 }
 
 access(all) fun getCurrentTime(): UFix64 {
@@ -205,7 +205,7 @@ access(all) fun mintFromDrop(
         nftIdentifier,
         commissionReceiver
     ]
-    txExecutor("drops/mint.cdc", [minter], args, nil, nil)
+    txExecutor("drops/mint.cdc", [minter], args)
 }
 
 access(all) fun getDropIDs(
@@ -227,7 +227,7 @@ access(all) fun createEndlessOpenEditionDrop(
 ): UInt64 {
     txExecutor("drops/add_endless_open_edition.cdc", [acct], [
         name, description, ipfsCid, ipfsPath, price, paymentIdentifier, minterControllerID, nftTypeIdentifier
-    ], nil, nil)
+    ])
     
     let e = Test.eventsOfType(Type<FlowtyDrops.DropAdded>()).removeLast() as! FlowtyDrops.DropAdded
     return e.id
@@ -248,18 +248,18 @@ access(all) fun createTimebasedOpenEditionDrop(
 ): UInt64 {
     txExecutor("drops/add_time_based_open_edition.cdc", [acct], [
         name, description, ipfsCid, ipfsPath, price, paymentIdentifier, startUnix, endUnix, minterControllerID, nftTypeIdentifier
-    ], nil, nil)
+    ])
 
     let e = Test.eventsOfType(Type<FlowtyDrops.DropAdded>()).removeLast() as! FlowtyDrops.DropAdded
     return e.id
 }
 
 access(all) fun sendFlowTokens(fromAccount: Test.TestAccount, toAccount: Test.TestAccount, amount: UFix64) {
-    txExecutor("util/send_flow_tokens.cdc", [fromAccount], [toAccount.address, amount], nil, nil)
+    txExecutor("util/send_flow_tokens.cdc", [fromAccount], [toAccount.address, amount])
 }
 
 access(all) fun mintFlowTokens(_ acct: Test.TestAccount, _ amount: UFix64) {
-    txExecutor("flow-token/mint.cdc", [serviceAccount], [acct.address, amount], nil, nil)
+    txExecutor("flow-token/mint.cdc", [serviceAccount], [acct.address, amount])
 }
 
 access(all) fun flowTokenIdentifier(): String {
