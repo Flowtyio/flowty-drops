@@ -12,7 +12,7 @@ access(all) fun setup() {
 }
 
 access(all) fun afterEach() {
-    txExecutor("drops/remove_all_drops.cdc", [openEditionAccount], [], nil, nil)
+    txExecutor("drops/remove_all_drops.cdc", [openEditionAccount], [])
 }
 
 access(all) fun testImports() {
@@ -91,7 +91,7 @@ access(all) fun test_OpenEditionNFT_EditPhaseDetails() {
     let currentTime = getCurrentTime()
     let newStart = UInt64(currentTime + 5.0)
 
-    txExecutor("drops/edit_timebased_phase_start_and_end.cdc", [openEditionAccount], [dropID, 0, newStart, newStart + 5], nil, nil)
+    txExecutor("drops/edit_timebased_phase_start_and_end.cdc", [openEditionAccount], [dropID, 0, newStart, newStart + 5])
     Test.assertEqual(false, hasDropPhaseStarted(nftTypeIdentifier: openEditionNftIdentifier(), dropID: dropID, phaseIndex: 0))
     Test.assertEqual(false, hasDropPhaseEnded(nftTypeIdentifier: openEditionNftIdentifier(), dropID: dropID, phaseIndex: 0))
 
@@ -109,14 +109,14 @@ access(all) fun test_OpenEditionNFT_EditPrice() {
     let dropID = createDefaultTimeBasedOpenEditionDrop()
     Test.assertEqual(1.0, getPriceAtPhase(nftTypeIdentifier: openEditionNftIdentifier(), dropID: dropID, phaseIndex: 0, minter: openEditionAccount.address, numToMint: 1, paymentIdentifier: flowTokenIdentifier()))
 
-    txExecutor("drops/edit_flat_price.cdc", [openEditionAccount], [dropID, 0, 2.0], nil, nil)
+    txExecutor("drops/edit_flat_price.cdc", [openEditionAccount], [dropID, 0, 2.0])
     Test.assertEqual(2.0, getPriceAtPhase(nftTypeIdentifier: openEditionNftIdentifier(), dropID: dropID, phaseIndex: 0, minter: openEditionAccount.address, numToMint: 1, paymentIdentifier: flowTokenIdentifier()))
 }
 
 access(all) fun test_OpenEditionNFT_EditMaxPerMint() {
     let dropID = createDefaultTimeBasedOpenEditionDrop()
     Test.assertEqual(true, canMintAtPhase(nftTypeIdentifier: openEditionNftIdentifier(), dropID: dropID, phaseIndex: 0, minter: openEditionAccount.address, numToMint: 10, totalMinted: 0, paymentIdentifier: flowTokenIdentifier()))
-    txExecutor("drops/edit_address_verifier_max_per_mint.cdc", [openEditionAccount], [dropID, 0, 5], nil, nil)
+    txExecutor("drops/edit_address_verifier_max_per_mint.cdc", [openEditionAccount], [dropID, 0, 5])
 
     Test.assertEqual(false, canMintAtPhase(nftTypeIdentifier: openEditionNftIdentifier(), dropID: dropID, phaseIndex: 0, minter: openEditionAccount.address, numToMint: 10, totalMinted: 0, paymentIdentifier: flowTokenIdentifier()))
     Test.assertEqual(true, canMintAtPhase(nftTypeIdentifier: openEditionNftIdentifier(), dropID: dropID, phaseIndex: 0, minter: openEditionAccount.address, numToMint: 5, totalMinted: 0, paymentIdentifier: flowTokenIdentifier()))
@@ -131,13 +131,13 @@ access(all) fun test_OpenEditionNFT_GetActivePhases() {
 access(all) fun test_OpenEditionNFT_addPhase() {
     let dropID = createDefaultTimeBasedOpenEditionDrop()
 
-    txExecutor("drops/add_free_phase.cdc", [openEditionAccount], [dropID, nil, nil, "https://example.com/fake_image.jpg"], nil, nil)
+    txExecutor("drops/add_free_phase.cdc", [openEditionAccount], [dropID, "https://example.com/fake_image.jpg"])
     let phaseEvent = Test.eventsOfType(Type<FlowtyDrops.PhaseAdded>()).removeLast() as! FlowtyDrops.PhaseAdded
 
     var activePhaseIDs = scriptExecutor("get_active_phases.cdc", [openEditionNftIdentifier(), dropID])! as! [UInt64]
     Test.assert(activePhaseIDs.contains(phaseEvent.id), message: "unexpected active phase length")
 
-    txExecutor("drops/remove_last_phase.cdc", [openEditionAccount], [dropID, nil, nil], nil, nil)
+    txExecutor("drops/remove_last_phase.cdc", [openEditionAccount], [dropID])
     activePhaseIDs = scriptExecutor("get_active_phases.cdc", [openEditionNftIdentifier(), dropID])! as! [UInt64]
     Test.assert(!activePhaseIDs.contains(phaseEvent.id), message: "unexpected active phase length")
 }
@@ -251,7 +251,7 @@ access(all) fun mintDrop(
 ): [UInt64] {
     txExecutor("drops/mint.cdc", [minter], [
         nftTypeIdentifier, numToMint, totalCost, paymentIdentifier, paymentStoragePath, paymentReceiverPath, dropID, dropPhaseIndex, nftIdentifier, commissionAddress
-    ], nil, nil)
+    ])
 
     let ids: [UInt64] = []
     let events = Test.eventsOfType(Type<FlowtyDrops.Minted>())
