@@ -131,13 +131,13 @@ access(all) fun test_OpenEditionNFT_GetActivePhases() {
 access(all) fun test_OpenEditionNFT_addPhase() {
     let dropID = createDefaultTimeBasedOpenEditionDrop()
 
-    txExecutor("drops/add_free_phase.cdc", [openEditionAccount], [dropID, "https://example.com/fake_image.jpg"])
+    txExecutor("drops/add_free_phase.cdc", [openEditionAccount], [dropID, nil, nil, "https://example.com/fake_image.jpg"])
     let phaseEvent = Test.eventsOfType(Type<FlowtyDrops.PhaseAdded>()).removeLast() as! FlowtyDrops.PhaseAdded
 
     var activePhaseIDs = scriptExecutor("get_active_phases.cdc", [openEditionNftIdentifier(), dropID])! as! [UInt64]
     Test.assert(activePhaseIDs.contains(phaseEvent.id), message: "unexpected active phase length")
 
-    txExecutor("drops/remove_last_phase.cdc", [openEditionAccount], [dropID])
+    txExecutor("drops/remove_last_phase.cdc", [openEditionAccount], [dropID, nil, nil])
     activePhaseIDs = scriptExecutor("get_active_phases.cdc", [openEditionNftIdentifier(), dropID])! as! [UInt64]
     Test.assert(!activePhaseIDs.contains(phaseEvent.id), message: "unexpected active phase length")
 }
