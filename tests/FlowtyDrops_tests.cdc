@@ -61,7 +61,6 @@ access(all) fun test_OpenEditionNFT_mint() {
         paymentReceiverPath: flowTokenReceiverPath,
         dropID: dropID,
         dropPhaseIndex: 0,
-        nftIdentifier: Type<@OpenEditionNFT.NFT>().identifier,
         commissionAddress: flowtyDropsAccount.address
     )
 
@@ -164,7 +163,6 @@ access(all) fun test_OpenEditionNFT_getDropSummary() {
         paymentReceiverPath: flowTokenReceiverPath,
         dropID: dropID,
         dropPhaseIndex: 0,
-        nftIdentifier: Type<@OpenEditionNFT.NFT>().identifier,
         commissionAddress: flowtyDropsAccount.address
     )
 
@@ -246,11 +244,10 @@ access(all) fun mintDrop(
     paymentReceiverPath: PublicPath,
     dropID: UInt64,
     dropPhaseIndex: Int,
-    nftIdentifier: String,
     commissionAddress: Address
 ): [UInt64] {
     txExecutor("drops/mint.cdc", [minter], [
-        nftTypeIdentifier, numToMint, totalCost, paymentIdentifier, paymentStoragePath, paymentReceiverPath, dropID, dropPhaseIndex, nftIdentifier, commissionAddress
+        nftTypeIdentifier, numToMint, totalCost, paymentIdentifier, paymentStoragePath, paymentReceiverPath, dropID, dropPhaseIndex, commissionAddress
     ])
 
     let ids: [UInt64] = []
