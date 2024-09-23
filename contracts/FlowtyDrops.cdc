@@ -5,11 +5,15 @@ import "AddressUtils"
 import "FungibleTokenMetadataViews"
 import "FungibleTokenRouter"
 
+// FlowtyDrops is a contract to help collections manage their primary sale needs on flow.
+// Multiple drops can be made for a single contract (like how TopShot has had lots of pack drops),
+// and can be split into phases to represent different behaviors over the course of a drop
 access(all) contract FlowtyDrops {
     access(all) let ContainerStoragePath: StoragePath
     access(all) let ContainerPublicPath: PublicPath
 
     access(all) event DropAdded(address: Address, id: UInt64, name: String, description: String, imageUrl: String, start: UInt64?, end: UInt64?, nftType: String)
+    access(all) event DropRemoved(address: Address, id: UInt64)
     access(all) event Minted(address: Address, dropID: UInt64, phaseID: UInt64, nftID: UInt64, nftType: String)
     access(all) event PhaseAdded(dropID: UInt64, dropAddress: Address, id: UInt64, index: Int, activeCheckerType: String, pricerType: String, addressVerifierType: String)
     access(all) event PhaseRemoved(dropID: UInt64, dropAddress: Address, id: UInt64)
@@ -75,6 +79,8 @@ access(all) contract FlowtyDrops {
         }
     }
 
+    // The primary resource of this contract. A drop has some top-level details, and some phase-specific details which are encapsulated
+    // by each phase.
     access(all) resource Drop: DropPublic {
         access(all) event ResourceDestroyed(
             uuid: UInt64 = self.uuid,
@@ -87,8 +93,11 @@ access(all) contract FlowtyDrops {
         access(self) let phases: @[Phase]
         // the details of a drop. This includes things like display information and total number of mints
         access(self) let details: DropDetails
+        // capability to mint nfts with. Regardless of where a drop is hosted, the minter itself is what is responsible for creating nfts
+        // and is used by the drop's mint method.
         access(self) let minterCap: Capability<&{Minter}>
 
+        // general-purpose property bags which are needed to ensure extensibility of this resource
         access(all) let data: {String: AnyStruct}
         access(all) let resources: @{String: AnyResource}
 
@@ -116,6 +125,7 @@ access(all) contract FlowtyDrops {
             )
 
             let paymentAmount = phase.details.pricer.getPrice(num: amount, paymentTokenType: payment.getType(), minter: receiverCap.address)
+            assert(payment.balance >= paymentAmount, message: "payment balance is lower than payment amount")
             let withdrawn <- payment.withdraw(amount: paymentAmount) // make sure that we have a fresh vault resource
 
             // take commission
@@ -124,13 +134,14 @@ access(all) contract FlowtyDrops {
                 commissionReceiver!.borrow()!.deposit(from: <-commission)
             }
 
-            assert(phase.details.pricer.getPrice(num: amount, paymentTokenType: withdrawn.getType(), minter: receiverCap.address) * (1.0 - self.details.commissionRate) == withdrawn.balance, message: "incorrect payment amount")
+            // The balance of the payment sent to the creator is equal to the paymentAmount - fees
+            assert(paymentAmount * (1.0 - self.details.commissionRate) == withdrawn.balance, message: "incorrect payment amount")
             assert(phase.details.pricer.getPaymentTypes().contains(withdrawn.getType()), message: "unsupported payment type")
+            assert(phase.details.activeChecker.hasStarted() && !phase.details.activeChecker.hasEnded(), message: "phase is not active")
 
             // mint the nfts
             let minter = self.minterCap.borrow() ?? panic("minter capability could not be borrowed")
             let mintedNFTs: @[{NonFungibleToken.NFT}] <- minter.mint(payment: <-withdrawn, amount: amount, phase: phase, data: data)
-            assert(phase.details.activeChecker.hasStarted() && !phase.details.activeChecker.hasEnded(), message: "phase is not active")
             assert(mintedNFTs.length == amount, message: "incorrect number of items returned")
 
             // distribute to receiver
@@ -319,6 +330,7 @@ access(all) contract FlowtyDrops {
         }
     }
 
+    // The AddressVerifier interface is responsible for determining whether an address is permitted to mint or not
     access(all) struct interface AddressVerifier {
         access(all) fun canMint(addr: Address, num: Int, totalMinted: Int, data: {String: AnyStruct}): Bool {
             return true
@@ -333,12 +345,15 @@ access(all) contract FlowtyDrops {
         }
     }
 
+    // The pricer interface is responsible for the cost of a mint. It can vary by phase
     access(all) struct interface Pricer {
         access(all) fun getPrice(num: Int, paymentTokenType: Type, minter: Address?): UFix64
         access(all) fun getPaymentTypes(): [Type]
     }
 
     access(all) resource interface Minter {
+        // mint is only able to be called either by this contract (FlowtyDrops) or the implementing contract.
+        // In its default implementation, it is assumed that the receiver capability for payment is the FungibleTokenRouter
         access(contract) fun mint(payment: @{FungibleToken.Vault}, amount: Int, phase: &FlowtyDrops.Phase, data: {String: AnyStruct}): @[{NonFungibleToken.NFT}] {
             let resourceAddress = AddressUtils.parseAddress(self.getType())!
             let receiver = getAccount(resourceAddress).capabilities.get<&{FungibleToken.Receiver}>(FungibleTokenRouter.PublicPath).borrow()
@@ -356,9 +371,11 @@ access(all) contract FlowtyDrops {
             return <- nfts
         }
 
+        // required so that the minter interface has a way to create NFTs on its implementing resource
         access(contract) fun createNextNFT(): @{NonFungibleToken.NFT}
     }
     
+    // Struct to wrap obtaining a Drop container. Intended for use with the ViewResolver contract interface
     access(all) struct DropResolver {
         access(self) let cap: Capability<&{ContainerPublic}>
 
@@ -380,7 +397,7 @@ access(all) contract FlowtyDrops {
         access(all) fun getIDs(): [UInt64]
     }
 
-    // Contains drops. 
+    // Container holds drops so that one address can host more than one drop at once
     access(all) resource Container: ContainerPublic {
         access(self) let drops: @{UInt64: Drop}
 
@@ -413,6 +430,7 @@ access(all) contract FlowtyDrops {
                 self.drops.containsKey(id): "drop was not found"
             }
 
+            emit DropRemoved(address: self.owner!.address, id: id)
             return <- self.drops.remove(key: id)!
         }
 
