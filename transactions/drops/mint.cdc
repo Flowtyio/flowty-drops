@@ -15,7 +15,6 @@ transaction(
     paymentReceiverPath: PublicPath,
     dropID: UInt64,
     dropPhaseIndex: Int,
-    nftIdentifier: String,
     commissionAddress: Address
 ) {
     prepare(acct: auth(Capabilities, Storage) &Account) {
@@ -41,8 +40,6 @@ transaction(
         let receiverCap = acct.capabilities.get<&{NonFungibleToken.CollectionPublic}>(collectionData.publicPath)
         assert(receiverCap.check(), message: "invalid receiver capability")
 
-        let expectedNftType = CompositeType(nftIdentifier) ?? panic("invalid nft identifier")
-
         let vault = acct.storage.borrow<auth(FungibleToken.Withdraw) &{FungibleToken.Provider}>(from: paymentStoragePath)
             ?? panic("could not borrow token provider")
 
@@ -59,7 +56,7 @@ transaction(
             payment: <-paymentVault,
             amount: numToMint,
             phaseIndex: dropPhaseIndex,
-            expectedType: expectedNftType,
+            expectedType: nftType,
             receiverCap: receiverCap,
             commissionReceiver: commissionReceiver,
             data: {}
