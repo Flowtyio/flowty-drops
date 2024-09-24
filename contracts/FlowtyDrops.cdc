@@ -9,6 +9,9 @@ import "FungibleTokenRouter"
 // Multiple drops can be made for a single contract (like how TopShot has had lots of pack drops),
 // and can be split into phases to represent different behaviors over the course of a drop
 access(all) contract FlowtyDrops {
+    // The total number of nfts minted by this contract
+    access(all) var TotalMinted: UInt64
+
     access(all) let ContainerStoragePath: StoragePath
     access(all) let ContainerPublicPath: PublicPath
 
@@ -150,6 +153,8 @@ access(all) contract FlowtyDrops {
             let minter = self.minterCap.borrow() ?? panic("minter capability could not be borrowed")
             let mintedNFTs: @[{NonFungibleToken.NFT}] <- minter.mint(payment: <-withdrawn, amount: amount, phase: phase, data: data)
             assert(mintedNFTs.length == amount, message: "incorrect number of items returned")
+
+            FlowtyDrops.TotalMinted = FlowtyDrops.TotalMinted + UInt64(mintedNFTs.length)
 
             // distribute to receiver
             let receiver = receiverCap.borrow() ?? panic("could not borrow receiver capability")
@@ -489,5 +494,7 @@ access(all) contract FlowtyDrops {
 
         self.ContainerStoragePath = StoragePath(identifier: containerIdentifier)!
         self.ContainerPublicPath = PublicPath(identifier: containerIdentifier)!
+
+        self.TotalMinted = 0
     }
 }

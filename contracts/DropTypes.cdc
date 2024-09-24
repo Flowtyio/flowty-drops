@@ -207,7 +207,7 @@ access(all) contract DropTypes {
                 totalMinted: minter != nil ? dropDetails.minters[minter!] : nil,
                 minter: minter,
                 quantity: quantity,
-                paymentIdentifiers: paymentIdentifiers
+                paymentIdentifiers: paymentIdentifiers.length > 0 ? paymentIdentifiers : dropDetails.paymentTokenTypes.keys
             )
             phaseSummaries.append(summary)
         }
