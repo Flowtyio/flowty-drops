@@ -23,7 +23,7 @@
       "key": "f2e846bd4c1fbf17839ae59e111c6b1c98579eda7a841412f102d6621ec671cb"
     },
     "flowty-drops-testnet": {
-      "address": "0x155bce6ac93f3e00",
+      "address": "0x5d06d5357cdf8063",
       "key": {
         "type": "google-kms",
         "index": 0,
@@ -33,7 +33,7 @@
       }
     },
     "droptypes-testnet": {
-      "address": "0x53ff16309e318ae2",
+      "address": "0xa8d83f18fd8ba80a",
       "key": {
         "type": "google-kms",
         "index": 0,

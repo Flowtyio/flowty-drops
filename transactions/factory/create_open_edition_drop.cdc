@@ -76,7 +76,8 @@ transaction(contractName: String, managerInitialTokenBalance: UFix64, start: UIn
             ),
             medias: nil,
             commissionRate: 0.05,
-            nftType: nftType
+            nftType: nftType,
+            paymentTokenTypes: {paymentTokenType: true}
         )
 
         let phaseDetails = FlowtyDrops.PhaseDetails(
