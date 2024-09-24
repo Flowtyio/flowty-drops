@@ -298,6 +298,13 @@
         "mainnet": "0xd8a7e05a7ac670c0",
         "testing": "0x0000000000000008"
       }
+    },
+    "ExampleToken": {
+      "source": "./node_modules/@flowtyio/flow-contracts/contracts/example/ExampleToken.cdc",
+      "aliases": {
+        "emulator": "0xf8d6e0586b0a20c7",
+        "testing": "0x0000000000000008"
+      }
     }
   },
   "deployments": {
@@ -332,7 +339,8 @@
         "CapabilityDelegator",
         "CapabilityFilter",
         "HybridCustody",
-        "FTAllFactory"
+        "FTAllFactory",
+        "ExampleToken"
       ],
       "emulator-ft": [
         "FungibleToken",

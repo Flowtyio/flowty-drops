@@ -90,6 +90,8 @@ access(all) let openEditionAccount = Test.getAccount(Account0x7)
 access(all) let exampleTokenAccount = Test.getAccount(Account0x8)
 
 access(all) fun deployAll() {
+    deploy("ExampleToken", "../node_modules/@flowtyio/flow-contracts/contracts/example/ExampleToken.cdc", [])
+
     deploy("ArrayUtils", "../node_modules/@flowtyio/flow-contracts/contracts/flow-utils/ArrayUtils.cdc", [])
     deploy("StringUtils", "../node_modules/@flowtyio/flow-contracts/contracts/flow-utils/StringUtils.cdc", [])
     deploy("AddressUtils", "../node_modules/@flowtyio/flow-contracts/contracts/flow-utils/AddressUtils.cdc", [])

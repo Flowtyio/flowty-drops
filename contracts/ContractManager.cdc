@@ -171,7 +171,7 @@ access(all) contract ContractManager {
 
             let ftContract = getAccount(address).contracts.borrow<&{FungibleToken}>(name: name)
                 ?? panic("vault contract does not implement FungibleToken")
-            let data = ftContract.resolveContractView(resourceType: vaultType, viewType: Type<FungibleTokenMetadataViews.FTVaultData>()) as! FungibleTokenMetadataViews.FTVaultData
+            let data = ftContract.resolveContractView(resourceType: vaultType, viewType: Type<FungibleTokenMetadataViews.FTVaultData>())! as! FungibleTokenMetadataViews.FTVaultData
 
             let acct = self.acct.borrow()!
             if acct.storage.type(at: data.storagePath) == nil {

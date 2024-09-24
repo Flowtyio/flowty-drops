@@ -1,4 +1,3 @@
-import "FlowToken"
 import "FungibleToken"
 import "HybridCustody"
 import "ContractManager"
