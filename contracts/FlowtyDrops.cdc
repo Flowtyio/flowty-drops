@@ -17,7 +17,7 @@ access(all) contract FlowtyDrops {
 
     access(all) event DropAdded(address: Address, id: UInt64, name: String, description: String, imageUrl: String, start: UInt64?, end: UInt64?, nftType: String)
     access(all) event DropRemoved(address: Address, id: UInt64)
-    access(all) event Minted(address: Address, dropID: UInt64, phaseID: UInt64, nftID: UInt64, nftType: String)
+    access(all) event Minted(address: Address, dropID: UInt64, phaseID: UInt64, nftID: UInt64, nftType: String, totalMinted: UInt64)
     access(all) event PhaseAdded(dropID: UInt64, dropAddress: Address, id: UInt64, index: Int, activeCheckerType: String, pricerType: String, addressVerifierType: String)
     access(all) event PhaseRemoved(dropID: UInt64, dropAddress: Address, id: UInt64)
 
@@ -154,8 +154,6 @@ access(all) contract FlowtyDrops {
             let mintedNFTs: @[{NonFungibleToken.NFT}] <- minter.mint(payment: <-withdrawn, amount: amount, phase: phase, data: data)
             assert(mintedNFTs.length == amount, message: "incorrect number of items returned")
 
-            FlowtyDrops.TotalMinted = FlowtyDrops.TotalMinted + UInt64(mintedNFTs.length)
-
             // distribute to receiver
             let receiver = receiverCap.borrow() ?? panic("could not borrow receiver capability")
             self.details.addMinted(num: mintedNFTs.length, addr: receiverCap.address)
@@ -164,7 +162,8 @@ access(all) contract FlowtyDrops {
                 let nft <- mintedNFTs.removeFirst()
 
                 let nftType = nft.getType()
-                emit Minted(address: receiverCap.address, dropID: self.uuid, phaseID: phase.uuid, nftID: nft.id, nftType: nftType.identifier)
+                FlowtyDrops.TotalMinted = FlowtyDrops.TotalMinted + 1
+                emit Minted(address: receiverCap.address, dropID: self.uuid, phaseID: phase.uuid, nftID: nft.id, nftType: nftType.identifier, totalMinted: FlowtyDrops.TotalMinted)
 
                 // validate that every nft is the right type
                 assert(nftType == expectedType, message: "unexpected nft type was minted")
