@@ -259,7 +259,8 @@
       "aliases": {
         "emulator": "0xf8d6e0586b0a20c7",
         "testnet": "0x294e44e1ec6993c6",
-        "mainnet": "0xd8a7e05a7ac670c0"
+        "mainnet": "0xd8a7e05a7ac670c0",
+        "testing": "0x0000000000000008"
       }
     },
     "CapabilityDelegator": {
@@ -267,7 +268,8 @@
       "aliases": {
         "emulator": "0xf8d6e0586b0a20c7",
         "testnet": "0x294e44e1ec6993c6",
-        "mainnet": "0xd8a7e05a7ac670c0"
+        "mainnet": "0xd8a7e05a7ac670c0",
+        "testing": "0x0000000000000008"
       }
     },
     "CapabilityFilter": {
@@ -275,7 +277,8 @@
       "aliases": {
         "emulator": "0xf8d6e0586b0a20c7",
         "testnet": "0x294e44e1ec6993c6",
-        "mainnet": "0xd8a7e05a7ac670c0"
+        "mainnet": "0xd8a7e05a7ac670c0",
+        "testing": "0x0000000000000008"
       }
     },
     "HybridCustody": {
@@ -283,7 +286,17 @@
       "aliases": {
         "emulator": "0xf8d6e0586b0a20c7",
         "testnet": "0x294e44e1ec6993c6",
-        "mainnet": "0xd8a7e05a7ac670c0"
+        "mainnet": "0xd8a7e05a7ac670c0",
+        "testing": "0x0000000000000008"
+      }
+    },
+    "FTAllFactory": {
+      "source": "./node_modules/@flowtyio/flow-contracts/contracts/hybrid-custody/factories/FTAllFactory.cdc",
+      "aliases": {
+        "emulator": "0xf8d6e0586b0a20c7",
+        "testnet": "0x294e44e1ec6993c6",
+        "mainnet": "0xd8a7e05a7ac670c0",
+        "testing": "0x0000000000000008"
       }
     }
   },
@@ -318,7 +331,8 @@
         "CapabilityFactory",
         "CapabilityDelegator",
         "CapabilityFilter",
-        "HybridCustody"
+        "HybridCustody",
+        "FTAllFactory"
       ],
       "emulator-ft": [
         "FungibleToken",

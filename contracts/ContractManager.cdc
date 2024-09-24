@@ -135,22 +135,19 @@ access(all) contract ContractManager {
 
             // Flow maintains a set of pre-configured filter and factory resources that we will use:
             // https://github.com/onflow/hybrid-custody?tab=readme-ov-file#hosted-capabilityfactory--capabilityfilter-implementations
-            var factoryAddress: Address? = nil
-            var filterAddress: Address? = nil
-            let network = AddressUtils.getNetworkFromAddress(ContractManager.account.address)!
-            switch network {
-                case "EMULATOR":
-                    factoryAddress = ContractManager.account.address
-                    filterAddress = ContractManager.account.address
-                    break
-                case "TESTNET":
-                    factoryAddress = Address(0x1b7fa5972fcb8af5)
-                    filterAddress = Address(0xe2664be06bb0fe62)
-                    break
-                case "MAINNET":
-                    factoryAddress = Address(0x071d382668250606)
-                    filterAddress = Address(0x78e93a79b05d0d7d)
-                    break
+            var factoryAddress = ContractManager.account.address
+            var filterAddress = ContractManager.account.address
+            if let network = AddressUtils.getNetworkFromAddress(ContractManager.account.address) {
+                switch network {
+                    case "TESTNET":
+                        factoryAddress = Address(0x1b7fa5972fcb8af5)
+                        filterAddress = Address(0xe2664be06bb0fe62)
+                        break
+                    case "MAINNET":
+                        factoryAddress = Address(0x071d382668250606)
+                        filterAddress = Address(0x78e93a79b05d0d7d)
+                        break
+                }
             }
 
             owned.publishToParent(

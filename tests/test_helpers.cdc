@@ -95,6 +95,12 @@ access(all) fun deployAll() {
     deploy("AddressUtils", "../node_modules/@flowtyio/flow-contracts/contracts/flow-utils/AddressUtils.cdc", [])
     deploy("FungibleTokenRouter", "../node_modules/@flowtyio/flow-contracts/contracts/fungible-token-router/FungibleTokenRouter.cdc", [])
 
+    deploy("CapabilityFilter", "../node_modules/@flowtyio/flow-contracts/contracts/hybrid-custody/CapabilityFilter.cdc", [])
+    deploy("CapabilityFactory", "../node_modules/@flowtyio/flow-contracts/contracts/hybrid-custody/CapabilityFactory.cdc", [])
+    deploy("CapabilityDelegator", "../node_modules/@flowtyio/flow-contracts/contracts/hybrid-custody/CapabilityDelegator.cdc", [])
+    deploy("FTAllFactory", "../node_modules/@flowtyio/flow-contracts/contracts/hybrid-custody/factories/FTAllFactory.cdc", [])
+    deploy("HybridCustody", "../node_modules/@flowtyio/flow-contracts/contracts/hybrid-custody/HybridCustody.cdc", [])
+
     deploy("FlowtyDrops", "../contracts/FlowtyDrops.cdc", [])
     deploy("NFTMetadata", "../contracts/nft/NFTMetadata.cdc", [])
     deploy("BaseCollection", "../contracts/nft/BaseCollection.cdc", [])
@@ -165,6 +171,8 @@ access(all) fun deployAll() {
         "data": data
     }
     deploy("OpenEditionNFT", "../contracts/nft/OpenEditionNFT.cdc", [params, Type<OpenEditionInitializer>().identifier])
+
+    txExecutor("setup/configure_hybrid_custody_filter_and_factory.cdc", [flowtyDropsAccount], [])
 }
 
 access(all) fun deploy(_ name: String, _ path: String, _ arguments: [AnyStruct]) {
