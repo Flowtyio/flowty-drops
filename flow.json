@@ -253,6 +253,58 @@
         "testnet": "0x83231f90a288bc35",
         "mainnet": "0x707c0b39a8d689cb"
       }
+    },
+    "CapabilityFactory": {
+      "source": "./node_modules/@flowtyio/flow-contracts/contracts/hybrid-custody/CapabilityFactory.cdc",
+      "aliases": {
+        "emulator": "0xf8d6e0586b0a20c7",
+        "testnet": "0x294e44e1ec6993c6",
+        "mainnet": "0xd8a7e05a7ac670c0",
+        "testing": "0x0000000000000008"
+      }
+    },
+    "CapabilityDelegator": {
+      "source": "./node_modules/@flowtyio/flow-contracts/contracts/hybrid-custody/CapabilityDelegator.cdc",
+      "aliases": {
+        "emulator": "0xf8d6e0586b0a20c7",
+        "testnet": "0x294e44e1ec6993c6",
+        "mainnet": "0xd8a7e05a7ac670c0",
+        "testing": "0x0000000000000008"
+      }
+    },
+    "CapabilityFilter": {
+      "source": "./node_modules/@flowtyio/flow-contracts/contracts/hybrid-custody/CapabilityFilter.cdc",
+      "aliases": {
+        "emulator": "0xf8d6e0586b0a20c7",
+        "testnet": "0x294e44e1ec6993c6",
+        "mainnet": "0xd8a7e05a7ac670c0",
+        "testing": "0x0000000000000008"
+      }
+    },
+    "HybridCustody": {
+      "source": "./node_modules/@flowtyio/flow-contracts/contracts/hybrid-custody/HybridCustody.cdc",
+      "aliases": {
+        "emulator": "0xf8d6e0586b0a20c7",
+        "testnet": "0x294e44e1ec6993c6",
+        "mainnet": "0xd8a7e05a7ac670c0",
+        "testing": "0x0000000000000008"
+      }
+    },
+    "FTAllFactory": {
+      "source": "./node_modules/@flowtyio/flow-contracts/contracts/hybrid-custody/factories/FTAllFactory.cdc",
+      "aliases": {
+        "emulator": "0xf8d6e0586b0a20c7",
+        "testnet": "0x294e44e1ec6993c6",
+        "mainnet": "0xd8a7e05a7ac670c0",
+        "testing": "0x0000000000000008"
+      }
+    },
+    "ExampleToken": {
+      "source": "./node_modules/@flowtyio/flow-contracts/contracts/example/ExampleToken.cdc",
+      "aliases": {
+        "emulator": "0xf8d6e0586b0a20c7",
+        "testing": "0x0000000000000008"
+      }
     }
   },
   "deployments": {
@@ -282,7 +334,13 @@
         "ArrayUtils",
         "StringUtils",
         "AddressUtils",
-        "FungibleTokenRouter"
+        "FungibleTokenRouter",
+        "CapabilityFactory",
+        "CapabilityDelegator",
+        "CapabilityFilter",
+        "HybridCustody",
+        "FTAllFactory",
+        "ExampleToken"
       ],
       "emulator-ft": [
         "FungibleToken",
