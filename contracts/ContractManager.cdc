@@ -80,6 +80,9 @@ access(all) contract ContractManager {
 
             acct.storage.borrow<&{FungibleToken.Receiver}>(from: /storage/flowTokenVault)!.deposit(from: <-tokens)
 
+            // setup a provider capability so that tokens are accessible via hybrid custody
+            acct.capabilities.storage.issue<auth(FungibleToken.Withdraw) &{FungibleToken.Vault}>(/storage/flowTokenVault)
+
             let router <- FungibleTokenRouter.createRouter(defaultAddress: defaultRouterAddress)
             acct.storage.save(<-router, to: FungibleTokenRouter.StoragePath)
 
