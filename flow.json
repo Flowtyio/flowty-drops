@@ -22,6 +22,16 @@
       "address": "0ae53cb6e3f42a79",
       "key": "f2e846bd4c1fbf17839ae59e111c6b1c98579eda7a841412f102d6621ec671cb"
     },
+    "sample-nfts-testnet": {
+      "address": "0xd92e02ee8881d9c1",
+      "key": {
+        "type": "google-kms",
+        "index": 0,
+        "signatureAlgorithm": "ECDSA_P256",
+        "hashAlgorithm": "SHA2_256",
+        "resourceID": "projects/flowty-test/locations/global/keyRings/flow/cryptoKeys/flowty-drops/cryptoKeyVersions/1"
+      }
+    },
     "flowty-drops-testnet": {
       "address": "0xea3e1b74e99dc035",
       "key": {
@@ -60,16 +70,6 @@
         "signatureAlgorithm": "ECDSA_P256",
         "hashAlgorithm": "SHA2_256",
         "resourceID": "projects/flowty-prod/locations/global/keyRings/flow/cryptoKeys/flowty-drops/cryptoKeyVersions/1"
-      }
-    },
-    "sample-nfts-testnet": {
-      "address": "0xd92e02ee8881d9c1",
-      "key": {
-        "type": "google-kms",
-        "index": 0,
-        "signatureAlgorithm": "ECDSA_P256",
-        "hashAlgorithm": "SHA2_256",
-        "resourceID": "projects/flowty-test/locations/global/keyRings/flow/cryptoKeys/flowty-drops/cryptoKeyVersions/1"
       }
     }
   },
@@ -390,6 +390,29 @@
         "DropFactory"
       ],
       "droptypes-testnet": [
+        "DropTypes"
+      ]
+    },
+    "mainnet": {
+      "flowty-drops-mainnet": [
+        "ContractManager",
+        "ContractInitializer",
+        "OpenEditionInitializer",
+        "ContractBorrower",
+        "ContractFactoryTemplate",
+        "ContractFactory",
+        "OpenEditionTemplate",
+        "NFTMetadata",
+        "BaseNFT",
+        "BaseCollection",
+        "UniversalCollection",
+        "FlowtyDrops",
+        "FlowtyActiveCheckers",
+        "FlowtyAddressVerifiers",
+        "FlowtyPricers",
+        "DropFactory"
+      ],
+      "droptypes-mainnet": [
         "DropTypes"
       ]
     }
