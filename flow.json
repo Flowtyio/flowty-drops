@@ -42,6 +42,26 @@
         "resourceID": "projects/flowty-test/locations/global/keyRings/flow/cryptoKeys/flowty-drops/cryptoKeyVersions/1"
       }
     },
+    "flowty-drops-mainnet": {
+      "address": "0xbefbaccb5032a457",
+      "key": {
+        "type": "google-kms",
+        "index": 0,
+        "signatureAlgorithm": "ECDSA_P256",
+        "hashAlgorithm": "SHA2_256",
+        "resourceID": "projects/flowty-prod/locations/global/keyRings/flow/cryptoKeys/flowty-drops/cryptoKeyVersions/1"
+      }
+    },
+    "droptypes-mainnet": {
+      "address": "0x54233ec36b0c883b",
+      "key": {
+        "type": "google-kms",
+        "index": 0,
+        "signatureAlgorithm": "ECDSA_P256",
+        "hashAlgorithm": "SHA2_256",
+        "resourceID": "projects/flowty-prod/locations/global/keyRings/flow/cryptoKeys/flowty-drops/cryptoKeyVersions/1"
+      }
+    },
     "sample-nfts-testnet": {
       "address": "0xd92e02ee8881d9c1",
       "key": {
